@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FAQRow: View {
+    @EnvironmentObject var theme: VendanoTheme
     let faq: FAQItem
     let viewed: Bool
     let expanded: Bool
@@ -16,20 +17,20 @@ struct FAQRow: View {
         HStack(spacing: 12) {
             if faq.icon.count == 1 {
                 Text(faq.icon)
-                    .foregroundColor(viewed ? Color("TextSecondary") : Color("Accent"))
+                    .foregroundColor(viewed ? theme.color(named: "TextSecondary") : theme.color(named: "Accent"))
                     .frame(width: 20, height: 20)
             } else {
                 Image(systemName: faq.icon)
-                    .foregroundColor(viewed ? Color("TextSecondary") : Color("Accent"))
+                    .foregroundColor(viewed ? theme.color(named: "TextSecondary") : theme.color(named: "Accent"))
                     .frame(width: 20, height: 20)
             }
 
             Text(faq.question)
-                .foregroundColor(viewed ? Color("TextSecondary") : Color("Accent"))
-                .font(.system(size: 16))
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(viewed ? theme.color(named: "TextSecondary") : theme.color(named: "Accent"))
             Spacer()
             Image(systemName: expanded ? "chevron.down" : "chevron.right")
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(theme.color(named: "TextSecondary"))
         }
         .padding(.vertical, 8)
         .contentShape(Rectangle())
@@ -37,6 +38,8 @@ struct FAQRow: View {
 }
 
 struct FAQView: View {
+    @EnvironmentObject var theme: VendanoTheme
+    @Environment(\.dismiss) var dismiss
     @State private var selected: FAQItem?
 
     @StateObject private var state = AppState.shared
@@ -50,13 +53,22 @@ struct FAQView: View {
                 DarkGradientView()
                     .ignoresSafeArea()
 
-                List {
-                    Section(header:
+                VStack(spacing: 0) {
+                    // Custom Title Bar
+                    HStack {
                         Text(FAQTitle)
-                            .font(.title3.bold())
-                            .foregroundColor(Color("TextReversed"))
-                            .padding([.top, .bottom])
-                    ) {
+                            .vendanoFont(.title, size: 24, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
+                        Spacer()
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(theme.color(named: "TextReversed").opacity(0.7))
+                        }
+                    }
+                    .padding()
+                    
+                    List {
                         ForEach(faqs) { faq in
                             Button {
                                 toggle(faq)
@@ -68,29 +80,29 @@ struct FAQView: View {
                                 )
                             }
                             .buttonStyle(.plain)
-                            .listRowBackground(Color("FieldBackground"))
+                            .listRowBackground(theme.color(named: "FieldBackground"))
+                        }
+                        
+                        Section {
+                            Button(FAQContinueButtonLabel) {
+                                (onFinish ?? { state.onboardingStep = .auth })()
+                            }
+                            .buttonStyle(CapsuleButtonStyle())
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
                         }
                     }
-
-                    Section {
-                        Button(FAQContinueButtonLabel) {
-                            (onFinish ?? { state.onboardingStep = .auth })()
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
+                    .sheet(item: $selected) { faq in
+                        FAQSheet(faq: faq) {
+                            selected = nil
                         }
-                        .buttonStyle(CapsuleButtonStyle())
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets())
+                        .presentationDetents([.fraction(0.6), .medium, .large])
+                        .presentationDragIndicator(.visible)
+                        .environmentObject(state)
                     }
-                }
-                .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
-                .background(Color.clear)
-                .sheet(item: $selected) { faq in
-                    FAQSheet(faq: faq) {
-                        selected = nil
-                    }
-                    .presentationDetents([.fraction(0.6), .medium, .large])
-                    .presentationDragIndicator(.visible)
-                    .environmentObject(state)
                 }
             }
         }

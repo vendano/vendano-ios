@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct PrimaryButtonStyle: ButtonStyle {
+    @EnvironmentObject var theme: VendanoTheme
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
+            .vendanoFont(.body, size: 18, weight: .semibold)
             .padding()
             .frame(maxWidth: .infinity)
             .background(
                 Group {
                     if isEnabled {
-                        Color("Accent")
+                        theme.color(named: "Accent")
                     } else {
-                        Color("Accent").opacity(0.4)
+                        theme.color(named: "Accent").opacity(0.4)
                     }
                 }
             )
             .foregroundColor(
-                Color("TextReversed")
+                theme.color(named: "TextReversed")
                     .opacity(isEnabled ? 1 : 0.7)
             )
             .clipShape(Capsule())

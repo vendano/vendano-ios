@@ -14,6 +14,7 @@ enum ContactMethod: String, Identifiable {
 }
 
 struct NewContactAuthView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @Environment(\.dismiss) private var dismiss
 
     let method: ContactMethod
@@ -61,24 +62,25 @@ struct NewContactAuthView: View {
                     Text(sent
                         ? (method == .email ? "Verify your email" : "Enter your code")
                         : (method == .email ? "Add Email" : "Add Phone"))
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextPrimary"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
 
                     if !sent {
                         Text(method == .email
                             ? "Enter the email you’d like to add."
                             : "Enter the phone number you’d like to add.")
+                            .vendanoFont(.body, size: 16)
                             .multilineTextAlignment(.center)
-                            .foregroundColor(Color("TextPrimary"))
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                     } else {
                         Text(method == .email
                             ? "Tap the link we sent to:"
                             : "We sent a 6-digit code to:")
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                         Text(method == .email ? email : "\(dialCode) \(localNumber)")
-                            .font(.title3.weight(.semibold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -109,34 +111,39 @@ struct NewContactAuthView: View {
         VStack(spacing: 16) {
             if let err = errorMessage {
                 Text(err)
-                    .foregroundColor(Color("Negative"))
+                    .vendanoFont(.body, size: 16)
+                    .foregroundColor(theme.color(named: "Negative"))
                     .multilineTextAlignment(.center)
             }
 
             if method == .email {
-                TextField("you@example.com", text: $email)
+                TextField("you\u{200B}@example.com", text: $email)
+                    .vendanoFont(.body, size: 18)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
+                    .textContentType(nil)
                     .disableAutocorrection(true)
                     .textInputAutocapitalization(.never)
                     .padding()
-                    .background(Color("FieldBackground"))
+                    .background(theme.color(named: "FieldBackground"))
                     .cornerRadius(8)
                     .focused($entryFieldIsFocused)
             } else {
                 HStack(spacing: 12) {
                     TextField("+1", text: $dialCode)
+                        .vendanoFont(.body, size: 18)
                         .frame(width: 60)
                         .keyboardType(.phonePad)
                         .padding()
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
 
                     TextField("5551234567", text: $localNumber)
+                        .vendanoFont(.body, size: 18)
                         .keyboardType(.phonePad)
                         .padding()
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .focused($entryFieldIsFocused)
                 }
@@ -158,15 +165,16 @@ struct NewContactAuthView: View {
             if method == .email {
                 if isSimulator {
                     Text("Simulator can’t open universal links. Paste it here:")
-                        .font(.footnote)
-                        .foregroundColor(Color("TextSecondary"))
+                        .vendanoFont(.caption, size: 13)
+                        .foregroundColor(theme.color(named: "TextSecondary"))
 
                     TextField("Paste sign-in link", text: $code)
+                        .vendanoFont(.body, size: 18)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                         .textInputAutocapitalization(.never)
                         .padding()
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .focused($verifyFieldIsFocused)
 
@@ -185,13 +193,14 @@ struct NewContactAuthView: View {
                 } else {
                     ProgressView("Waiting for confirmation…")
                         .progressViewStyle(.circular)
-                        .tint(Color("TextPrimary"))
+                        .tint(theme.color(named: "TextPrimary"))
                         .onAppear { /* your onOpenURL handler will finish() */ }
                 }
             } else {
                 if let err = errorMessage {
                     Text(err)
-                        .foregroundColor(Color("Negative"))
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "Negative"))
                         .multilineTextAlignment(.center)
                 }
 
@@ -213,12 +222,12 @@ struct NewContactAuthView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(idx == code.count
-                                    ? Color("Accent")
-                                    : Color("FieldBackground"),
+                                    ? theme.color(named: "Accent")
+                                    : theme.color(named: "FieldBackground"),
                                     lineWidth: 2)
                                 .frame(width: 44, height: 54)
                             Text(code.digit(at: idx))
-                                .font(.title2.monospacedDigit())
+                                .vendanoFont(.title, size: 24, weight: .semibold)
                         }
                     }
                 }

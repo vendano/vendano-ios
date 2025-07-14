@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ImportSeedView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @State private var phraseText = ""
     @State private var showError = false
@@ -22,20 +23,21 @@ struct ImportSeedView: View {
 
                 VStack(spacing: 24) {
                     Text("Wallet Import")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
 
                     Text("Paste your 12-, 15-, or 24-word recovery phrase.")
-                        .foregroundColor(Color("TextPrimary"))
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
                         .multilineTextAlignment(.center)
 
                     TextEditor(text: $phraseText)
+                        .vendanoFont(.body, size: 16)
                         .frame(height: 120)
                         .padding(4)
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .overlay(RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color("CellBackground"), lineWidth: 1))
+                            .stroke(theme.color(named: "CellBackground"), lineWidth: 1))
 
                     Button("Import") {
                         let cleaned = phraseText
@@ -76,7 +78,7 @@ struct ImportSeedView: View {
                     Button("Back") {
                         state.onboardingStep = .walletChoice
                     }
-                    .foregroundColor(Color("Accent"))
+                    .foregroundColor(theme.color(named: "Accent"))
                 }
                 .padding()
 
@@ -86,12 +88,13 @@ struct ImportSeedView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text("Make sure you’ve pasted exactly 12, 15, or 24 words separated by spaces.")
-                    .foregroundColor(Color("TextSecondary"))
+                    .vendanoFont(.body, size: 16)
+                    .foregroundColor(theme.color(named: "TextSecondary"))
             }
         }
     }
 }
 
-#Preview {
-    ImportSeedView()
-}
+//#Preview {
+//    ImportSeedView()
+//}

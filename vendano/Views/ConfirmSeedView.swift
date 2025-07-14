@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ConfirmSeedView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
 
     @State private var correctWords: [String] = []
@@ -23,13 +24,12 @@ struct ConfirmSeedView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     Text("Confirm Keys")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
 
                     Text("Tap your \(correctWords.count) recovery words in the correct order.")
-                        .font(.headline)
-                        .foregroundColor(Color("TextPrimary"))
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
                         .multilineTextAlignment(.center)
 
                     Text("""
@@ -37,8 +37,8 @@ struct ConfirmSeedView: View {
                     We just need to confirm you’ve written them down correctly, because if you lose \
                     them you won’t be able to recover your wallet.
                     """)
-                    .font(.footnote)
-                    .foregroundColor(Color("TextSecondary"))
+                    .vendanoFont(.caption, size: 13)
+                    .foregroundColor(theme.color(named: "TextSecondary"))
                     .multilineTextAlignment(.center)
 
                     // Tappable grid
@@ -50,11 +50,11 @@ struct ConfirmSeedView: View {
                                     withAnimation { selected.append(word) }
                                 }) {
                                     Text(word)
-                                        .font(.callout)
-                                        .foregroundColor(Color("TextPrimary"))
+                                        .vendanoFont(.caption, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
                                         .padding(8)
                                         .frame(maxWidth: .infinity)
-                                        .background(Color("CellBackground"))
+                                        .background(theme.color(named: "CellBackground"))
                                         .cornerRadius(6)
                                 }
                             } else {
@@ -72,11 +72,11 @@ struct ConfirmSeedView: View {
                                 selected.remove(at: i)
                             }) {
                                 Text("\(i + 1). \(selected[i])")
-                                    .font(.callout)
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .vendanoFont(.caption, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
                                     .padding(6)
                                     .frame(maxWidth: .infinity)
-                                    .background(Color("Accent").opacity(0.15))
+                                    .background(theme.color(named: "Accent").opacity(0.15))
                                     .cornerRadius(6)
                             }
                         }
@@ -126,8 +126,8 @@ struct ConfirmSeedView: View {
 
                     if error {
                         Text("Incorrect order. Try again.")
-                            .foregroundColor(Color("Negative"))
-                            .font(.footnote)
+                            .vendanoFont(.caption, size: 13)
+                            .foregroundColor(theme.color(named: "Negative"))
                             .padding(.top, 8)
                     }
                 }

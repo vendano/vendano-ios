@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FeedbackSheet: View {
+    @EnvironmentObject var theme: VendanoTheme
     @Environment(\.dismiss) var dismiss
     @StateObject private var vm = FeedbackViewModel()
     @State private var text = ""
@@ -30,24 +31,23 @@ struct FeedbackSheet: View {
             VStack(spacing: 0) {
                 HStack {
                     Text("Contact Us")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     Spacer()
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(Color("TextReversed").opacity(0.7))
+                            .foregroundColor(theme.color(named: "TextReversed").opacity(0.7))
                     }
                 }
                 .padding()
 
                 if vm.messages.isEmpty {
-                    // 3️⃣ Centered empty state
                     VStack {
                         Spacer()
                         Text(prompt)
-                            .font(.footnote)
-                            .foregroundColor(Color("TextReversed"))
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextReversed"))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         Spacer()
@@ -55,7 +55,6 @@ struct FeedbackSheet: View {
                     .frame(maxWidth: .infinity)
 
                 } else {
-                    // 3) Chat messages list
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 12) {
@@ -77,17 +76,15 @@ struct FeedbackSheet: View {
                     .padding(.top, 8)
                 }
 
-                // 4) Divider
                 Divider()
-                    .background(Color("CellBackground"))
+                    .background(theme.color(named: "CellBackground"))
 
-                // 5) Input field + Send button
                 HStack(spacing: 12) {
                     TextEditor(text: $text)
-                        .font(.system(size: 16))
-                        .foregroundColor(Color("TextPrimary"))
+                        .vendanoFont(.body, size: 18)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
                         .padding(8)
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .frame(minHeight: 40, maxHeight: 80)
                         .focused($focus)
@@ -109,9 +106,9 @@ struct FeedbackSheet: View {
                     }) {
                         Image(systemName: "paperplane.fill")
                             .frame(width: 24, height: 24)
-                            .foregroundColor(Color("Accent"))
+                            .foregroundColor(theme.color(named: "Accent"))
                             .padding(10)
-                            .background(Circle().fill(Color("TextReversed")))
+                            .background(Circle().fill(theme.color(named: "TextReversed")))
                     }
                     .buttonStyle(.plain)
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

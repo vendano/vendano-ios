@@ -9,6 +9,7 @@ import FirebaseAuth
 import SwiftUI
 
 struct OTPView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @State private var pastedLink = "" // only for Simulator
 
@@ -35,19 +36,19 @@ struct OTPView: View {
 
                 VStack(spacing: 8) {
                     Text(isEmail ? "Verify your email" : "Enter your code")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
 
                     if isEmail {
                         Text("Tap the sign-in link we sent to:")
+                            .vendanoFont(.body, size: 16)
                     } else {
                         Text("We sent a 6-digit code to:")
+                            .vendanoFont(.body, size: 16)
                     }
                     Text(isEmail ? (state.otpEmail ?? "") : (state.otpPhone ?? ""))
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("TextPrimary"))
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 24)
@@ -56,10 +57,11 @@ struct OTPView: View {
                     if isSimulator {
                         VStack(spacing: 16) {
                             Text("Simulator can’t open universal links. Paste it here:")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                                .vendanoFont(.caption, size: 13)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
 
                             TextField("Paste sign-in link", text: $pastedLink)
+                                .vendanoFont(.body, size: 18)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -83,7 +85,7 @@ struct OTPView: View {
                     } else {
                         ProgressView("Waiting for confirmation…")
                             .progressViewStyle(.circular)
-                            .foregroundColor(Color("TextReversed"))
+                            .foregroundColor(theme.color(named: "TextReversed"))
                             .padding(.top, 16)
                     }
 
@@ -91,6 +93,7 @@ struct OTPView: View {
                     VStack(spacing: 16) {
                         if let errorMessage = errorMessage {
                             Text(errorMessage)
+                                .vendanoFont(.body, size: 16)
                                 .foregroundColor(.red)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
@@ -98,6 +101,7 @@ struct OTPView: View {
 
                         // hidden field captures paste & keyboard
                         TextField("", text: $code)
+                            .vendanoFont(.body, size: 18)
                             .keyboardType(.numberPad)
                             .textContentType(.oneTimeCode)
                             .foregroundColor(.clear)
@@ -114,12 +118,12 @@ struct OTPView: View {
                             ForEach(0 ..< maxDigits, id: \.self) { idx in
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 8)
-                                        .stroke(idx == code.count ? Color("FieldBackground") : Color("TextPrimary"),
+                                        .stroke(idx == code.count ? theme.color(named: "FieldBackground") : theme.color(named: "TextPrimary"),
                                                 lineWidth: 2)
                                         .frame(width: 44, height: 54)
 
                                     Text(code.digit(at: idx))
-                                        .font(.title2.weight(.semibold))
+                                        .vendanoFont(.headline, size: 18, weight: .semibold)
                                 }
                             }
                         }

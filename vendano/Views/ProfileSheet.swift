@@ -9,14 +9,16 @@ import PhotosUI
 import SwiftUI
 
 struct ProfileSheet: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @Environment(\.dismiss) private var dismiss
-
+    
     @AppStorage("appearancePreference") private var appearancePrefRaw = AppearancePreference.system.rawValue
+    
     private var appearancePref: AppearancePreference {
         AppearancePreference(rawValue: appearancePrefRaw) ?? .system
     }
-
+    
     @State private var authPurpose: ContactMethod?
     @State private var name = ""
     @State private var pickerItem: PhotosPickerItem?
@@ -25,18 +27,21 @@ struct ProfileSheet: View {
     @State private var showDel = false
     @State private var textChanged = false
     @State private var uploading = false
-
+    
+    @State private var useHoskyTheme = false
+    @State private var suppressAppearanceReset = false
+    
     @FocusState private var focus: Bool
-
+    
     var body: some View {
         ZStack {
             DarkGradientView()
                 .ignoresSafeArea()
-
+            
             VStack {
                 HStack {
                     Spacer()
-
+                    
                     Button(textChanged ? "Save" : "Done") {
                         if textChanged {
                             Task {
@@ -53,18 +58,18 @@ struct ProfileSheet: View {
                         }
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || uploading)
-                    .tint(Color("TextReversed"))
-                    .font(.system(size: 16, weight: .semibold))
+                    .tint(theme.color(named: "TextReversed"))
+                    .vendanoFont(.body, size: 16, weight: .semibold)
                     .padding()
                 }
                 .padding()
-
+                
                 Form {
                     Section(
                         header:
-                        Text("Name & photo")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("TextReversed"))
+                            Text("Name & photo")
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         HStack(spacing: 16) {
                             AvatarThumb(
@@ -90,11 +95,12 @@ struct ProfileSheet: View {
                                 }
                             }
                             .disabled(uploading)
-
+                            
                             TextField("Display name", text: $name)
-                                .font(.system(size: 16))
-                                .foregroundColor(Color("TextPrimary"))
+                                .vendanoFont(.body, size: 18)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
                                 .padding(12)
+                                .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(8)
                                 .disableAutocorrection(true)
                                 .textInputAutocapitalization(.words)
@@ -104,17 +110,22 @@ struct ProfileSheet: View {
                                 }
                         }
                     }
-
+                    .listRowBackground(theme.color(named: "CellBackground"))
+                    
                     Section(
                         header:
-                        Text("Logins")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("TextReversed"))
+                            Text("Logins")
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         ForEach(state.email, id: \.self) { handle in
                             HStack {
                                 Text(handle)
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                
                                 Spacer()
+                                
                                 Button(role: .destructive) {
                                     state.removeEmail(handle)
                                 } label: { Image(systemName: "trash") }
@@ -122,10 +133,13 @@ struct ProfileSheet: View {
                             }
                         }
                         Button("Add Email") { authPurpose = .email }
-
+                        
                         ForEach(state.phone, id: \.self) { handle in
                             HStack {
                                 Text(handle)
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                
                                 Spacer()
                             }
                         }
@@ -133,30 +147,43 @@ struct ProfileSheet: View {
                             Button("Add Phone") { authPurpose = .phone }
                         }
                     }
-
-                    Section(header:
-                        Text("Appearance")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("TextReversed"))
+                    .listRowBackground(theme.color(named: "CellBackground"))
+                    
+                    Section(header: Text("Appearance")
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         Picker("Appearance", selection: $appearancePrefRaw) {
                             ForEach(AppearancePreference.allCases) { option in
-                                Text(option.displayName).tag(option.rawValue)
+                                Text(option.displayName)
+                                    .vendanoFont(.body, size: 16)
+                                    .tag(option.rawValue)
                             }
                         }
                         .pickerStyle(.segmented)
+                        
+                        if state.hoskyBalance > 0 {
+                            Toggle("HOSKYfy my app", isOn: $useHoskyTheme)
+                                .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
+                                .vendanoFont(.body, size: 16)
+                                .foregroundColor(theme.color(named: "TextPrimary"))
+                        }
                     }
-
+                    .listRowBackground(theme.color(named: "CellBackground"))
+                    
                     Section(
                         header:
-                        Text("Danger Zone")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("TextReversed"))
+                            Text("Danger Zone")
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         Button("Delete account", role: .destructive) {
                             showDel = true
                         }
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     }
+                    .listRowBackground(theme.color(named: "Negative"))
                 }
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
@@ -177,21 +204,59 @@ struct ProfileSheet: View {
                 .alert("Delete account?",
                        isPresented: $showDel,
                        actions: {
-                           Button("Cancel", role: .cancel) {}
-                           Button("Delete", role: .destructive) {
-                               Task {
-                                   await state.nukeAccount()
-                               }
-                           }
-                       },
-                       message: {
-                           Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 24-word recovery phrase.")
-                       })
+                    Button("Cancel", role: .cancel) {}
+                    Button("Delete", role: .destructive) {
+                        Task {
+                            await state.nukeAccount()
+                        }
+                    }
+                }, message: {
+                    Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 24-word recovery phrase.")
+                        .vendanoFont(.body, size: 16)
+                })
+            }
+            .onAppear() {
+                useHoskyTheme = UserDefaults.standard.bool(forKey: "useHoskyTheme")
+            }
+            .onChange(of: useHoskyTheme) { _, new in
+                UserDefaults.standard.set(new, forKey: "useHoskyTheme")
+                if new {
+                    suppressAppearanceReset = true
+                    appearancePrefRaw = AppearancePreference.system.rawValue
+                    VendanoTheme.shared.currentPalette = .hosky
+                    guard UIApplication.shared.alternateIconName != "hosky-icon" else { return }
+
+                    UIApplication.shared.setAlternateIconName("hosky-icon") { (error) in
+                        if let error = error {
+                            print("Failed request to update the app’s icon: \(error)")
+                        }
+                    }
+                } else {
+                    UIApplication.shared.setAlternateIconName(nil)
+                    VendanoTheme.shared.currentPalette =
+                      (appearancePref == .dark ? .dark : .light)
+                }
+            }
+            .onChange(of: appearancePrefRaw) { _, _ in
+                if suppressAppearanceReset {
+                    suppressAppearanceReset = false
+                    return
+                }
+                useHoskyTheme = false
+                switch appearancePref {
+                case .light:
+                    VendanoTheme.shared.currentPalette = .light
+                case .dark:
+                    VendanoTheme.shared.currentPalette = .dark
+                case .system:
+                    let style = UITraitCollection.current.userInterfaceStyle
+                    VendanoTheme.shared.currentPalette = (style == .dark ? .dark : .light)
+                }
             }
             .preferredColorScheme(resolvedScheme())
         }
     }
-
+    
     private func resolvedScheme() -> ColorScheme? {
         switch appearancePref {
         case .light: return .light

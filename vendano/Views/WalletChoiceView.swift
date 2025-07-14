@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WalletChoiceView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
 
     var body: some View {
@@ -20,17 +21,18 @@ struct WalletChoiceView: View {
 
                 VStack(spacing: 20) {
                     Text("Let’s begin!")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
 
                     Text("To send or receive ADA, you first need a wallet address.")
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Text("Create a new wallet and we’ll give you a secure recovery phrase.")
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -38,11 +40,13 @@ struct WalletChoiceView: View {
                         state.onboardingStep = .newSeed
                     } label: {
                         Label("Create new wallet", systemImage: "sparkles")
+                            .vendanoFont(.body, size: 16)
                     }
                     .buttonStyle(CapsuleButtonStyle())
 
                     Text("Import an existing wallet by entering your 12-, 15-, or 24-word recovery phrase.")
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -50,6 +54,7 @@ struct WalletChoiceView: View {
                         state.onboardingStep = .importSeed
                     } label: {
                         Label("Import seed phrase", systemImage: "arrow.up.doc")
+                            .vendanoFont(.body, size: 16)
                     }
                     .buttonStyle(PrimaryButtonStyle())
                 }
@@ -61,6 +66,6 @@ struct WalletChoiceView: View {
     }
 }
 
-#Preview {
-    WalletChoiceView()
-}
+//#Preview {
+//    WalletChoiceView()
+//}

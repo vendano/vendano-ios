@@ -9,6 +9,7 @@ import Bip39
 import SwiftUI
 
 struct NewSeedView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
 
     @State private var acknowledged = false
@@ -34,19 +35,21 @@ struct NewSeedView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     Text("Your recovery phrase")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                         .padding(.top, 40)
 
                     Text("Write these \(wordCount) words in order. If you lose them, your ADA is gone—nobody can reset them.")
+                        .vendanoFont(.body, size: 16)
                         .multilineTextAlignment(.leading)
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(theme.color(named: "TextPrimary"))
                         .padding(.horizontal, 24)
 
                     Picker("Words", selection: $wordCount) {
                         ForEach(options, id: \.self) { n in
-                            Text("\(n) words").tag(n)
+                            Text("\(n) words")
+                                .tag(n)
+                                .vendanoFont(.body, size: 16)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -54,22 +57,26 @@ struct NewSeedView: View {
                     .onChange(of: wordCount) { _, _ in regenerate() }
 
                     Text(wordDescription)
-                        .font(.footnote)
-                        .foregroundStyle(Color("TextPrimary"))
+                        .vendanoFont(.caption, size: 13)
+                        .foregroundStyle(theme.color(named: "TextPrimary"))
                         .padding(.horizontal, 24)
 
                     LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 12) {
                         ForEach(words.indices, id: \.self) { idx in
                             HStack {
-                                Text("\(idx + 1).").monospacedDigit()
+                                Text("\(idx + 1).")
+                                    .monospacedDigit()
+                                    .vendanoFont(.body, size: 16)
+                                
                                 Text(words[idx])
+                                    .vendanoFont(.body, size: 16)
+                                
                                 Spacer()
                             }
-                            .font(.callout)
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
                             .padding(8)
-                            .background(Color("CellBackground"))
+                            .background(theme.color(named: "CellBackground"))
                             .cornerRadius(8)
                         }
                     }
@@ -77,7 +84,7 @@ struct NewSeedView: View {
                     .padding(.vertical, 8)
 
                     Toggle("I wrote them down in a safe place", isOn: $acknowledged)
-                        .tint(Color("Positive"))
+                        .tint(theme.color(named: "Positive"))
                         .padding(.horizontal, 24)
 
                     Button("Next") {
@@ -101,6 +108,7 @@ struct NewSeedView: View {
                 Screenshots may sync to iCloud and expose your recovery words. \
                 Write them on paper instead and store them in a safe place.
                 """)
+                .vendanoFont(.body, size: 16)
             }
             .onAppear { regenerate() }
         }
@@ -129,6 +137,6 @@ struct NewSeedView: View {
     }
 }
 
-#Preview {
-    NewSeedView()
-}
+//#Preview {
+//    NewSeedView()
+//}

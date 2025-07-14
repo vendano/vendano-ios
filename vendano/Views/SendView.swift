@@ -19,6 +19,7 @@ enum SendMethod: String, CaseIterable, Identifiable {
 }
 
 struct SendView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     let onClose: () -> Void
 
@@ -107,7 +108,7 @@ struct SendView: View {
                     Button(action: onClose) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(Color("TextReversed").opacity(0.7))
+                            .foregroundColor(theme.color(named: "TextReversed").opacity(0.7))
                     }
                 }
                 .padding(.horizontal)
@@ -115,17 +116,20 @@ struct SendView: View {
                 // form
                 Form {
                     Section(header: Text("To")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         Picker("", selection: $sendMethod) {
                             ForEach(SendMethod.allCases) { method in
-                                Text(method.rawValue).tag(method)
+                                Text(method.rawValue)
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                    .tag(method)
                             }
                         }
                         .pickerStyle(.segmented)
                         .padding(.vertical, 4)
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .onChange(of: sendMethod) { _, newMethod in
                             switch newMethod {
@@ -140,14 +144,15 @@ struct SendView: View {
 
                         switch sendMethod {
                         case .email:
-                            TextField("name@example.com", text: $email)
+                            TextField("you\u{200B}@example.com", text: $email)
+                                .vendanoFont(.body, size: 18)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .textInputAutocapitalization(.never)
-                                .font(.system(size: 16))
+                                .textContentType(nil)
                                 .padding(12)
-                                .background(Color("FieldBackground"))
+                                .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(8)
                                 .focused($emailFocus)
                                 .onChange(of: email) { _, _ in
@@ -158,10 +163,10 @@ struct SendView: View {
                         case .phone:
                             HStack(spacing: 12) {
                                 TextField("+1", text: $dialCode)
+                                    .vendanoFont(.body, size: 18)
                                     .keyboardType(.phonePad)
-                                    .font(.system(size: 16))
                                     .padding(12)
-                                    .background(Color("FieldBackground"))
+                                    .background(theme.color(named: "FieldBackground"))
                                     .cornerRadius(8)
                                     .frame(width: 80)
                                     .onChange(of: dialCode) { _, _ in
@@ -170,10 +175,10 @@ struct SendView: View {
                                         }
                                     }
                                 TextField("5551234567", text: $localNumber)
+                                    .vendanoFont(.body, size: 18)
                                     .keyboardType(.phonePad)
-                                    .font(.system(size: 16))
                                     .padding(12)
-                                    .background(Color("FieldBackground"))
+                                    .background(theme.color(named: "FieldBackground"))
                                     .cornerRadius(8)
                                     .focused($phoneFocus)
                                     .onChange(of: localNumber) { _, _ in
@@ -184,12 +189,12 @@ struct SendView: View {
                             }
                         case .address:
                             TextField("Paste a Cardano address", text: $addressText)
-                                .font(.system(size: 16))
+                                .vendanoFont(.body, size: 18)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .textInputAutocapitalization(.never)
                                 .padding(12)
-                                .background(Color("FieldBackground"))
+                                .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(8)
                                 .focused($addrFocus)
                                 .onChange(of: addressText) { _, _ in
@@ -209,12 +214,12 @@ struct SendView: View {
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(rec.name)
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(Color("TextPrimary"))
+                                        .vendanoFont(.body, size: 16, weight: .semibold)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
 
                                     Text(rec.address)
-                                        .font(.footnote)
-                                        .foregroundColor(Color("TextSecondary"))
+                                        .vendanoFont(.caption, size: 13)
+                                        .foregroundColor(theme.color(named: "TextSecondary"))
                                         .lineLimit(1)
                                         .truncationMode(.middle)
                                 }
@@ -222,26 +227,27 @@ struct SendView: View {
                             .padding()
                         }
                     }
+                    .listRowBackground(theme.color(named: "CellBackground"))
 
                     Section(header: Text("Amount")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.headline, size: 18, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         HStack {
                             TextField("₳0.0", text: $adaText)
+                                .vendanoFont(.body, size: 18)
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.trailing)
-                                .font(.system(size: 16))
                                 .padding(12)
-                                .background(Color("FieldBackground"))
+                                .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(8)
 
                             Spacer()
 
                             if let ada = adaValue {
                                 Text("≈ $\(ada * usdRate, specifier: "%.2f")")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color("TextSecondary"))
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextSecondary"))
                             }
 
                             Button("All") {
@@ -253,16 +259,17 @@ struct SendView: View {
 
                                 adaText = String(format: "%.6f", maxAmount)
                             }
-                            .font(.system(size: 16, weight: .semibold))
+                            .vendanoFont(.body, size: 16, weight: .semibold)
                             .padding()
-                            .background(Color("Accent"))
-                            .foregroundColor(Color("TextReversed"))
+                            .background(theme.color(named: "Accent"))
+                            .foregroundColor(theme.color(named: "TextReversed"))
                             .clipShape(Capsule())
                         }
 
                         if let ada = adaValue, ada > 0 {
                             Toggle("Add a tip for the developer", isOn: $includeTip)
-                                .tint(Color("Accent"))
+                                .tint(theme.color(named: "Accent"))
+                                .foregroundColor(theme.color(named: "TextPrimary"))
                                 .padding()
                                 .onChange(of: includeTip) { _, newVal in
                                     if !newVal {
@@ -273,68 +280,114 @@ struct SendView: View {
                             if includeTip {
                                 HStack {
                                     TextField("₳0.00", text: $tipText)
+                                        .vendanoFont(.body, size: 18)
                                         .keyboardType(.decimalPad)
                                         .multilineTextAlignment(.trailing)
-                                        .font(.system(size: 16))
                                         .padding(12)
-                                        .background(Color("FieldBackground"))
+                                        .background(theme.color(named: "FieldBackground"))
                                         .cornerRadius(8)
                                         .onChange(of: tipText) { _, new in
                                             tipText = sanitizeDecimal(new)
                                         }
+                                    
                                     Spacer()
+                                    
                                     Text("Tip amount")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                                 .padding(.vertical, 4)
 
                                 Text("Network fees cover basic blockchain costs; any extra tip helps me keep this app running and is greatly appreciated!")
-                                    .font(.footnote)
-                                    .foregroundColor(Color("TextSecondary"))
+                                    .vendanoFont(.caption, size: 13)
+                                    .foregroundColor(theme.color(named: "TextSecondary"))
                                     .padding(.top, 4)
                             }
                         }
                     }
+                    .listRowBackground(theme.color(named: "CellBackground"))
 
                     if let ada = adaValue, ada > 0 {
                         Section(header: Text("Summary")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("TextReversed"))
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
                         ) {
                             HStack {
-                                Text("Amount"); Spacer()
+                                Text("Amount")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                
+                                Spacer()
+                                
                                 Text("₳\(ada, specifier: "%.2f")")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
                             }
 
                             if tipValue > 0 {
                                 HStack {
-                                    Text("Tip"); Spacer()
+                                    Text("Tip")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
+                                    
+                                    Spacer()
+                                    
                                     Text("₳\(tipValue, specifier: "%.2f")")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                             }
 
                             VStack {
                                 HStack {
                                     Text("Network fee")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
+                                    
                                     Spacer()
+                                    
                                     if netFee == 0 {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: Color("Accent")))
+                                            .progressViewStyle(CircularProgressViewStyle(tint: theme.color(named: "Accent")))
                                     } else {
                                         Text("₳\(netFee, specifier: "%.2f")")
+                                            .vendanoFont(.body, size: 16)
+                                            .foregroundColor(theme.color(named: "TextPrimary"))
                                     }
                                 }
                                 if let err = feeError {
                                     Text(err)
-                                        .font(.footnote)
-                                        .foregroundColor(Color("Negative"))
+                                        .vendanoFont(.caption, size: 13)
+                                        .foregroundColor(theme.color(named: "Negative"))
                                         .padding([.top, .bottom], 8)
                                 }
                             }
 
-                            HStack { Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))"); Spacer(); Text("₳\(appFee, specifier: "%.2f")") }
+                            HStack {
+                                Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                
+                                Spacer()
+                                
+                                Text("₳\(appFee, specifier: "%.2f")")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                            }
 
-                            HStack { Text("Total"); Spacer(); Text("₳\(ada + tipValue + netFee + appFee, specifier: "%.2f")") }
+                            HStack {
+                                Text("Total")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                
+                                Spacer()
+                                
+                                Text("₳\(ada + tipValue + netFee + appFee, specifier: "%.2f")")
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                            }
                         }
+                        .listRowBackground(theme.color(named: "CellBackground"))
                     }
 
                     Section {
@@ -343,6 +396,7 @@ struct SendView: View {
                                 authenticateAndSend()
                             } label: {
                                 Label("Send ADA", systemImage: "paperplane.fill")
+                                    .vendanoFont(.body, size: 16)
                                     .frame(maxWidth: .infinity)
                             }
                             .disabled(!recipientOK || !amountOK)
@@ -375,6 +429,7 @@ struct SendView: View {
                     }
                     .listRowBackground(Color.clear)
                 }
+                .listRowBackground(theme.color(named: "CellBackground"))
             }
             .task {
                 if sendMethod == .email {
@@ -393,19 +448,11 @@ struct SendView: View {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 ProgressView("Sending ADA...")
                     .padding(24)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color("FieldBackground")))
+                    .background(RoundedRectangle(cornerRadius: 8).fill(theme.color(named: "FieldBackground")))
             }
         }
         .onTapGesture {
             UIApplication.shared.endEditing()
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Hide") {
-                    UIApplication.shared.endEditing()
-                }
-            }
         }
         .alert("Unknown Address", isPresented: $showWarning) {
             Button("Cancel", role: .cancel) {}
@@ -414,12 +461,16 @@ struct SendView: View {
             }
         } message: {
             Text("We don’t recognize this address in Vendano (which is fine, if you know this person). Once ADA is sent, it can’t be undone - so please double-check everything before you continue.")
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // success alert
         .alert("🎉 ADA Sent!", isPresented: $sendSuccess) {
             Button("OK", action: onClose)
         } message: {
             Text("Your ADA has been successfully sent. You’ll see it in your transaction history in a few minutes (once the blockchain updates).")
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // generic error alert
         .alert("Error", isPresented: Binding(
@@ -429,12 +480,16 @@ struct SendView: View {
             Button("OK") { sendError = nil }
         } message: {
             Text(sendError ?? "Something went wrong and your ADA wasn’t sent. Please try again in a moment.")
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // invite‐notfound alert
         .alert(inviteTitle, isPresented: $showInviteAlert) {
             Button("OK") {}
         } message: {
             Text(inviteMessage)
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(theme.color(named: "TextPrimary"))
         }
         .sheet(item: $shareInvite) { invitation in
             ZStack {
@@ -452,6 +507,8 @@ struct SendView: View {
                         )
                     } else {
                         Text("Mail services are not available on this device.")
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                     }
 
                 case .phone:
@@ -463,6 +520,8 @@ struct SendView: View {
                         )
                     } else {
                         Text("SMS services are not available on this device.")
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                     }
 
                 case .address:
@@ -478,6 +537,8 @@ struct SendView: View {
                 Button("Not Now", role: .cancel) {}
             } message: {
                 Text("Vendano uses notifications to let you know when friends join or send you ADA.")
+                    .vendanoFont(.body, size: 16)
+                    .foregroundColor(theme.color(named: "TextPrimary"))
             }
         }
     }

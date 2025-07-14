@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OnboardingFAQCardView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @State private var currentIndex: Int = 0
     @State private var level: Int = 0 // 0 = answer, 1 = clarify, 2 = details
     let faqs: [FAQItem]
@@ -50,11 +51,11 @@ struct OnboardingFAQCardView: View {
 
                 Button("Skip", action: onSkip ?? { state.onboardingStep = .auth })
                     .buttonStyle(.borderedProminent)
-                    .tint(Color("Accent"))
+                    .tint(theme.color(named: "Accent"))
 
                 Text("(or swipe for more)")
-                    .font(.footnote)
-                    .foregroundColor(Color("TextSecondary"))
+                    .vendanoFont(.caption, size: 13)
+                    .foregroundColor(theme.color(named: "TextSecondary"))
             }
             .padding()
             .onAppear {
@@ -88,14 +89,14 @@ struct OnboardingFAQCardView: View {
             // question and answer/clarify/details
             Button(action: toggleLevel) {
                 Text(item.question)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .vendanoFont(.title, size: 24, weight: .semibold)
+                    .foregroundColor(theme.color(named: "TextPrimary"))
                     .multilineTextAlignment(.center)
             }
             Button(action: toggleLevel) {
                 Text(level == 0 ? item.answer : (level == 1 ? item.clarify : item.details))
-                    .font(.system(size: 16))
-                    .foregroundColor(Color("TextSecondary"))
+                    .vendanoFont(.body, size: 16)
+                    .foregroundColor(theme.color(named: "TextSecondary"))
                     .multilineTextAlignment(.leading)
                     .padding(.horizontal)
             }
@@ -103,8 +104,8 @@ struct OnboardingFAQCardView: View {
             // tap prompt
             Button(action: toggleLevel) {
                 Text(promptText)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("Accent"))
+                    .vendanoFont(.body, size: 14, weight: .semibold)
+                    .foregroundColor(theme.color(named: "Accent"))
             }
         }
     }
@@ -113,18 +114,18 @@ struct OnboardingFAQCardView: View {
 
     private func card(for faq: FAQItem, viewed: Bool) -> some View {
         RoundedRectangle(cornerRadius: 16)
-            .fill(viewed ? Color("TextSecondary") : Color("Accent"))
+            .fill(viewed ? theme.color(named: "TextSecondary") : theme.color(named: "Accent"))
             .frame(width: 120, height: 120)
             .overlay(
                 Group {
                     if faq.icon.count == 1 {
                         Text(faq.icon)
                             .font(.system(size: 48))
-                            .foregroundColor(Color("TextReversed"))
+                            .foregroundColor(theme.color(named: "TextReversed"))
                     } else {
                         Image(systemName: faq.icon)
                             .font(.system(size: 48))
-                            .foregroundColor(Color("TextReversed"))
+                            .foregroundColor(theme.color(named: "TextReversed"))
                     }
                 }
             )
@@ -138,7 +139,7 @@ struct OnboardingFAQCardView: View {
         } label: {
             Image(systemName: direction < 0 ? "chevron.left" : "chevron.right")
                 .font(.largeTitle)
-                .foregroundColor(viewed ? Color("TextSecondary") : Color("Accent"))
+                .foregroundColor(viewed ? theme.color(named: "TextSecondary") : theme.color(named: "Accent"))
         }
         .buttonStyle(.plain)
         .padding(8)

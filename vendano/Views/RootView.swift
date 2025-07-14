@@ -10,6 +10,7 @@ import FirebaseFirestore
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @StateObject private var network = NetworkMonitor()
 

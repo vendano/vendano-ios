@@ -9,6 +9,7 @@ import MessageUI
 import SwiftUI
 
 struct MailComposeView: UIViewControllerRepresentable {
+    @EnvironmentObject var theme: VendanoTheme
     @Environment(\.presentationMode) var presentation
     let recipients: [String]
     let subject: String

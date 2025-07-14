@@ -10,6 +10,7 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct ReceiveView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     let onClose: () -> Void
 
@@ -26,17 +27,17 @@ struct ReceiveView: View {
                     Button(action: onClose) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(Color("TextReversed").opacity(0.7))
+                            .foregroundColor(theme.color(named: "TextReversed").opacity(0.7))
                     }
                 }
 
                 VStack(spacing: 8) {
                     Text("Receive ADA")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
                     Text("Scan this QR in your Vendano app to send ADA to you")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("TextReversed").opacity(0.8))
+                        .vendanoFont(.body, size: 16)
+                        .foregroundColor(theme.color(named: "TextReversed").opacity(0.8))
                         .multilineTextAlignment(.center)
                 }
 
@@ -44,22 +45,23 @@ struct ReceiveView: View {
                     // QR section
                     VStack(spacing: 8) {
                         Text("Your receive code")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.body, size: 16, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                         Image(uiImage: generateQRCode())
                             .resizable()
                             .scaledToFit()
                             .frame(width: 200, height: 200)
                             .padding(12)
-                            .background(Color("CellBackground"))
+                            .background(theme.color(named: "CellBackground"))
                     }
 
                     // Address box
                     Text(state.walletAddress)
-                        .font(.system(.footnote, design: .monospaced))
+                        .monospaced()
+                        .vendanoFont(.caption, size: 13)
                         .padding(12)
                         .frame(maxWidth: .infinity)
-                        .background(Color("FieldBackground"))
+                        .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .textSelection(.enabled)
 

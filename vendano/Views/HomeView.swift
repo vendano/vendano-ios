@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @State private var showSend = false
     @State private var showReceive = false
     @State private var showProfile = false
@@ -42,16 +43,16 @@ struct HomeView: View {
                         )
                         VStack(alignment: .leading) {
                             Text(state.displayName.isEmpty ? "Unnamed" : state.displayName)
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Color("TextPrimary"))
+                                .vendanoFont(.title, size: 24, weight: .semibold)
+                                .foregroundColor(theme.color(named: "TextPrimary"))
                             Text((state.email.count > 0 ? state.email.first : state.phone.first) ?? "")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                                .vendanoFont(.caption, size: 13)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                         Spacer()
                         Text("Edit")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color("Accent"))
+                            .vendanoFont(.body, size: 16, weight: .semibold)
+                            .foregroundColor(theme.color(named: "Accent"))
                     }
                     .padding(.vertical, 8)
                     .contentShape(Rectangle())
@@ -61,23 +62,23 @@ struct HomeView: View {
 
                     VStack(spacing: 2) {
                         Text("\(state.adaBalance.truncating(toPlaces: 1)) ADA")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.title, size: 48, weight: .heavy)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                         if let usdRate = WalletService.shared.adaUsdRate {
                             Text("≈ $\(state.adaBalance * usdRate, format: .number.precision(.fractionLength(2))) USD")
-                                .font(.subheadline)
-                                .foregroundColor(Color("TextSecondary"))
+                                .vendanoFont(.headline, size: 18, weight: .semibold)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                     }
 
                     if state.hoskyBalance > 0 {
                         VStack(spacing: 2) {
                             Text("HOSKY \(state.hoskyBalance, format: .number.precision(.fractionLength(0)))")
-                                .font(.headline)
-                                .foregroundColor(Color("TextPrimary"))
+                                .vendanoFont(.headline, size: 18, weight: .semibold)
+                                .foregroundColor(theme.color(named: "TextPrimary"))
                             Text("≈ $\(state.hoskyBalance * 0, format: .number.precision(.fractionLength(2))) USD")
-                                .font(.subheadline)
-                                .foregroundColor(Color("TextSecondary"))
+                                .vendanoFont(.body, size: 16)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                     }
 
@@ -106,28 +107,30 @@ struct HomeView: View {
                 .padding()
                 .offset(y: verticalOffset)
                 .animation(.easeInOut, value: showSend || showReceive)
-
-                if showSend {
-                    SendView {
-                        withAnimation(.easeInOut) { showSend = false }
-                    }
-                    .transition(.move(edge: .top))
-                    .zIndex(1)
-                }
-
-                if showReceive {
-                    ReceiveView {
-                        withAnimation(.easeInOut) { showReceive = false }
-                    }
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
-                }
             }
             .refreshable {
                 // re-fetch balances & history
                 state.refreshOnChainData()
             }
+            .background(Color.clear)
+            .scrollContentBackground(.hidden)
             .ignoresSafeArea(edges: .bottom)
+            
+            if showSend {
+                SendView {
+                    withAnimation(.easeInOut) { showSend = false }
+                }
+                .transition(.move(edge: .top))
+                .zIndex(1)
+            }
+
+            if showReceive {
+                ReceiveView {
+                    withAnimation(.easeInOut) { showReceive = false }
+                }
+                .transition(.move(edge: .bottom))
+                .zIndex(1)
+            }
         }
         .toolbar {
             if showSend == false && showReceive == false {
@@ -138,7 +141,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "person.crop.circle.badge.questionmark")
                     }
-                    .foregroundColor(Color("Accent"))
+                    .foregroundColor(theme.color(named: "Accent"))
                 }
                 // FAQ “?” button
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -147,7 +150,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "questionmark.circle")
                     }
-                    .foregroundColor(Color("Accent"))
+                    .foregroundColor(theme.color(named: "Accent"))
                 }
                 // Logout button
 
@@ -157,7 +160,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                     }
-                    .foregroundColor(Color("Accent"))
+                    .foregroundColor(theme.color(named: "Accent"))
                     .alert("Remove your wallet?", isPresented: $showLogoutAlert) {
                         Button("Cancel", role: .cancel) {}
                         Button("Remove", role: .destructive) {
@@ -172,10 +175,14 @@ struct HomeView: View {
                         }
                     } message: {
                         Text("This app will forget your wallet. Your funds remain secure on the blockchain, but you won’t see your balance until you restore it with your 24-word recovery phrase.")
+                            .vendanoFont(.body, size: 16)
                     }
                 }
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .automatic)
         .sheet(isPresented: $showProfile) { ProfileSheet() }
         .sheet(isPresented: $showFAQ) {
             FAQView(faqs: FAQs.shared.fullFAQs(), onFinish: { showFAQ = false })

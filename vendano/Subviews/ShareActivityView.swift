@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ShareActivityView: UIViewControllerRepresentable {
+    @EnvironmentObject var theme: VendanoTheme
     typealias UIViewControllerType = UIActivityViewController
 
     let activityItems: [Any]

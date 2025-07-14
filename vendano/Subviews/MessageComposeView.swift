@@ -10,6 +10,7 @@ import MessageUI
 import SwiftUI
 
 struct MessageComposeView: UIViewControllerRepresentable {
+    @EnvironmentObject var theme: VendanoTheme
     @Environment(\.presentationMode) var presentation
     let recipients: [String]
     let body: String

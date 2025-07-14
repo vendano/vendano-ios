@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FAQSheet: View {
+    @EnvironmentObject var theme: VendanoTheme
     let faq: FAQItem
     let onDismiss: () -> Void
 
@@ -25,8 +26,8 @@ struct FAQSheet: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // Question (title)
                         Text(faq.question)
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.body, size: 12, weight: .bold)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                             .multilineTextAlignment(.leading)
 
                         // TL;DR chip
@@ -37,23 +38,23 @@ struct FAQSheet: View {
                                 if faq.icon.count == 1 {
                                     Text(faq.icon)
                                         .font(.system(size: 32))
-                                        .foregroundColor(Color("Accent"))
+                                        .foregroundColor(theme.color(named: "Accent"))
                                         .padding(.leading)
                                 } else {
                                     Image(systemName: faq.icon)
                                         .font(.system(size: 32))
-                                        .foregroundColor(Color("Accent"))
+                                        .foregroundColor(theme.color(named: "Accent"))
                                         .padding(.leading)
                                 }
 
                                 Text(faq.tldr)
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .vendanoFont(.title, size: 22, weight: .semibold)
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
                                     .padding()
                             }
                             .padding(4)
                             .overlay(
-                                Capsule().stroke(Color("Accent"), lineWidth: 1)
+                                Capsule().stroke(theme.color(named: "Accent"), lineWidth: 1)
                             )
 
                             Spacer()
@@ -69,8 +70,8 @@ struct FAQSheet: View {
 
                         // Content text, based on selected segment
                         Text(currentContent)
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("TextPrimary"))
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
                             .lineSpacing(4)
                     }
                     .padding()

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OfflineBanner: View {
+    @EnvironmentObject var theme: VendanoTheme
     @State private var pulse = false
 
     var body: some View {
@@ -16,10 +17,10 @@ struct OfflineBanner: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                Image("vendano-logo")
+                Image(VendanoTheme.shared.isHosky() ? "vendoggo-logo" : "vendano-logo")
                     .resizable()
                     .renderingMode(.template)
-                    .foregroundColor(Color("TextReversed"))
+                    .foregroundColor(theme.color(named: "TextReversed"))
                     .scaledToFit()
                     .frame(width: 120)
                     .padding()
@@ -33,14 +34,14 @@ struct OfflineBanner: View {
                         }
                     }
 
-                Text("Vendano")
-                    .font(.system(size: 36, weight: .heavy))
-                    .foregroundColor(Color("TextPrimary"))
+                Text(VendanoTheme.shared.isHosky() ? "vendoggo" : "vendano")
+                    .vendanoFont(.title, size: 48, weight: .heavy)
+                    .foregroundColor(theme.color(named: "TextReversed"))
 
                 Text("No internet connection.\nPlease check your network and try again.")
-                    .font(.system(size: 16, weight: .medium))
+                    .vendanoFont(.headline, size: 18, weight: .semibold)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(Color("TextPrimary").opacity(0.85))
+                    .foregroundColor(theme.color(named: "TextPrimary").opacity(0.85))
 
                 Spacer().frame(height: 48)
 
@@ -51,12 +52,12 @@ struct OfflineBanner: View {
 //                }
 //                .buttonStyle(.plain)
 //                .padding()
-//                .background(Color("TextReversed"))
+//                .background(theme.color(named: "TextReversed"))
 //                .clipShape(Capsule())
-//                .shadow(color: Color("Accent").opacity(0.4),
+//                .shadow(color: theme.color(named: "Accent").opacity(0.4),
 //                        radius: 8, x: 0, y: 4)
 //                .overlay(
-//                    Capsule().stroke(Color("Accent"), lineWidth: 2)
+//                    Capsule().stroke(theme.color(named: "Accent"), lineWidth: 2)
 //                )
             }
             .padding()

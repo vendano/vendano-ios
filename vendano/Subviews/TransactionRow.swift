@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TransactionRow: View {
+    @EnvironmentObject var theme: VendanoTheme
     let tx: TxRowViewModel
     var body: some View {
         HStack {
@@ -22,30 +23,30 @@ struct TransactionRow: View {
                 )
             } else {
                 ZStack {
-                    Circle().fill(Color("TextSecondary"))
+                    Circle().fill(theme.color(named: "TextSecondary"))
                     Image(systemName: "wallet.pass.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(Color("FieldBackground"))
+                        .foregroundColor(theme.color(named: "FieldBackground"))
                 }
                 .frame(width: 36, height: 36)
             }
 
             // name or address
             Text(tx.name ?? tx.counterpartyAddress.truncated())
-                .font(.body)
-                .foregroundColor(Color("TextPrimary"))
+                .vendanoFont(.body, size: 16)
+                .foregroundColor(theme.color(named: "TextPrimary"))
 
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
                 Text("\(tx.outgoing ? "+" : "-")\(tx.amount, specifier: "%.1f")₳")
                     .monospacedDigit()
-                    .font(.body)
-                    .foregroundColor(tx.outgoing ? Color("Positive") : Color("Negative"))
+                    .vendanoFont(.body, size: 16)
+                    .foregroundColor(tx.outgoing ? theme.color(named: "Positive") : theme.color(named: "Negative"))
 
                 Text("\(tx.balanceAfter, specifier: "%.1f")₳")
-                    .font(.footnote)
-                    .foregroundColor(Color("TextSecondary"))
+                    .vendanoFont(.caption, size: 13)
+                    .foregroundColor(theme.color(named: "TextSecondary"))
             }
         }
     }

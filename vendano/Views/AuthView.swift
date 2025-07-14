@@ -9,6 +9,7 @@ import FirebaseAuth
 import SwiftUI
 
 struct AuthView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
 
     @State private var email = ""
@@ -38,28 +39,31 @@ struct AuthView: View {
 
             VStack(spacing: 24) {
                 Text("Login / Register")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("TextReversed"))
+                    .vendanoFont(.title, size: 24, weight: .semibold)
+                    .foregroundColor(theme.color(named: "TextReversed"))
 
                 Text("Enter your email or phone number and we’ll text / email a one-time code—no passwords needed.")
-                    .font(.subheadline)
+                    .vendanoFont(.headline, size: 18)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(theme.color(named: "TextPrimary"))
 
                 Picker("", selection: $useEmail) {
-                    Text("Email").tag(true)
-                    Text("Phone").tag(false)
+                    Text("Email")
+                        .tag(true)
+                        .vendanoFont(.body, size: 16)
+                    Text("Phone")
+                        .tag(false)
+                        .vendanoFont(.body, size: 16)
                 }
                 .pickerStyle(.segmented)
-                .tint(Color("Accent"))
+                .tint(theme.color(named: "Accent"))
                 .onChange(of: useEmail) { _, _ in errorMessage = nil }
 
                 if let error = errorMessage {
                     Text(error)
-                        .font(.footnote)
+                        .vendanoFont(.caption, size: 13)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(Color("Negative"))
+                        .foregroundColor(theme.color(named: "Negative"))
                         .padding(.top, 4)
                 }
 
@@ -67,33 +71,37 @@ struct AuthView: View {
                     TextField(
                         "",
                         text: $email,
-                        prompt: Text("you@example.com")
-                            .foregroundColor(Color("Accent"))
+                        prompt: Text("you\u{200B}@example.com")
+                            .foregroundColor(theme.color(named: "Accent"))
                     )
+                    .vendanoFont(.body, size: 18)
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
+                    .textContentType(nil)
                     .disableAutocorrection(true)
                     .textInputAutocapitalization(.never)
                     .padding()
-                    .background(Color("FieldBackground"))
+                    .background(theme.color(named: "FieldBackground"))
                     .cornerRadius(8)
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(theme.color(named: "TextPrimary"))
                     .focused($emailFocus)
                     .onAppear { emailFocus = true }
 
                 } else {
                     HStack(spacing: 12) {
                         TextField("+1", text: $dialCode)
+                            .vendanoFont(.body, size: 18)
                             .keyboardType(.phonePad)
                             .padding()
                             .frame(width: 70)
-                            .background(Color("FieldBackground"))
+                            .background(theme.color(named: "FieldBackground"))
                             .cornerRadius(8)
-                            .foregroundColor(Color("TextPrimary"))
+                            .foregroundColor(theme.color(named: "TextPrimary"))
 
                         AuthPhoneField(localNumber: $localNumber)
+                            .vendanoFont(.body, size: 18)
                             .padding()
-                            .background(Color("FieldBackground"))
+                            .background(theme.color(named: "FieldBackground"))
                             .cornerRadius(8)
                             .focused($phoneFocus)
                             .onAppear { phoneFocus = true }
@@ -107,10 +115,11 @@ struct AuthView: View {
                     if isLoading {
                         ProgressView()
                             .progressViewStyle(.circular)
-                            .tint(Color("TextReversed"))
+                            .tint(theme.color(named: "TextReversed"))
                             .frame(maxWidth: .infinity)
                     } else {
                         Text("Send code")
+                            .vendanoFont(.body, size: 16)
                             .frame(maxWidth: .infinity)
                     }
                 }
@@ -119,9 +128,9 @@ struct AuthView: View {
                 .opacity(isLoading ? 0.7 : 1)
 
                 Text("(If you’re new, we’ll create an account automatically.)")
-                    .font(.footnote)
+                    .vendanoFont(.caption, size: 13)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(theme.color(named: "TextSecondary"))
                     .padding(.top, 4)
             }
             .padding()
@@ -154,6 +163,6 @@ struct AuthView: View {
     }
 }
 
-#Preview {
-    AuthView()
-}
+//#Preview {
+//    AuthView()
+//}

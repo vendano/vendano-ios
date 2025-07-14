@@ -9,6 +9,7 @@ import PhotosUI
 import SwiftUI
 
 struct CreateProfileView: View {
+    @EnvironmentObject var theme: VendanoTheme
     @ObservedObject var state = AppState.shared
 
     @State private var name: String = ""
@@ -27,14 +28,13 @@ struct CreateProfileView: View {
                 // ① Title + blurb
                 VStack(spacing: 8) {
                     Text("Tell us about you")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("TextReversed"))
+                        .vendanoFont(.title, size: 24, weight: .semibold)
+                        .foregroundColor(theme.color(named: "TextReversed"))
 
                     Text("Add a name and picture so senders can be sure it’s you.")
-                        .font(.body)
+                        .vendanoFont(.body, size: 16)
                         .multilineTextAlignment(.leading)
-                        .foregroundColor(Color("TextReversed").opacity(0.85))
+                        .foregroundColor(theme.color(named: "TextReversed").opacity(0.85))
                         .padding(.horizontal, 24)
                 }
 
@@ -55,6 +55,7 @@ struct CreateProfileView: View {
                     )
 
                     TextField("Your name", text: $name)
+                        .vendanoFont(.body, size: 18)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disableAutocorrection(true)
                         .textInputAutocapitalization(.words)
@@ -78,6 +79,7 @@ struct CreateProfileView: View {
                     state.onboardingStep = .walletChoice
                 } label: {
                     Text("Continue")
+                        .vendanoFont(.body, size: 16)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(CapsuleButtonStyle())
@@ -103,6 +105,6 @@ struct CreateProfileView: View {
     }
 }
 
-#Preview {
-    CreateProfileView()
-}
+//#Preview {
+//    CreateProfileView()
+//}

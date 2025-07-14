@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MessageRow: View {
+    @EnvironmentObject var theme: VendanoTheme
     let message: FeedbackMessage
 
     private var isMe: Bool {
@@ -19,9 +20,10 @@ struct MessageRow: View {
         HStack {
             if isMe { Spacer() }
             Text(message.text)
+                .vendanoFont(.body, size: 16)
                 .padding(10)
-                .background(isMe ? Color("BackgroundStart") : Color("BackgroundEnd"))
-                .foregroundColor(Color("TextPrimary"))
+                .background(isMe ? theme.color(named: "BackgroundStart") : theme.color(named: "BackgroundEnd"))
+                .foregroundColor(theme.color(named: "TextPrimary"))
                 .cornerRadius(12)
                 .frame(maxWidth: .infinity, alignment: isMe ? .trailing : .leading)
             if !isMe { Spacer() }

@@ -9,6 +9,7 @@ import PhoneNumberKit
 import SwiftUI
 
 struct AuthPhoneField: View {
+    @EnvironmentObject var theme: VendanoTheme
     @Binding var localNumber: String
     @State private var rawInput = ""
 
@@ -17,6 +18,7 @@ struct AuthPhoneField: View {
 
     var body: some View {
         TextField("(555) 123-4567", text: $rawInput)
+            .vendanoFont(.body, size: 18)
             .keyboardType(.phonePad)
             .onChange(of: rawInput) { _, new in
                 rawInput = fmtr.formatPartial(new)
