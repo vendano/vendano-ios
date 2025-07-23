@@ -23,7 +23,8 @@ struct ShareActivityView: UIViewControllerRepresentable {
             // Find the first connected UIWindowScene
             if let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-                let root = scene.windows.first {
+                let root = scene.windows.first
+            {
                 pop.sourceView = root
                 pop.sourceRect = CGRect(
                     x: root.bounds.midX,

@@ -66,6 +66,6 @@ struct WalletChoiceView: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    WalletChoiceView()
-//}
+// }

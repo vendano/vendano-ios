@@ -20,7 +20,7 @@ final class CoinGeckoService: PriceService {
         var comps = URLComponents(string: baseURL)
         comps?.queryItems = [
             URLQueryItem(name: "ids", value: id),
-            URLQueryItem(name: "vs_currencies", value: "usd")
+            URLQueryItem(name: "vs_currencies", value: "usd"),
         ]
         guard let url = comps?.url else {
             throw URLError(.badURL)

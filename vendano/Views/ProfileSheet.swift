@@ -12,13 +12,13 @@ struct ProfileSheet: View {
     @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @Environment(\.dismiss) private var dismiss
-    
+
     @AppStorage("appearancePreference") private var appearancePrefRaw = AppearancePreference.system.rawValue
-    
+
     private var appearancePref: AppearancePreference {
         AppearancePreference(rawValue: appearancePrefRaw) ?? .system
     }
-    
+
     @State private var authPurpose: ContactMethod?
     @State private var name = ""
     @State private var pickerItem: PhotosPickerItem?
@@ -27,21 +27,21 @@ struct ProfileSheet: View {
     @State private var showDel = false
     @State private var textChanged = false
     @State private var uploading = false
-    
+
     @State private var useHoskyTheme = false
     @State private var suppressAppearanceReset = false
-    
+
     @FocusState private var focus: Bool
-    
+
     var body: some View {
         ZStack {
             DarkGradientView()
                 .ignoresSafeArea()
-            
+
             VStack {
                 HStack {
                     Spacer()
-                    
+
                     Button(textChanged ? "Save" : "Done") {
                         if textChanged {
                             Task {
@@ -63,11 +63,11 @@ struct ProfileSheet: View {
                     .padding()
                 }
                 .padding()
-                
+
                 Form {
                     Section(
                         header:
-                            Text("Name & photo")
+                        Text("Name & photo")
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
@@ -95,7 +95,7 @@ struct ProfileSheet: View {
                                 }
                             }
                             .disabled(uploading)
-                            
+
                             TextField("Display name", text: $name)
                                 .vendanoFont(.body, size: 18)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
@@ -111,10 +111,10 @@ struct ProfileSheet: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
-                    
+
                     Section(
                         header:
-                            Text("Logins")
+                        Text("Logins")
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
@@ -123,9 +123,9 @@ struct ProfileSheet: View {
                                 Text(handle)
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
-                                
+
                                 Spacer()
-                                
+
                                 Button(role: .destructive) {
                                     state.removeEmail(handle)
                                 } label: { Image(systemName: "trash") }
@@ -133,13 +133,13 @@ struct ProfileSheet: View {
                             }
                         }
                         Button("Add Email") { authPurpose = .email }
-                        
+
                         ForEach(state.phone, id: \.self) { handle in
                             HStack {
                                 Text(handle)
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
-                                
+
                                 Spacer()
                             }
                         }
@@ -148,7 +148,7 @@ struct ProfileSheet: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
-                    
+
                     Section(header: Text("Appearance")
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
@@ -161,7 +161,7 @@ struct ProfileSheet: View {
                             }
                         }
                         .pickerStyle(.segmented)
-                        
+
                         if state.hoskyBalance > 0 {
                             Toggle("HOSKYfy my app", isOn: $useHoskyTheme)
                                 .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
@@ -170,10 +170,10 @@ struct ProfileSheet: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
-                    
+
                     Section(
                         header:
-                            Text("Danger Zone")
+                        Text("Danger Zone")
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
@@ -204,18 +204,18 @@ struct ProfileSheet: View {
                 .alert("Delete account?",
                        isPresented: $showDel,
                        actions: {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Delete", role: .destructive) {
-                        Task {
-                            await state.nukeAccount()
-                        }
-                    }
-                }, message: {
-                    Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 24-word recovery phrase.")
-                        .vendanoFont(.body, size: 16)
-                })
+                           Button("Cancel", role: .cancel) {}
+                           Button("Delete", role: .destructive) {
+                               Task {
+                                   await state.nukeAccount()
+                               }
+                           }
+                       }, message: {
+                           Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 24-word recovery phrase.")
+                               .vendanoFont(.body, size: 16)
+                       })
             }
-            .onAppear() {
+            .onAppear {
                 useHoskyTheme = UserDefaults.standard.bool(forKey: "useHoskyTheme")
             }
             .onChange(of: useHoskyTheme) { _, new in
@@ -226,7 +226,7 @@ struct ProfileSheet: View {
                     VendanoTheme.shared.currentPalette = .hosky
                     guard UIApplication.shared.alternateIconName != "hosky-icon" else { return }
 
-                    UIApplication.shared.setAlternateIconName("hosky-icon") { (error) in
+                    UIApplication.shared.setAlternateIconName("hosky-icon") { error in
                         if let error = error {
                             print("Failed request to update the app’s icon: \(error)")
                         }
@@ -234,7 +234,7 @@ struct ProfileSheet: View {
                 } else {
                     UIApplication.shared.setAlternateIconName(nil)
                     VendanoTheme.shared.currentPalette =
-                      (appearancePref == .dark ? .dark : .light)
+                        (appearancePref == .dark ? .dark : .light)
                 }
             }
             .onChange(of: appearancePrefRaw) { _, _ in
@@ -256,7 +256,7 @@ struct ProfileSheet: View {
             .preferredColorScheme(resolvedScheme())
         }
     }
-    
+
     private func resolvedScheme() -> ColorScheme? {
         switch appearancePref {
         case .light: return .light

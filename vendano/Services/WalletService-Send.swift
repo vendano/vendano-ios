@@ -84,10 +84,10 @@ extension WalletService {
         let vendanoFeeCoin = UInt64(amount * Config.vendanoAppFeePercent * 1_000_000)
         let vendanoFeeAddr = try CardanoCore.Address(bech32: Config.vendanoFeeAddress)
         try builder.addOutput(
-          output: TransactionOutput(
-            address: vendanoFeeAddr,
-            amount: Value(coin: vendanoFeeCoin)
-          )
+            output: TransactionOutput(
+                address: vendanoFeeAddr,
+                amount: Value(coin: vendanoFeeCoin)
+            )
         )
 
         if tip > 0 {
@@ -109,7 +109,7 @@ extension WalletService {
                 code: 4,
                 userInfo: [
                     NSLocalizedDescriptionKey:
-                        "Insufficient funds: have \(totalLovelace), need \(required)"
+                        "Insufficient funds: have \(totalLovelace), need \(required)",
                 ]
             )
         }

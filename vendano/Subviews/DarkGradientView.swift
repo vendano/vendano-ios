@@ -17,19 +17,19 @@ struct DarkGradientView: View {
             LinearGradient(
                 gradient: Gradient(colors: [
                     theme.color(named: "Accent").opacity(0.9),
-                    theme.color(named: "Accent").opacity(0.7)
+                    theme.color(named: "Accent").opacity(0.7),
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             if VendanoTheme.shared.isHosky() {
                 RadialGradient(
                     gradient: Gradient(colors: [
                         theme.color(named: "GlowPink").opacity(0.6),
                         theme.color(named: "GlowPurple").opacity(0.4),
-                        .clear
+                        .clear,
                     ]),
                     center: .center,
                     startRadius: 80,
@@ -43,7 +43,7 @@ struct DarkGradientView: View {
                         theme.color(named: "GlowPurple"),
                         theme.color(named: "GlowPink"),
                         theme.color(named: "AccentAlt"),
-                        theme.color(named: "GlowPurple")
+                        theme.color(named: "GlowPurple"),
                     ]),
                     center: .center
                 )
@@ -52,8 +52,6 @@ struct DarkGradientView: View {
                 .rotationEffect(.degrees(45))
                 .ignoresSafeArea()
             }
-            
-            
         }
     }
 }

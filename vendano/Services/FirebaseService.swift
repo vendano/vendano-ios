@@ -7,8 +7,8 @@
 
 import CryptoKit
 import FirebaseAuth
-import FirebaseStorage
 @preconcurrency import FirebaseFirestore
+import FirebaseStorage
 import SwiftUI
 
 enum FirebaseServiceError: Error {
@@ -175,11 +175,11 @@ final class FirebaseService: ObservableObject {
 
         let userBase: [String: Any] = [
             "phone": FieldValue.arrayUnion([phone]),
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ]
         let publicBase: [String: Any] = [
             "phoneHashes": FieldValue.arrayUnion([hash]),
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ]
 
         if userHasCreated {
@@ -215,7 +215,8 @@ final class FirebaseService: ObservableObject {
         actionCodeSettings.setIOSBundleID(Bundle.main.bundleIdentifier!)
 
         Auth.auth().sendSignInLink(toEmail: email,
-                                   actionCodeSettings: actionCodeSettings) { err in
+                                   actionCodeSettings: actionCodeSettings)
+        { err in
             completion(err)
         }
     }
@@ -261,11 +262,11 @@ final class FirebaseService: ObservableObject {
 
         let userBase: [String: Any] = [
             "email": FieldValue.arrayUnion([email]),
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ]
         let publicBase: [String: Any] = [
             "emailHashes": FieldValue.arrayUnion([hash]),
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ]
 
         if userHasCreated {
@@ -281,7 +282,7 @@ final class FirebaseService: ObservableObject {
         if publicHasCreated {
             try await safeUpdate(publicRef, [
                 "emailHashes": FieldValue.arrayUnion([hash]),
-                "updatedDate": FieldValue.serverTimestamp()
+                "updatedDate": FieldValue.serverTimestamp(),
             ])
         } else {
             var full = publicBase
@@ -302,8 +303,24 @@ final class FirebaseService: ObservableObject {
         guard let uid = user?.uid else { return }
         try await db.collection("public").document(uid).setData([
             "displayName": name,
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ], merge: true)
+    }
+
+    func uploadAvatar(from url: URL) async throws -> URL {
+        let (data, _) = try await URLSession.shared.data(from: url)
+        guard let image = UIImage(data: data) else {
+            throw FirebaseServiceError.pngEncodingFailed
+        }
+        // Reuse existing image-cropping + upload logic
+        let newURL = try await uploadAvatar(image)
+
+        // Update in-memory state
+        DispatchQueue.main.async {
+            AppState.shared.avatar = Image(uiImage: image)
+            AppState.shared.avatarUrl = newURL.absoluteString
+        }
+        return newURL
     }
 
     func uploadAvatar(_ image: UIImage) async throws -> URL {
@@ -335,7 +352,7 @@ final class FirebaseService: ObservableObject {
 
         try await db.collection("public").document(uid).setData([
             "avatarURL": url.absoluteString,
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ], merge: true)
 
         return url
@@ -408,7 +425,7 @@ final class FirebaseService: ObservableObject {
 
         try? await db.collection("users").document(uid)
             .setData([
-                "viewedFAQ": FieldValue.arrayUnion(faqViewedIDs.map(\.uuidString))
+                "viewedFAQ": FieldValue.arrayUnion(faqViewedIDs.map(\.uuidString)),
             ], merge: true)
     }
 
@@ -416,7 +433,7 @@ final class FirebaseService: ObservableObject {
         guard let uid = user?.uid else { return }
         try? await db.collection("users").document(uid)
             .setData([
-                "viewedFAQ": FieldValue.arrayUnion([id.uuidString])
+                "viewedFAQ": FieldValue.arrayUnion([id.uuidString]),
             ], merge: true)
     }
 
@@ -481,7 +498,7 @@ final class FirebaseService: ObservableObject {
         do {
             try await safeUpdate(userRef, [
                 "email": FieldValue.arrayRemove([emailToRemove]),
-                "updatedDate": FieldValue.serverTimestamp()
+                "updatedDate": FieldValue.serverTimestamp(),
             ])
             print("✅ Removed email from users/\(uid)")
         } catch {
@@ -491,7 +508,7 @@ final class FirebaseService: ObservableObject {
         do {
             try await safeUpdate(publicRef, [
                 "emailHashes": FieldValue.arrayRemove([hash]),
-                "updatedDate": FieldValue.serverTimestamp()
+                "updatedDate": FieldValue.serverTimestamp(),
             ])
             print("✅ Removed email hash from public/\(uid)")
         } catch {
@@ -527,7 +544,7 @@ final class FirebaseService: ObservableObject {
         do {
             try await safeUpdate(userRef, [
                 "phone": FieldValue.arrayRemove([phoneToRemove]),
-                "updatedDate": FieldValue.serverTimestamp()
+                "updatedDate": FieldValue.serverTimestamp(),
             ])
             print("✅ Removed phone from users/\(uid)")
         } catch {
@@ -536,7 +553,7 @@ final class FirebaseService: ObservableObject {
         do {
             try await safeUpdate(publicRef, [
                 "phoneHashes": FieldValue.arrayRemove([hash]),
-                "updatedDate": FieldValue.serverTimestamp()
+                "updatedDate": FieldValue.serverTimestamp(),
             ])
             print("✅ Removed phone hash from public/\(uid)")
         } catch {
@@ -599,13 +616,14 @@ final class FirebaseService: ObservableObject {
         let doc = try await db.collection("public").document(uid).getDocument()
 
         if !doc.exists ||
-            doc["displayName"] == nil {
+            doc["displayName"] == nil
+        {
             return .profile
         }
 
         return .walletChoice
     }
-    
+
     private func safeUpdate(
         _ ref: DocumentReference,
         _ fields: [String: Any]
@@ -622,54 +640,54 @@ final class FirebaseService: ObservableObject {
     }
 
     /*
-    @MainActor
-    func seedMockRecipients() async {
-        let db = Firestore.firestore()
-        
-        // 20 sample names
-        let names = [
-            "Alice","Bob","Carol","Dave","Eve","Frank","Grace","Koyaanisquatsiuth","Ivan","Judy",
-            "Mallory","Niaj","Oscar","Peggy","Ru","Sybil","Trent","Victor","Walter","Xavier"
-        ]
-        
-        func randomCardanoAddress() -> String {
-            // testnet bech32 prefix + 50 random base32 chars
-            let charset = Array("abcdefghijklmnopqrstuvwxyz234567")
-            let suffix = (0..<50).map { _ in charset.randomElement()! }
-            return "addr_test1" + String(suffix)
-        }
-        
-        for (i, name) in names.enumerated() {
-            let address = randomCardanoAddress()
-            let avatarURL = "https://i.pravatar.cc/150?img=\(i+1)"
-            
-            let email = "\(name.lowercased())@\(name.lowercased()).com"
-            
-            let hash = handleHash(email)
-            
-            let docData: [String:Any] = [
-                "displayName": name,
-                "avatarURL": avatarURL,
-                "walletAddress": address,
-                "emailHashes": [hash],
-                "createdDate": FieldValue.serverTimestamp(),
-                "updatedDate": FieldValue.serverTimestamp(),
-            ]
-            
-            do {
-                try await db
-                    .collection("public")
-                    .document()
-                    .setData(docData, merge: true)
-                print("✅ Seeded \(name) @ \(address)")
-            } catch {
-                print("❌ Failed to seed \(name):", error)
-            }
-        }
-        
-        print("🎉 Done seeding mock recipients.")
-    }
-    */
+     @MainActor
+     func seedMockRecipients() async {
+         let db = Firestore.firestore()
+
+         // 20 sample names
+         let names = [
+             "Alice","Bob","Carol","Dave","Eve","Frank","Grace","Koyaanisquatsiuth","Ivan","Judy",
+             "Mallory","Niaj","Oscar","Peggy","Ru","Sybil","Trent","Victor","Walter","Xavier"
+         ]
+
+         func randomCardanoAddress() -> String {
+             // testnet bech32 prefix + 50 random base32 chars
+             let charset = Array("abcdefghijklmnopqrstuvwxyz234567")
+             let suffix = (0..<50).map { _ in charset.randomElement()! }
+             return "addr_test1" + String(suffix)
+         }
+
+         for (i, name) in names.enumerated() {
+             let address = randomCardanoAddress()
+             let avatarURL = "https://i.pravatar.cc/150?img=\(i+1)"
+
+             let email = "\(name.lowercased())@\(name.lowercased()).com"
+
+             let hash = handleHash(email)
+
+             let docData: [String:Any] = [
+                 "displayName": name,
+                 "avatarURL": avatarURL,
+                 "walletAddress": address,
+                 "emailHashes": [hash],
+                 "createdDate": FieldValue.serverTimestamp(),
+                 "updatedDate": FieldValue.serverTimestamp(),
+             ]
+
+             do {
+                 try await db
+                     .collection("public")
+                     .document()
+                     .setData(docData, merge: true)
+                 print("✅ Seeded \(name) @ \(address)")
+             } catch {
+                 print("❌ Failed to seed \(name):", error)
+             }
+         }
+
+         print("🎉 Done seeding mock recipients.")
+     }
+     */
 
     private func normalizePhone(_ raw: String) -> String {
         // remove +, spaces, punctuation, etc.
@@ -685,10 +703,10 @@ final class FirebaseService: ObservableObject {
 
         let norm = handle.lowercased()
         let hash = handleHash(norm)
-        
+
         try await safeUpdate(userRef, [
             "pendingContacts": FieldValue.arrayUnion([hash]),
-            "updatedDate": FieldValue.serverTimestamp()
+            "updatedDate": FieldValue.serverTimestamp(),
         ])
     }
 }

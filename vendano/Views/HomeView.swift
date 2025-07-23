@@ -16,7 +16,10 @@ struct HomeView: View {
     @State private var showFeedback = false
     @State private var showLogoutAlert = false
 
+    @State private var selectedNFT: NFT?
+
     @StateObject private var state = AppState.shared
+    @StateObject private var nftVM = NFTGalleryViewModel()
 
     // how far the main card moves while an overlay is on-screen
     private var verticalOffset: CGFloat {
@@ -100,6 +103,15 @@ struct HomeView: View {
                         .buttonStyle(PrimaryButtonStyle())
                     }
 
+                    // TODO: enable NFT view
+                    // - test with NFTs
+                    // - view sheet, set PFP
+                    /*
+                    if !nftVM.nfts.isEmpty {
+                        NFTThumbnailRow(selectedNFT: $selectedNFT)
+                    }
+                    */
+
                     ActivityView()
 
                     Spacer()
@@ -115,7 +127,7 @@ struct HomeView: View {
             .background(Color.clear)
             .scrollContentBackground(.hidden)
             .ignoresSafeArea(edges: .bottom)
-            
+
             if showSend {
                 SendView {
                     withAnimation(.easeInOut) { showSend = false }
@@ -189,6 +201,9 @@ struct HomeView: View {
                 .environmentObject(state)
         }
         .sheet(isPresented: $showFeedback) { FeedbackSheet() }
+        .sheet(item: $selectedNFT) { nft in
+            NFTDetailSheet(nft: nft)
+        }
         .onChange(of: state.avatarUrl) { _, _ in
             Task { await state.reloadAvatarIfNeeded() }
         }

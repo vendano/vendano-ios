@@ -21,8 +21,8 @@ final class KeyboardGuardian: ObservableObject {
             object: nil, queue: .main
         ) { note in
             guard let frame =
-                    note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-                        as? CGRect else { return }
+                note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
+                    as? CGRect else { return }
             self.height = frame.height
         }
 

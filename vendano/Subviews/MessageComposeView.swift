@@ -31,7 +31,8 @@ struct MessageComposeView: UIViewControllerRepresentable {
         let parent: MessageComposeView
         init(_ parent: MessageComposeView) { self.parent = parent }
         func messageComposeViewController(_: MFMessageComposeViewController,
-                                          didFinishWith _: MessageComposeResult) {
+                                          didFinishWith _: MessageComposeResult)
+        {
             parent.presentation.wrappedValue.dismiss()
         }
     }

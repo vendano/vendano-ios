@@ -22,11 +22,11 @@ struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @StateObject private var kb = KeyboardGuardian()
-    
+
     let onClose: () -> Void
-    
+
     @State private var sendMethod: SendMethod = .email
-    
+
     @State private var email = ""
     @State private var dialCode = "+1"
     @State private var localNumber = ""
@@ -35,9 +35,9 @@ struct SendView: View {
     @State private var lookupTask: Task<Void, Never>?
     @State private var showWarning = false
     @State private var feeError: String?
-    
+
     // MARK: – Alert state
-    
+
     @State private var isSending = false
     @State private var sendSuccess = false
     @State private var sendError: String?
@@ -45,7 +45,7 @@ struct SendView: View {
     @State private var inviteTitle = ""
     @State private var inviteMessage = ""
     @State private var shareInvite: ShareMessage?
-    
+
     private var recipientOK: Bool {
         switch sendMethod {
         case .email: return emailOK
@@ -54,59 +54,58 @@ struct SendView: View {
             return isValidCardanoAddress(addressText)
         }
     }
-    
+
     @FocusState private var emailFocus: Bool
     @FocusState private var phoneFocus: Bool
     @FocusState private var addrFocus: Bool
-    
+
     @State private var adaText = ""
-    private let usdRate: Double = 0.42 // TODO: fetch live
-    
+
     @State private var netFee: Double = 0
     @State private var feeLoading = false
-    
+
     private var adaValue: Double? { Double(adaText) }
     private var appFee: Double { (adaValue ?? 0) * Config.vendanoAppFeePercent } // 1 %
-    
+
     //    private let phoneKit = PhoneNumberUtility()
     //    private let phoneFmt = PartialFormatter()
-    
+
     @State private var includeTip = false
     @State private var tipText = ""
-    
+
     @State private var showNotificationPrompt = false
-    
+
     // rudimentary checks
     private var emailOK: Bool {
         email.contains("@") && email.contains(".")
     }
-    
+
     private var phoneOK: Bool {
         let digits = localNumber.filter(\.isWholeNumber)
         return digits.count >= 6 && digits.count <= 15 && dialCode.hasPrefix("+")
     }
-    
+
     private func isValidCardanoAddress(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         return (try? Address(bech32: trimmed)) != nil
     }
-    
+
     private var tipValue: Double { Double(tipText) ?? 0 }
     private var amountOK: Bool {
         let base = (adaValue ?? 0) + netFee + appFee + tipValue
         return (adaValue ?? 0) > 0 && base <= state.adaBalance
     }
-    
+
     var body: some View {
         ZStack {
             DarkGradientView()
                 .ignoresSafeArea()
-            
+
             VStack {
                 // close button
                 HStack {
                     Spacer()
-                    
+
                     Button(action: onClose) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
@@ -114,7 +113,7 @@ struct SendView: View {
                     }
                 }
                 .padding(.horizontal)
-                
+
                 // form
                 Form {
                     Section(header: Text("To")
@@ -143,7 +142,7 @@ struct SendView: View {
                                 addrFocus = true
                             }
                         }
-                        
+
                         switch sendMethod {
                         case .email:
                             TextField("you\u{200B}@example.com", text: $email)
@@ -206,7 +205,7 @@ struct SendView: View {
                                     }
                                 }
                         }
-                        
+
                         if let rec = recipient {
                             HStack(spacing: 12) {
                                 AvatarThumb(
@@ -216,12 +215,12 @@ struct SendView: View {
                                     size: 36,
                                     tap: {}
                                 )
-                                
+
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(rec.name)
                                         .vendanoFont(.body, size: 16, weight: .semibold)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
-                                    
+
                                     Text(rec.address)
                                         .vendanoFont(.caption, size: 13)
                                         .foregroundColor(theme.color(named: "TextSecondary"))
@@ -233,7 +232,7 @@ struct SendView: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
-                    
+
                     Section(header: Text("Amount")
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
@@ -246,25 +245,27 @@ struct SendView: View {
                                 .padding(12)
                                 .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(8)
-                            
+
                             Spacer()
-                            
-                            if let ada = adaValue {
+
+                            if let ada = adaValue,
+                               let usdRate = WalletService.shared.adaUsdRate
+                            {
                                 Text("₳ ≈ $\(ada * usdRate, specifier: "%.2f")")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
                             }
-                            
+
                             Button("All") {
                                 var available = state.adaBalance - tipValue - netFee
                                 if netFee == 0 {
                                     available -= 0.17 // estimated
                                 }
                                 let maxAmount = available > 0 ? (available / (1 + Config.vendanoAppFeePercent)) : 0
-                                
+
                                 adaText = String(format: "%.6f", maxAmount)
-                                
-                                print (adaText)
+
+                                print(adaText)
                             }
                             .vendanoFont(.body, size: 16, weight: .semibold)
                             .padding()
@@ -272,7 +273,7 @@ struct SendView: View {
                             .foregroundColor(theme.color(named: "TextReversed"))
                             .clipShape(Capsule())
                         }
-                        
+
                         if let ada = adaValue, ada > 0 {
                             Toggle("Add a tip for the developer", isOn: $includeTip)
                                 .tint(theme.color(named: "Accent"))
@@ -283,7 +284,7 @@ struct SendView: View {
                                         tipText = ""
                                     }
                                 }
-                            
+
                             if includeTip {
                                 HStack {
                                     TextField("0.00", text: $tipText)
@@ -296,15 +297,15 @@ struct SendView: View {
                                         .onChange(of: tipText) { _, new in
                                             tipText = sanitizeDecimal(new)
                                         }
-                                    
+
                                     Spacer()
-                                    
+
                                     Text("₳ Tip amount")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                                 .padding(.vertical, 4)
-                                
+
                                 Text("Network fees cover basic blockchain costs; any extra tip helps us keep this app running and is greatly appreciated!")
                                     .vendanoFont(.caption, size: 14)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
@@ -313,7 +314,7 @@ struct SendView: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
-                    
+
                     if let ada = adaValue, ada > 0 {
                         Section(header: Text("Summary")
                             .vendanoFont(.headline, size: 18, weight: .semibold)
@@ -323,36 +324,36 @@ struct SendView: View {
                                 Text("Amount")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
-                                
+
                                 Spacer()
-                                
+
                                 Text("\(ada, specifier: "%.2f") ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                             }
-                            
+
                             if tipValue > 0 {
                                 HStack {
                                     Text("Tip")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
-                                    
+
                                     Spacer()
-                                    
+
                                     Text("\(tipValue, specifier: "%.2f") ₳")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                             }
-                            
+
                             VStack {
                                 HStack {
                                     Text("Network fee")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
-                                    
+
                                     Spacer()
-                                    
+
                                     if netFee == 0 {
                                         ProgressView()
                                             .progressViewStyle(CircularProgressViewStyle(tint: theme.color(named: "Accent")))
@@ -369,26 +370,26 @@ struct SendView: View {
                                         .padding([.top, .bottom], 8)
                                 }
                             }
-                            
+
                             HStack {
                                 Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
-                                
+
                                 Spacer()
-                                
+
                                 Text("\(appFee, specifier: "%.2f") ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                             }
-                            
+
                             HStack {
                                 Text("Total")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
-                                
+
                                 Spacer()
-                                
+
                                 Text("\(ada + tipValue + netFee + appFee, specifier: "%.2f") ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
@@ -396,7 +397,7 @@ struct SendView: View {
                         }
                         .listRowBackground(theme.color(named: "CellBackground"))
                     }
-                    
+
                     Section {
                         if recipient != nil || sendMethod == .address {
                             Button {
@@ -422,9 +423,9 @@ struct SendView: View {
                                 let msg = """
                                 \(state.displayName) wants to send you \(adaMsg) ADA on the Cardano blockchain. Please download the Vendano app at https://vendano.net to get started!
                                 """
-                                
+
                                 shareInvite = ShareMessage(text: msg)
-                                
+
                                 Task {
                                     try? await FirebaseService.shared.addPendingContact(handle)
                                 }
@@ -437,8 +438,8 @@ struct SendView: View {
                     .listRowBackground(Color.clear)
                 }
                 .scrollDismissesKeyboard(.interactively)
-                .keyboardAware(using: kb)
                 .listRowBackground(theme.color(named: "CellBackground"))
+                .padding(.bottom, kb.height)
             }
             .task {
                 if sendMethod == .email {
@@ -449,7 +450,7 @@ struct SendView: View {
             .scrollContentBackground(.hidden)
             .background(Color.clear)
             .onChange(of: adaText) { _, _ in recalcFee() }
-            
+
             if isSending {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 ProgressView("Sending ADA...")
@@ -457,6 +458,7 @@ struct SendView: View {
                     .background(RoundedRectangle(cornerRadius: 8).fill(theme.color(named: "FieldBackground")))
             }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .alert("Unknown Address", isPresented: $showWarning) {
             Button("Cancel", role: .cancel) {}
             Button("Send Anyway") {
@@ -498,7 +500,7 @@ struct SendView: View {
             ZStack {
                 LightGradientView()
                     .ignoresSafeArea()
-                
+
                 switch sendMethod {
                 case .email:
                     // pop up Mail composer with the address they entered
@@ -513,7 +515,7 @@ struct SendView: View {
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                     }
-                    
+
                 case .phone:
                     // pop up SMS composer with the number they entered
                     if MFMessageComposeViewController.canSendText() {
@@ -526,7 +528,7 @@ struct SendView: View {
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                     }
-                    
+
                 case .address:
                     // fallback to generic share sheet when it’s just a raw address
                     ShareActivityView(activityItems: [invitation.text])
@@ -545,7 +547,7 @@ struct SendView: View {
             }
         }
     }
-    
+
     func sanitizeDecimal(_ s: String, maxFractionDigits: Int = 6) -> String {
         // keep only digits and the first “.”
         var filtered = s.filter { "0123456789.".contains($0) }
@@ -562,7 +564,7 @@ struct SendView: View {
         if filtered.first == "." { filtered = "0" + filtered }
         return filtered
     }
-    
+
     func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             if settings.authorizationStatus == .notDetermined {
@@ -572,7 +574,7 @@ struct SendView: View {
             }
         }
     }
-    
+
     func requestPushPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             if granted {
@@ -582,11 +584,11 @@ struct SendView: View {
             }
         }
     }
-    
+
     @MainActor
     private func recalcFee() {
         let dest = (recipient?.address ?? addressText).trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         guard
             let ada = Double(adaText),
             ada > 0,
@@ -595,7 +597,7 @@ struct SendView: View {
             netFee = 0
             return
         }
-        
+
         feeLoading = true
         Task {
             do {
@@ -605,7 +607,7 @@ struct SendView: View {
                 feeError = nil
             } catch {
                 DebugLogger.log("⚠️ Failed to estimate fee: \(error)")
-                
+
                 if let rustError = error as? CardanoRustError {
                     switch rustError {
                     case let .common(message):
@@ -621,21 +623,22 @@ struct SendView: View {
                 } else {
                     feeError = "Couldn’t estimate the fee. Please try again."
                 }
-                
+
                 netFee = 0
             }
             feeLoading = false
         }
     }
-    
+
     // MARK: – Face ID + send
-    
+
     private func authenticateAndSend() {
         let ctx = LAContext()
         var authErr: NSError?
         if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
             ctx.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                               localizedReason: "Let's confirm it’s you before you send ADA from your wallet.") { success, _ in
+                               localizedReason: "Let's confirm it’s you before you send ADA from your wallet.")
+            { success, _ in
                 if success {
                     Task { await sendTransaction() }
                 }
@@ -644,20 +647,20 @@ struct SendView: View {
             Task { await sendTransaction() }
         }
     }
-    
+
     @MainActor
     private func sendTransaction() async {
         isSending = true
         defer { isSending = false }
-        
+
         guard let amount = Double(adaText), amount > 0 else {
             sendError = "Enter a valid amount."
             return
         }
         let tip = Double(tipText) ?? 0
-        
+
         let dest = (recipient?.address ?? addressText).trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         do {
             _ = try await WalletService.shared.sendMultiTransaction(
                 to: dest,
@@ -672,13 +675,13 @@ struct SendView: View {
             sendError = error.localizedDescription
         }
     }
-    
+
     private func lookupRecipient() {
         lookupTask?.cancel()
-        
+
         lookupTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 200_000_000)
-            
+
             let handle: String
             switch sendMethod {
             case .email:
@@ -687,7 +690,7 @@ struct SendView: View {
                     return
                 }
                 handle = email.lowercased()
-                
+
             case .phone:
                 let digits = localNumber.filter(\.isWholeNumber)
                 guard phoneOK else {
@@ -695,7 +698,7 @@ struct SendView: View {
                     return
                 }
                 handle = "\(dialCode)\(digits)"
-                
+
             case .address:
                 let a = addressText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard a.hasPrefix("addr") && a.count > 50 else {
@@ -709,7 +712,7 @@ struct SendView: View {
                 recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
                 return
             }
-            
+
             if let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: handle) {
                 recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
                 recalcFee()
@@ -718,6 +721,4 @@ struct SendView: View {
             }
         }
     }
-    
 }
-

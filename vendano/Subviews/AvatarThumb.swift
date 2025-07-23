@@ -78,16 +78,4 @@ struct AvatarThumb: View {
                 .foregroundColor(theme.color(named: "TextReversed"))
         }
     }
-
-    @ViewBuilder
-    private var maskView: some View {
-        if VendanoTheme.shared.isHosky() {
-            Image("hosky-mask")
-                .resizable()
-                .scaledToFit()
-        } else {
-            Circle()
-        }
-    }
-
 }

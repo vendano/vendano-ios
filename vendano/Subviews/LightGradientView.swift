@@ -14,21 +14,20 @@ struct LightGradientView: View {
             LinearGradient(
                 gradient: Gradient(colors: [
                     theme.color(named: "BackgroundStart"),
-                    theme.color(named: "BackgroundEnd")
+                    theme.color(named: "BackgroundEnd"),
                 ]),
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
-            
+
             if VendanoTheme.shared.isHosky() {
-                
                 RadialGradient(
                     gradient: Gradient(colors: [
                         theme.color(named: "GlowPink").opacity(0.35),
                         theme.color(named: "GlowPurple").opacity(0.25),
                         Color.white.opacity(0.05),
-                        .clear
+                        .clear,
                     ]),
                     center: .center,
                     startRadius: 60,
@@ -42,7 +41,7 @@ struct LightGradientView: View {
                         theme.color(named: "GlowPink"),
                         theme.color(named: "GlowPurple"),
                         theme.color(named: "AccentAlt"),
-                        theme.color(named: "GlowPink")
+                        theme.color(named: "GlowPink"),
                     ]),
                     center: .center
                 )
@@ -50,10 +49,7 @@ struct LightGradientView: View {
                 .blendMode(.overlay)
                 .rotationEffect(.degrees(-20))
                 .ignoresSafeArea()
-                
             }
-            
-            
         }
     }
 }

@@ -67,7 +67,7 @@ struct FAQView: View {
                         }
                     }
                     .padding()
-                    
+
                     List {
                         ForEach(faqs) { faq in
                             Button {
@@ -82,7 +82,7 @@ struct FAQView: View {
                             .buttonStyle(.plain)
                             .listRowBackground(theme.color(named: "FieldBackground"))
                         }
-                        
+
                         Section {
                             Button(FAQContinueButtonLabel) {
                                 (onFinish ?? { state.onboardingStep = .auth })()

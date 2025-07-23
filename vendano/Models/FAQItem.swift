@@ -50,7 +50,7 @@ class FAQs {
               tldr: "Buy on an exchange then transfer in.",
               answer: "Create a wallet here, then buy ADA on an exchange (e.g. Coinbase) and send it to your Vendano address.",
               clarify: "Create or load a Cardano wallet here, copy the receive address, then purchase ADA on an exchange like Coinbase or Kraken and transfer it to the address of your Vendano wallet.",
-              details: "Exchanges convert dollars to ADA much like a foreign currency booth converts USD to EUR. After purchase, use the exchange’s \"withdraw\" or \"send\" button, paste your Vendano receive address, and confirm. Within a minute or two you’ll see the ADA on your Home screen. Fees vary by exchange; Cardano’s small on-chain fee is baked into the transaction (those fees are used to maintain and support the software).")
+              details: "Exchanges convert dollars to ADA much like a foreign currency booth converts USD to EUR. After purchase, use the exchange’s \"withdraw\" or \"send\" button, paste your Vendano receive address, and confirm. Within a minute or two you’ll see the ADA on your Home screen. Fees vary by exchange; Cardano’s small on-chain fee is baked into the transaction (those fees are used to maintain and support the software)."),
     ]
 
     let additional: [FAQItem] = [
@@ -74,7 +74,7 @@ class FAQs {
               answer: "1% keeps the lights on and is ~⅓ normal app fees.",
               clarify: "Traditional fiat apps add 3% plus hidden FX costs. Cardano’s low network fee lets us charge a flat \(Config.vendanoAppFeePercentFormatted).",
               details: "Each Cardano transaction costs ~0.17 ADA on-chain. Vendano adds \(Config.vendanoAppFeePercentFormatted) so we can run secure servers, pay for SMS / email OTPs, and keep improving features like staking or biometrics. There are no hidden spreads or monthly charges."),
-        
+
         .init(
             icon: "arrow.triangle.2.circlepath.circle",
             question: "Can I use my Vendano funds in another wallet (like Yoroi)?",
@@ -83,7 +83,7 @@ class FAQs {
             clarify: "Your 12/15/24‑word phrase is universal. Copy it exactly into any Cardano wallet app’s restore feature.",
             details: "1. Open Yoroi and pick “Restore”\n 2. Select “Shelley/Byron” era (if prompted)\n 3. Enter the same 12/15/24 words you wrote down\n 4. Give the wallet a name and optional password\n 5. Hit “Restore” and watch your ADA balance sync"
         ),
-        
+
         .init(
             icon: "trash.circle",
             question: "How do I delete my Vendano account and data?",
@@ -105,20 +105,20 @@ class FAQs {
               tldr: "cardano.org, cardanoscan.io.",
               answer: "Everything is public—check fees, docs, and live transactions.",
               clarify: "Cardano is open source; use explorers to see any address or block.",
-              details: "• Learn at cardano.org (official docs).\n• Inspect any transaction on cardanoscan.io.\n• Compare network fees at fees.cardano.org.\nOpen data means you don’t have to trust Vendano’s word—verify on the blockchain and independent sites.")
+              details: "• Learn at cardano.org (official docs).\n• Inspect any transaction on cardanoscan.io.\n• Compare network fees at fees.cardano.org.\nOpen data means you don’t have to trust Vendano’s word—verify on the blockchain and independent sites."),
     ]
 
     // TODO: Future functionality
     //
     /*
-     .init(icon: "checkmark.shield",
-           question: "Can I earn rewards (staking)?",
-           tldr: "Yes, stake it in this app.",
-           answer: "Delegate your ADA to a pool and earn ~3–4 % yearly.",
-           clarify: "Staking helps secure the network; rewards deposit automatically every 5 days.",
-           details: "Open **Delegate** → pick a stake pool → tap *Delegate*. Your ADA never leaves the wallet; the protocol just counts your stake toward the pool. Rewards are automatic and liquid; you can send ADA at any time without ‘unstaking’ or lock-up periods."
-          ),
-    */
+      .init(icon: "checkmark.shield",
+            question: "Can I earn rewards (staking)?",
+            tldr: "Yes, stake it in this app.",
+            answer: "Delegate your ADA to a pool and earn ~3–4 % yearly.",
+            clarify: "Staking helps secure the network; rewards deposit automatically every 5 days.",
+            details: "Open **Delegate** → pick a stake pool → tap *Delegate*. Your ADA never leaves the wallet; the protocol just counts your stake toward the pool. Rewards are automatic and liquid; you can send ADA at any time without ‘unstaking’ or lock-up periods."
+           ),
+     */
 
     func fullFAQs() -> [FAQItem] {
         return onboarding + additional

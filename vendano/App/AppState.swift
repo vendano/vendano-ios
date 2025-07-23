@@ -117,7 +117,8 @@ final class AppState: ObservableObject {
                     for idx in vms.indices {
                         group.addTask {
                             if let (n, a, _) = await FirebaseService.shared
-                                .fetchRecipient(for: vms[idx].counterpartyAddress) {
+                                .fetchRecipient(for: vms[idx].counterpartyAddress)
+                            {
                                 vms[idx].name = n
                                 vms[idx].avatarURL = a.flatMap(URL.init(string:))
                             }

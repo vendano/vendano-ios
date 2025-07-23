@@ -33,7 +33,8 @@ struct MailComposeView: UIViewControllerRepresentable {
         init(_ parent: MailComposeView) { self.parent = parent }
         func mailComposeController(_: MFMailComposeViewController,
                                    didFinishWith _: MFMailComposeResult,
-                                   error _: Error?) {
+                                   error _: Error?)
+        {
             parent.presentation.wrappedValue.dismiss()
         }
     }

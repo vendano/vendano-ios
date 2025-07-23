@@ -12,17 +12,17 @@ import SwiftUI
 struct ReceiveView: View {
     @EnvironmentObject var theme: VendanoTheme
     @Environment(\.openURL) private var openURL
-    
+
     @StateObject private var state = AppState.shared
     let onClose: () -> Void
-    
+
     private let context = CIContext()
     private let filter = CIFilter.qrCodeGenerator()
-    
+
     var body: some View {
         ZStack {
             DarkGradientView().ignoresSafeArea()
-            
+
             VStack(spacing: 24) {
                 HStack {
                     Spacer()
@@ -32,7 +32,7 @@ struct ReceiveView: View {
                             .foregroundColor(theme.color(named: "TextReversed").opacity(0.7))
                     }
                 }
-                
+
                 VStack(spacing: 8) {
                     Text("Receive ADA")
                         .vendanoFont(.title, size: 24, weight: .semibold)
@@ -42,7 +42,7 @@ struct ReceiveView: View {
                         .foregroundColor(theme.color(named: "TextReversed").opacity(0.8))
                         .multilineTextAlignment(.center)
                 }
-                
+
                 VStack(spacing: 24) {
                     // QR section
                     VStack(spacing: 8) {
@@ -56,7 +56,7 @@ struct ReceiveView: View {
                             .padding(12)
                             .background(theme.color(named: "CellBackground"))
                     }
-                    
+
                     // Address box
                     Text(state.walletAddress)
                         .monospaced()
@@ -66,7 +66,7 @@ struct ReceiveView: View {
                         .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
                         .textSelection(.enabled)
-                    
+
                     // Actions
                     HStack(spacing: 16) {
                         Button {
@@ -75,7 +75,7 @@ struct ReceiveView: View {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
                         .buttonStyle(PrimaryButtonStyle())
-                        
+
                         Button {
                             let sheet = UIActivityViewController(
                                 activityItems: [state.walletAddress],
@@ -83,17 +83,17 @@ struct ReceiveView: View {
                             )
                             let allScenes = UIApplication.shared.connectedScenes
                             let scene = allScenes.first { $0.activationState == .foregroundActive }
-                            
+
                             if let windowScene = scene as? UIWindowScene {
                                 windowScene.keyWindow?.rootViewController?.present(sheet, animated: true, completion: nil)
                             }
-                            
+
                         } label: {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                         .buttonStyle(PrimaryButtonStyle())
                     }
-                    
+
                     if state.adaBalance == 0 {
                         DisclosureGroup(
                             content: {
@@ -101,7 +101,7 @@ struct ReceiveView: View {
                                     Text("1. Create an account on an exchange (e.g. Coinbase, Kraken).")
                                     Text("2. Buy ADA using your bank or card.")
                                     Text("3. Withdraw or Send ADA to the address above.")
-                                    
+
                                     Button("Learn how →") {
                                         guard let url = URL(string: "https://vendano.net/getting-ada.html") else { return }
                                         openURL(url)
@@ -125,9 +125,8 @@ struct ReceiveView: View {
                         .padding()
                         .background(theme.color(named: "CellBackground"))
                         .cornerRadius(12)
-                        
                     }
-                    
+
                     Spacer()
                 }
                 .padding()
@@ -135,25 +134,23 @@ struct ReceiveView: View {
             .padding()
         }
     }
-    
+
     // MARK: – QR generator
-    
+
     func generateQRCode() -> UIImage {
         let link = "https://vendano.net/receive?addr=\(state.walletAddress)"
-        
+
         filter.message = Data(link.utf8)
         filter.setValue("L", forKey: "inputCorrectionLevel")
-        
+
         let qrTransform = CGAffineTransform(scaleX: 12, y: 12)
-        
+
         if let outputImage = filter.outputImage?.transformed(by: qrTransform) {
             if let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
                 return UIImage(cgImage: cgImage)
             }
         }
-        
+
         return UIImage(systemName: "qrcode") ?? UIImage()
     }
 }
-
-

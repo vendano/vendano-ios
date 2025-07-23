@@ -67,7 +67,7 @@ struct ImportSeedView: View {
                                 }
                                 state.onboardingStep = .home
                             } catch {
-                                DebugLogger.log("⚠️ Wallet creation failed: \( error)")
+                                DebugLogger.log("⚠️ Wallet creation failed: \(error)")
                                 showError = true
                             }
                         }
@@ -95,6 +95,6 @@ struct ImportSeedView: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    ImportSeedView()
-//}
+// }

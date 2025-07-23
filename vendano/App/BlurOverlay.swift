@@ -12,13 +12,13 @@ class BlurOverlay: ObservableObject {
 
     init() {
         let nc = NotificationCenter.default
-        
+
         nc.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 self?.presentBlur()
             }
         }
-        
+
         nc.addObserver(forName: UIApplication.didBecomeActiveNotification,
                        object: nil, queue: .main) { _ in self.removeBlur() }
     }

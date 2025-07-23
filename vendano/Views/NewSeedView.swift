@@ -67,10 +67,10 @@ struct NewSeedView: View {
                                 Text("\(idx + 1).")
                                     .monospacedDigit()
                                     .vendanoFont(.body, size: 16)
-                                
+
                                 Text(words[idx])
                                     .vendanoFont(.body, size: 16)
-                                
+
                                 Spacer()
                             }
                             .lineLimit(1)
@@ -137,6 +137,6 @@ struct NewSeedView: View {
     }
 }
 
-//#Preview {
+// #Preview {
 //    NewSeedView()
-//}
+// }

@@ -57,7 +57,7 @@ class FeedbackViewModel: ObservableObject {
         ref.setData([
             "uid": uid,
             "text": text,
-            "timestamp": FieldValue.serverTimestamp()
+            "timestamp": FieldValue.serverTimestamp(),
         ])
     }
 

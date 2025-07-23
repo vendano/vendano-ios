@@ -32,7 +32,7 @@ struct SplashView: View {
                             pulse.toggle()
                         }
                     }
-                
+
                 Text(VendanoTheme.shared.isHosky() ? "vendoggo" : "vendano")
                     .vendanoFont(.title, size: 48, weight: .heavy)
                     .foregroundColor(theme.color(named: "TextReversed"))

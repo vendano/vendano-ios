@@ -20,7 +20,7 @@ struct FeedbackSheet: View {
         "Questions, praise, bugs - everything helps. Share what’s on your mind!",
         "Your insight shapes this app. Tell us what’s working or where we can improve...",
         "Wondering how to use Vendano? Ask away or let us know what you think so far.",
-        "Help us build a better experience - your feedback makes a difference!"
+        "Help us build a better experience - your feedback makes a difference!",
     ]
 
     var body: some View {
@@ -90,7 +90,6 @@ struct FeedbackSheet: View {
                         .focused($focus)
 
                     Button(action: {
-
                         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                         if trimmed.lowercased() == "debug" {
                             let log = DebugLogger.getLogWithDeviceInfo()
