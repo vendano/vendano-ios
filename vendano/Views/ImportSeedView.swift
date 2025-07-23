@@ -12,6 +12,7 @@ struct ImportSeedView: View {
     @StateObject private var state = AppState.shared
     @State private var phraseText = ""
     @State private var showError = false
+    @State private var errorMessage = "Unknown error"
 
     var body: some View {
         ZStack {
@@ -60,7 +61,7 @@ struct ImportSeedView: View {
 
                         Task {
                             do {
-                                try await WalletService.shared.createWallet(from: words)
+                                try await WalletService.shared.importWallet(words: words)
                                 if let addr = WalletService.shared.address {
                                     state.walletAddress = addr
                                     try await FirebaseService.shared.saveAddress(addr)
@@ -68,6 +69,7 @@ struct ImportSeedView: View {
                                 state.onboardingStep = .home
                             } catch {
                                 DebugLogger.log("⚠️ Wallet creation failed: \(error)")
+                                errorMessage = error.localizedDescription
                                 showError = true
                             }
                         }
@@ -87,7 +89,7 @@ struct ImportSeedView: View {
             .alert("Invalid recovery phrase", isPresented: $showError) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("Make sure you’ve pasted exactly 12, 15, or 24 words separated by spaces.")
+                Text(errorMessage)
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(theme.color(named: "TextSecondary"))
             }

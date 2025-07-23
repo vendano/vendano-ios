@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var selectedNFT: NFT?
 
     @StateObject private var state = AppState.shared
+    @StateObject private var wallet = WalletService.shared
     @StateObject private var nftVM = NFTGalleryViewModel()
 
     // how far the main card moves while an overlay is on-screen
@@ -64,22 +65,22 @@ struct HomeView: View {
                     }
 
                     VStack(spacing: 2) {
-                        Text("\(state.adaBalance.truncating(toPlaces: 1)) ADA")
+                        Text("\(wallet.adaBalance.truncating(toPlaces: 1)) ADA")
                             .vendanoFont(.title, size: 48, weight: .heavy)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                         if let usdRate = WalletService.shared.adaUsdRate {
-                            Text("≈ $\(state.adaBalance * usdRate, format: .number.precision(.fractionLength(2))) USD")
+                            Text("≈ $\(wallet.adaBalance * usdRate, format: .number.precision(.fractionLength(2))) USD")
                                 .vendanoFont(.headline, size: 18, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                     }
 
-                    if state.hoskyBalance > 0 {
+                    if wallet.hoskyBalance > 0 {
                         VStack(spacing: 2) {
-                            Text("HOSKY \(state.hoskyBalance, format: .number.precision(.fractionLength(0)))")
+                            Text("HOSKY \(wallet.hoskyBalance, format: .number.precision(.fractionLength(0)))")
                                 .vendanoFont(.headline, size: 18, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
-                            Text("≈ $\(state.hoskyBalance * 0, format: .number.precision(.fractionLength(2))) USD")
+                            Text("≈ $\(wallet.hoskyBalance * 0, format: .number.precision(.fractionLength(2))) USD")
                                 .vendanoFont(.body, size: 16)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
                         }
@@ -106,11 +107,11 @@ struct HomeView: View {
                     // TODO: enable NFT view
                     // - test with NFTs
                     // - view sheet, set PFP
-                    /*
+                    
                     if !nftVM.nfts.isEmpty {
                         NFTThumbnailRow(selectedNFT: $selectedNFT)
                     }
-                    */
+                    
 
                     ActivityView()
 
@@ -176,14 +177,7 @@ struct HomeView: View {
                     .alert("Remove your wallet?", isPresented: $showLogoutAlert) {
                         Button("Cancel", role: .cancel) {}
                         Button("Remove", role: .destructive) {
-                            state.walletAddress = ""
-                            state.adaBalance = 0
-                            state.hoskyBalance = 0
-                            state.seedWords = []
-
-                            KeychainWrapper.standard.removeObject(forKey: "seedWords")
-
-                            state.onboardingStep = .walletChoice
+                            state.removeWallet()
                         }
                     } message: {
                         Text("This app will forget your wallet. Your funds remain secure on the blockchain, but you won’t see your balance until you restore it with your 24-word recovery phrase.")

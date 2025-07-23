@@ -10,7 +10,10 @@ import SwiftUI
 
 struct ProfileSheet: View {
     @EnvironmentObject var theme: VendanoTheme
+    
     @StateObject private var state = AppState.shared
+    @StateObject private var wallet = WalletService.shared
+    
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage("appearancePreference") private var appearancePrefRaw = AppearancePreference.system.rawValue
@@ -162,7 +165,7 @@ struct ProfileSheet: View {
                         }
                         .pickerStyle(.segmented)
 
-                        if state.hoskyBalance > 0 {
+                        if wallet.hoskyBalance > 0 {
                             Toggle("HOSKYfy my app", isOn: $useHoskyTheme)
                                 .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
                                 .vendanoFont(.body, size: 16)

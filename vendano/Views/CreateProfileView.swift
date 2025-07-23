@@ -10,7 +10,7 @@ import SwiftUI
 
 struct CreateProfileView: View {
     @EnvironmentObject var theme: VendanoTheme
-    @ObservedObject var state = AppState.shared
+    @StateObject var state = AppState.shared
 
     @State private var name: String = ""
     @State private var pickerItem: PhotosPickerItem?

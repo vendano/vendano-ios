@@ -10,6 +10,7 @@ import Foundation
 enum Config {
     static var vendanoAppFeePercent: Double { 0.01 }
     static var vendanoAppFeePercentFormatted: String { "1%" }
+    static var blockfrostAPIURL: String { "https://cardano-mainnet.blockfrost.io/api/v0" }
 
     static var vendanoFeeAddress: String {
         guard let key = Bundle.main.object(forInfoDictionaryKey: "VENDANO_WALLET") as? String else {

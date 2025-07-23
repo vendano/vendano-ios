@@ -103,7 +103,7 @@ struct ConfirmSeedView: View {
                                 }
                                 Task {
                                     do {
-                                        try await WalletService.shared.createWallet(from: selected)
+                                        try await WalletService.shared.importWallet(words: selected)
                                         if let addr = WalletService.shared.address {
                                             state.walletAddress = addr
                                             try await FirebaseService.shared.saveAddress(addr)

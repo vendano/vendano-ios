@@ -12,45 +12,177 @@ import Foundation
 @MainActor
 final class WalletService: ObservableObject {
     static let shared = WalletService()
+    
     @Published private(set) var address: String?
+    @Published private(set) var allAddresses: [String] = []
+    
+    @Published private(set) var adaBalance: Double = 0
+    @Published private(set) var hoskyBalance: Double = 0
+    
     @Published var adaUsdRate: Double?
 
     var cardano: Cardano?
     private var keychain: Keychain?
 
-    private let apiBase = "https://cardano-mainnet.blockfrost.io/api/v0"
+    private let apiBase = Config.blockfrostAPIURL
     private var bfCache = BFCache()
 
     private let priceService: PriceService
+    private var cachedStake: String?
+    
+    private var importTask: Task<(), Error>?
+    private var txTask: Task<[RawTx], Error>?
+    
+    private let gapLimit = 20 // empty ADA addresses to skip through
+    
+    private lazy var session: URLSession = {
+        let config = URLSessionConfiguration.default
+        
+        // 20 MB in‑memory, 200 MB on disk
+        config.urlCache = URLCache(
+            memoryCapacity: 20*1_024*1_024,
+            diskCapacity: 200*1_024*1_024,
+            diskPath: "blockfrost-cache"
+        )
+        
+        config.requestCachePolicy = .useProtocolCachePolicy
+        return URLSession(configuration: config)
+    }()
 
     init(priceService: PriceService = CoinbaseService()) {
         self.priceService = priceService
     }
-
-    func clearCache() {
+    
+    func clearCache(preserveBalances: Bool = true) {
+        cachedStake = nil 
+        if preserveBalances == false {
+            adaBalance  = 0
+            hoskyBalance = 0
+        }
         bfCache = BFCache()
+        URLCache.shared.removeAllCachedResponses()
     }
-
+    
     func getJSON(_ url: Foundation.URL) async throws -> Data {
-        if let hit = await bfCache.get(url.absoluteString) { return hit }
-
+        let key = url.absoluteString
+        
+        // 1) If we have a fresh copy, just return it
+        if let (freshData, _) = await bfCache.get(key) {
+            return freshData
+        }
+        
         var req = URLRequest(url: url)
         req.setValue(Config.blockfrostKey, forHTTPHeaderField: "project_id")
-        let (data, resp) = try await URLSession.shared.data(for: req)
-        guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        
+        // 2) Peek at the stale entry to grab its ETag
+        if let stale = await bfCache.peek(key),
+           let tag = stale.etag {
+            req.setValue(tag, forHTTPHeaderField: "If-None-Match")
         }
-        await bfCache.set(url.absoluteString, data: data)
+        
+        // 3) Fire the request
+        let (data, resp) = try await session.data(for: req)
+        let http = resp as! HTTPURLResponse
+        
+        // 4) If 304, return the stale data
+        if http.statusCode == 304,
+           let stale = await bfCache.peek(key) {
+            // update fetchedAt so it becomes “fresh” again
+            await bfCache.set(key, data: stale.data, etag: stale.etag)
+            return stale.data
+        }
+        
+        // 5) Otherwise store new payload + ETag and return it
+        let etag = http.value(forHTTPHeaderField: "ETag")
+        await bfCache.set(key, data: data, etag: etag)
         return data
+    }
+    
+    func importWallet(words: [String]) async throws {
+        if let running = importTask {
+            try await running.value
+            return
+        }
+
+        let task = Task { [weak self] in
+            guard let self else { return }
+            try await self.createWallet(from: words)
+        }
+        
+        print ("import task!!")
+        importTask = task
+        defer { importTask = nil }
+        
+        try await task.value
+    }
+    
+    func stakeAddress(from payment: String) async throws -> String {
+        if let s = cachedStake { return s }
+
+        struct AddrInfo: Decodable {
+            let stake_address: String?   // may be null for enterprise addresses
+        }
+
+        let url  = URL(string: "\(apiBase)/addresses/\(payment)")!
+        let data = try await getJSON(url)
+        let info = try JSONDecoder().decode(AddrInfo.self, from: data)
+
+        guard let stake = info.stake_address else {
+            throw NSError(domain: "Vendano", code: 90,
+                          userInfo: [NSLocalizedDescriptionKey:
+                          "Payment address has no stake key (enterprise addr)"])
+        }
+        cachedStake = stake
+        return stake
+    }
+    
+    func stakeBalances(stake: String) async throws -> (ada: Double, hosky: Double) {
+        // ---------- ADA ----------
+        struct AccountInfo: Decodable { let controlled_amount: String }
+        let accURL = URL(string: "\(apiBase)/accounts/\(stake)")!
+        let accData = try await getJSON(accURL)
+        let account  = try JSONDecoder().decode(AccountInfo.self, from: accData)
+        let ada = Double(UInt64(account.controlled_amount) ?? 0) / 1_000_000
+
+        // ---------- native assets ----------
+        struct AssetRow: Decodable { let unit: String; let quantity: String }
+        let assetURL = URL(string:
+            "\(apiBase)/accounts/\(stake)/addresses/assets?count=100")!
+        let assetData = try await getJSON(assetURL)
+        let assets = try JSONDecoder().decode([AssetRow].self, from: assetData)
+
+        // HOSKY’s full “unit” = policy‑ID + asset‑name‑hex
+        let policy = "a0028f350aaabe0545fdcb56b039bfb08e4bb4d8c4d7c3c7d481c235"
+        let hoskyUnit = policy + "HOSKY".hexEncoded
+
+        let hoskyQty = assets
+            .first { $0.unit == hoskyUnit }?
+            .quantity ?? "0"
+        let hosky = Double(hoskyQty) ?? 0
+
+        print("⭐ ADA:", ada, "  HOSKY:", hosky)
+        return (ada, hosky)
     }
 
     // Create (or restore) from BIP-39 words, fetch or derive the first external address, and publish it.
     func createWallet(from words: [String]) async throws {
+        print("🛠️ createWallet(): word count =", words.count)
+        
         await bfCache.reset()
 
         // Init keychain & ensure account #0 exists
-        let keychain = try Keychain(mnemonic: words)
-        try keychain.addAccount(index: 0)
+        do {
+            let keychain = try Keychain(mnemonic: words)
+            try keychain.addAccount(index: 0)
+            self.keychain = keychain
+        } catch {
+            print("❌ Keychain init failed:", error)
+            throw error   // rethrow so your UI still shows an error
+        }
+        
+        guard let keychain = self.keychain else {
+            fatalError("💥 Keychain init failed!")
+        }
 
         // Init Cardano + Blockfrost
         let cardano = try Cardano(
@@ -58,18 +190,30 @@ final class WalletService: ObservableObject {
             info: .mainnet,
             signer: keychain
         )
-
-        // Sync addresses
-        _ = await withCheckedContinuation { cont in
-            cardano.addresses.fetch { cont.resume(returning: $0) }
+        
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+            cardano.addresses.fetch { result in
+                switch result {
+                case .success:
+                    cont.resume()
+                case .failure(let err):
+                    cont.resume(throwing: err)
+                }
+            }
         }
 
         // Grab the account and try to get any cached addresses…
-        guard let account = cardano.addresses.fetchedAccounts().first else {
-            throw NSError(domain: "Vendano", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "No account available"])
+        let accounts = cardano.addresses.fetchedAccounts()
+        print("⛏️ fetchedAccounts count: \(accounts.count)")
+        for acct in accounts {
+            print("   • account index: \(acct.index)")
         }
-        let cached = try cardano.addresses.get(cached: account) // :contentReference[oaicite:0]{index=0}
+        guard let account = accounts.first else {
+            fatalError("No account found after fetch()!")
+        }
+        
+        let cached = try cardano.addresses.get(cached: account)
+        print("⛏️ cached external addresses count: \(cached.count)")
 
         // …and if none, derive a brand-new one
         let addrObj: Address
@@ -80,10 +224,97 @@ final class WalletService: ObservableObject {
         }
 
         let bech32 = try addrObj.bech32()
+        
+        print("⛏️ using first external address:", bech32)
 
         self.keychain = keychain
         self.cardano = cardano
         address = bech32
+        
+        let stake = try await stakeAddress(from: bech32)
+        print("⭐ stake address:", stake)
+        
+        let (ada, hosky) = try await stakeBalances(stake: stake)
+        self.adaBalance   = ada
+        self.hoskyBalance = hosky
+        print("⭐ total ADA:", ada, "HOSKY:", hosky)
+        
+//        self.allAddresses = try await deriveAllAddresses(for: account)
+//        print("⛏️ derived total addresses:", allAddresses.count)
+//        allAddresses.forEach { print("   –", $0) }
+        
+//        let (ada, hosky) = try await fetchBalances()
+//        print("⛏️ summed ADA:", ada, "HOSKY:", hosky)
+//        self.adaBalance = ada
+//        self.hoskyBalance = hosky
+    }
+    
+    private func deriveAllAddresses(for account: Account) async throws -> [String] {
+        
+        struct UtxoEntry: Decodable {
+            struct Amount: Decodable {
+                let unit: String
+                let quantity: String
+            }
+            let tx_hash: String
+            let output_index: Int
+            let amount: [Amount]
+        }
+        
+        func hasUtxos(_ bech32: String) async throws -> Bool {
+            let url = URL(string: "\(apiBase)/addresses/\(bech32)/utxos")!
+            let data = try await getJSON(url)
+
+            // Fast‑path: if the payload starts with “[{” it’s an array → try decode
+            if data.first == UInt8(ascii: "[") {
+                let utxos = try JSONDecoder().decode([UtxoEntry].self, from: data)
+                return !utxos.isEmpty
+            }
+
+            // Otherwise it’s an object (error, 404, rate‑limit) → treat as “no UTxOs”
+            if
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let msg = obj["message"] as? String {
+                print("⚠️ Blockfrost replied \(msg) for \(bech32). Treating as empty.")
+            }
+            return false
+        }
+
+        var result: [String] = []
+
+        for change in [false, true] {
+            print("⛏️ deriving chain change=\(change)")
+            var emptyCount = 0
+            while emptyCount < gapLimit {
+                let addrObj = try cardano!.addresses.new(for: account, change: change)
+                let bech = try addrObj.bech32()
+                result.append(bech)
+
+                if try await hasUtxos(bech) {
+                    emptyCount = 0
+                } else {
+                    emptyCount += 1
+                    print("   ⚠️ no UTxOs, emptyCount = \(emptyCount)")
+                }
+            }
+        }
+
+        return result
+    }
+
+    // Fetch and sum ADA + HOSKY across every address in `allAddresses`
+    func fetchBalances() async throws -> (ada: Double, hosky: Double) {
+        var totalAda: Double = 0
+        var totalHosky: Double = 0
+
+        for addr in allAddresses {
+            let (ada, hosky) = try await getBalances(for: addr)
+            print("   ▶️ balance for \(addr): \(ada) ADA, \(hosky) HOSKY")
+            totalAda += ada
+            totalHosky += hosky
+        }
+
+        return (totalAda, totalHosky)
     }
 
     // Helper to collect all UTxOs from an iterator.
@@ -138,30 +369,6 @@ final class WalletService: ObservableObject {
         return (Double(ada) / 1_000_000, Double(hosky))
     }
 
-    /*
-     func paddedAssetName(from string: String) -> AssetName {
-         var buffer = [UInt8](repeating: 0, count: 32)
-         let bytes = Array(string.utf8.prefix(32)) // Max 32 bytes
-
-         for i in 0 ..< bytes.count {
-             buffer[i] = bytes[i]
-         }
-
-         let tuple = (
-             buffer[0], buffer[1], buffer[2], buffer[3],
-             buffer[4], buffer[5], buffer[6], buffer[7],
-             buffer[8], buffer[9], buffer[10], buffer[11],
-             buffer[12], buffer[13], buffer[14], buffer[15],
-             buffer[16], buffer[17], buffer[18], buffer[19],
-             buffer[20], buffer[21], buffer[22], buffer[23],
-             buffer[24], buffer[25], buffer[26], buffer[27],
-             buffer[28], buffer[29], buffer[30], buffer[31]
-         )
-
-         return AssetName(bytes: tuple, len: UInt8(bytes.count))
-     }
-      */
-
     func loadPrice() async {
         do {
             adaUsdRate = try await priceService.fetchPrice(for: "ADA-USD")
@@ -215,10 +422,20 @@ final class WalletService: ObservableObject {
 
         return Double(feeLovelace) / 1_000_000
     }
+    
+    func fetchTransactionsOnce(for addr: String) async throws -> [RawTx] {
+        if let t = txTask {
+            return try await t.value
+        }
+        let newTask = Task { try await fetchTransactions(for: addr) }
+        txTask = newTask
+        defer { txTask = nil }
+        return try await newTask.value
+    }
 
     // Fetch recent transactions for a given address via Blockfrost.
-    func fetchTransactions(for address: String) async throws -> [RawTx] {
-        let listURL = URL(string: "\(apiBase)/addresses/\(address)/transactions?order=desc")!
+    func fetchTransactions(for addr: String) async throws -> [RawTx] {
+        let listURL = URL(string: "\(apiBase)/addresses/\(addr)/transactions?order=desc")!
         let listData = try await getJSON(listURL)
 
         struct AddressTx: Decodable { let tx_hash: String }

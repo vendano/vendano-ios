@@ -14,6 +14,7 @@ struct ReceiveView: View {
     @Environment(\.openURL) private var openURL
 
     @StateObject private var state = AppState.shared
+    @StateObject private var wallet = WalletService.shared
     let onClose: () -> Void
 
     private let context = CIContext()
@@ -94,7 +95,7 @@ struct ReceiveView: View {
                         .buttonStyle(PrimaryButtonStyle())
                     }
 
-                    if state.adaBalance == 0 {
+                    if wallet.adaBalance == 0 {
                         DisclosureGroup(
                             content: {
                                 VStack(alignment: .leading, spacing: 8) {

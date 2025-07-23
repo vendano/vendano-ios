@@ -13,7 +13,7 @@ import SwiftUI
 /// Centralizes NFT discovery and metadata parsing
 actor NFTService {
     static let shared = NFTService()
-    private let baseURL = "https://cardano-mainnet.blockfrost.io/api/v0"
+    private let baseURL = Config.blockfrostAPIURL
     private let projectID = Config.blockfrostKey
 
     /// Helper to add the required header

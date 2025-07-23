@@ -50,9 +50,10 @@ struct RootView: View {
                 if onboardingStep == .walletChoice {
                     // check for saved wallet first
 
-                    if let saved = loadSeedWords() {
+                    if WalletService.shared.address == nil,
+                       let saved = loadSeedWords() {
                         Task {
-                            try? await WalletService.shared.createWallet(from: saved)
+                            try? await WalletService.shared.importWallet(words: saved)
 
                             if WalletService.shared.address != nil {
                                 state.walletAddress = WalletService.shared.address ?? ""

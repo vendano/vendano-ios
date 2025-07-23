@@ -25,33 +25,27 @@ final class AppState: ObservableObject {
     @Published var email: [String] = []
     @Published var walletAddress: String = "" {
         didSet {
-            Task {
-                await WalletService.shared.clearCache()
-            }
             Task { @MainActor in
+                WalletService.shared.clearCache()
                 refreshOnChainData()
             }
         }
     }
 
     @Published var viewedFAQIDs: Set<UUID> = []
-    @Published var adaBalance: Double = 0
-    @Published var hoskyBalance: Double = 0
     @Published var recentTxs: [TxRowViewModel] = []
 
-    @MainActor
-    func refreshOnChainData() {
+    @MainActor func refreshOnChainData() {
         Task {
             guard !walletAddress.isEmpty else { return }
             do {
                 await WalletService.shared.loadPrice()
-                let (ada, hosky) = try await WalletService.shared.getBalances(for: walletAddress)
-                self.adaBalance = ada
-                self.hoskyBalance = hosky
-
+                
+                let ada = WalletService.shared.adaBalance
+                print ("ADAADAADA: \(ada)")
                 guard ada > 0 else { return }
 
-                let raws = try await WalletService.shared.fetchTransactions(for: walletAddress)
+                let raws = try await WalletService.shared.fetchTransactionsOnce(for: walletAddress)
 
                 let sortedByBlockAndTime = raws.sorted {
                     if $0.blockHeight == $1.blockHeight {
@@ -127,10 +121,10 @@ final class AppState: ObservableObject {
                     await group.waitForAll()
                 }
 
-                for idx in vms.indices {
-                    let v = vms[idx]
-                    print("\(v.date) \(v.name ?? v.counterpartyAddress) \(v.outgoing ? "-" : "+")\(v.amount) \(v.balanceAfter)")
-                }
+//                for idx in vms.indices {
+//                    let v = vms[idx]
+//                    print("\(v.date) \(v.name ?? v.counterpartyAddress) \(v.outgoing ? "-" : "+")\(v.amount) \(v.balanceAfter)")
+//                }
 
                 self.recentTxs = vms
 
@@ -140,8 +134,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    @MainActor
-    func removeEmail(_ emailToRemove: String) {
+    @MainActor func removeEmail(_ emailToRemove: String) {
         let newEmails = email.filter { $0.lowercased() != emailToRemove.lowercased() }
         // Only proceed if at least one handle remains overall
         if !newEmails.isEmpty || !phone.isEmpty {
@@ -160,8 +153,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    @MainActor
-    func removePhone(_ phoneToRemove: String) {
+    @MainActor func removePhone(_ phoneToRemove: String) {
         let newPhones = phone.filter { $0 != phoneToRemove }
         if !newPhones.isEmpty || !email.isEmpty {
             Task {
@@ -230,45 +222,46 @@ final class AppState: ObservableObject {
             avatar = Image(uiImage: img)
         }
     }
-
-    @MainActor func nukeAccount() async {
-        onboardingStep = .splash
-
-        await FirebaseService.shared.removeUserData()
-
-        FirebaseService.shared.deleteAvatarFolder { result in
-            switch result {
-            case .success:
-                print("Avatar folder cleared")
-            case let .failure(err):
-                DebugLogger.log("⚠️ Error clearing avatar folder: \(err.localizedDescription)")
-            }
-        }
-
-        FirebaseService.shared.logoutUser()
+    
+    @MainActor func removeWallet() {
+        walletAddress = ""
+        seedWords     = []
 
         KeychainWrapper.standard.removeObject(forKey: "seedWords")
 
-        avatar = nil
-        avatarUrl = nil
-        displayName = ""
-        walletAddress = ""
-        seedWords = []
+        WalletService.shared.clearCache(preserveBalances: false)
+        
+        recentTxs.removeAll()
 
-        phone = []
-        email = []
+        onboardingStep = .walletChoice
+    }
+
+    @MainActor func nukeAccount() async {
+        removeWallet()
+        
+        onboardingStep = .splash
+        
+        await FirebaseService.shared.removeUserData()
+        FirebaseService.shared.deleteAvatarFolder { result in
+            switch result {
+            case .success:   print("Avatar folder cleared")
+            case .failure(let err): DebugLogger.log("⚠️ Error clearing avatar folder: \(err)")
+            }
+        }
+        FirebaseService.shared.logoutUser()
+        
+        avatar       = nil
+        avatarUrl    = nil
+        displayName  = ""
+        phone        = []
+        email        = []
         viewedFAQIDs = []
 
-        adaBalance = 0
-        hoskyBalance = 0
+        UserDefaults.standard.removeObject(forKey: "EmailForSignIn")
+        UserDefaults.standard.removeObject(forKey: "pendingEmail")
+        UserDefaults.standard.removeObject(forKey: "PhoneForSignIn")
+        UserDefaults.standard.removeObject(forKey: "phoneVID")
 
         removeImage()
-
-        WalletService.shared.clearCache()
-
-        UserDefaults.standard.set(nil, forKey: "EmailForSignIn")
-        UserDefaults.standard.set(nil, forKey: "pendingEmail")
-        UserDefaults.standard.set(nil, forKey: "PhoneForSignIn")
-        UserDefaults.standard.set(nil, forKey: "phoneVID")
     }
 }

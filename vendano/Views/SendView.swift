@@ -20,7 +20,9 @@ enum SendMethod: String, CaseIterable, Identifiable {
 
 struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
+    
     @StateObject private var state = AppState.shared
+    @StateObject private var wallet = WalletService.shared
     @StateObject private var kb = KeyboardGuardian()
 
     let onClose: () -> Void
@@ -93,7 +95,7 @@ struct SendView: View {
     private var tipValue: Double { Double(tipText) ?? 0 }
     private var amountOK: Bool {
         let base = (adaValue ?? 0) + netFee + appFee + tipValue
-        return (adaValue ?? 0) > 0 && base <= state.adaBalance
+        return (adaValue ?? 0) > 0 && base <= wallet.adaBalance
     }
 
     var body: some View {
@@ -257,7 +259,7 @@ struct SendView: View {
                             }
 
                             Button("All") {
-                                var available = state.adaBalance - tipValue - netFee
+                                var available = wallet.adaBalance - tipValue - netFee
                                 if netFee == 0 {
                                     available -= 0.17 // estimated
                                 }
@@ -654,7 +656,7 @@ struct SendView: View {
         defer { isSending = false }
 
         guard let amount = Double(adaText), amount > 0 else {
-            sendError = "Enter a valid amount."
+            sendError = "Enter a valid amount (more than 0)."
             return
         }
         let tip = Double(tipText) ?? 0
@@ -668,7 +670,7 @@ struct SendView: View {
                 tip: tip
             )
             Task { @MainActor in
-                AppState.shared.refreshOnChainData()
+                state.refreshOnChainData()
             }
             sendSuccess = true
         } catch {

@@ -138,7 +138,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // Called when FCM token is refreshed or initially assigned
     func messaging(_: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
-        print("FCM token: \(fcmToken)")
 
         let db = Firestore.firestore()
         let uid = Auth.auth().currentUser?.uid ?? "unknown"
