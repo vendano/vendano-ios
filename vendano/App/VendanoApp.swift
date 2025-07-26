@@ -5,6 +5,7 @@
 //  Created by Jeffrey Berthiaume on 6/3/25.
 //
 
+import FirebaseAnalytics
 import FirebaseAuth
 import FirebaseCore
 import FirebaseFirestore
@@ -42,7 +43,7 @@ struct VendanoApp: App {
                 }
         }
     }
-    
+
     func handleIncomingLink(_ url: URL) {
         if Auth.auth().canHandle(url) { return }
 
@@ -71,7 +72,6 @@ struct VendanoApp: App {
             }
         }
     }
-
 
 //    func handleIncomingLink(_ url: URL) {
 //        guard
@@ -147,10 +147,11 @@ struct VendanoApp: App {
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
-    func application(_: UIApplication,
-                     didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
-    {
+    func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FirebaseApp.configure()
+
+        AnalyticsManager.logOnce("first_open")
+        AnalyticsManager.logEvent("general_app_open")
 
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
@@ -159,9 +160,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     // Called when APNs has assigned the device a token
-    func application(_: UIApplication,
-                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
-    {
+    func application(_: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
     }
 
@@ -175,17 +174,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     // Handle foreground notification
-    func userNotificationCenter(_: UNUserNotificationCenter,
-                                willPresent _: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
-    {
+    func userNotificationCenter(_: UNUserNotificationCenter, willPresent _: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .sound]) // show as banner even if app is foreground
     }
 
-    func application(_: UIApplication,
-                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
-    {
+    func application(_: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         if Auth.auth().canHandleNotification(userInfo) {
             completionHandler(.noData)
             return

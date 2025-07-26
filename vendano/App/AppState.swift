@@ -47,12 +47,14 @@ final class AppState: ObservableObject {
             }
             do {
                 await WalletService.shared.loadPrice()
-                
+
                 let ada = WalletService.shared.adaBalance
                 guard ada > 0 else {
                     checkingTxs = false
                     return
                 }
+
+                AnalyticsManager.logOnce("receive_success", parameters: ["amount": ada])
 
                 let raws = try await WalletService.shared.fetchTransactionsOnce(for: walletAddress)
 
@@ -134,7 +136,7 @@ final class AppState: ObservableObject {
 //                    let v = vms[idx]
 //                    print("\(v.date) \(v.name ?? v.counterpartyAddress) \(v.outgoing ? "-" : "+")\(v.amount) \(v.balanceAfter)")
 //                }
-                
+
                 self.checkingTxs = false
                 self.recentTxs = vms
 
@@ -192,9 +194,8 @@ final class AppState: ObservableObject {
             DebugLogger.log("⚠️ failed to reload avatar: \(error)")
         }
     }
-    
+
     func uploadAvatar(from uiImg: UIImage) async {
-        
         os_log("uploadAvatar called on main? %{public}@", #function)
 
         await MainActor.run {
@@ -239,15 +240,15 @@ final class AppState: ObservableObject {
             avatar = Image(uiImage: img)
         }
     }
-    
+
     @MainActor func removeWallet() {
         walletAddress = ""
-        seedWords     = []
+        seedWords = []
 
         KeychainWrapper.standard.removeObject(forKey: "seedWords")
 
         WalletService.shared.clearCache(preserveBalances: false)
-        
+
         recentTxs.removeAll()
 
         onboardingStep = .walletChoice
@@ -255,25 +256,25 @@ final class AppState: ObservableObject {
 
     @MainActor func nukeAccount() async {
         removeWallet()
-        
+
         onboardingStep = .splash
-        
+
         FirebaseService.shared.deleteAvatarFolder { result in
             switch result {
-            case .success:   print("Avatar folder cleared")
-            case .failure(let err): DebugLogger.log("⚠️ Error clearing avatar folder: \(err)")
+            case .success: print("Avatar folder cleared")
+            case let .failure(err): DebugLogger.log("⚠️ Error clearing avatar folder: \(err)")
             }
         }
-        
+
         await FirebaseService.shared.removeUserData()
-        
+
         FirebaseService.shared.logoutUser()
-        
-        avatar       = nil
-        avatarUrl    = nil
-        displayName  = ""
-        phone        = []
-        email        = []
+
+        avatar = nil
+        avatarUrl = nil
+        displayName = ""
+        phone = []
+        email = []
         viewedFAQIDs = []
 
         UserDefaults.standard.removeObject(forKey: "EmailForSignIn")

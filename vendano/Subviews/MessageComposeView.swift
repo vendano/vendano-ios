@@ -30,9 +30,13 @@ struct MessageComposeView: UIViewControllerRepresentable {
     class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
         let parent: MessageComposeView
         init(_ parent: MessageComposeView) { self.parent = parent }
-        func messageComposeViewController(_: MFMessageComposeViewController,
-                                          didFinishWith _: MessageComposeResult)
-        {
+        func messageComposeViewController(_: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+            if result == .sent {
+                AnalyticsManager.logEvent(
+                    "invite_friend_sent",
+                    parameters: ["medium": "sms"]
+                )
+            }
             parent.presentation.wrappedValue.dismiss()
         }
     }

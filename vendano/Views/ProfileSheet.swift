@@ -11,10 +11,10 @@ import SwiftUI
 
 struct ProfileSheet: View {
     @EnvironmentObject var theme: VendanoTheme
-    
+
     @StateObject private var state = AppState.shared
     @StateObject private var wallet = WalletService.shared
-    
+
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage("appearancePreference") private var appearancePrefRaw = AppearancePreference.system.rawValue
@@ -226,6 +226,7 @@ struct ProfileSheet: View {
                     suppressAppearanceReset = true
                     appearancePrefRaw = AppearancePreference.system.rawValue
                     VendanoTheme.shared.currentPalette = .hosky
+                    AnalyticsManager.logEvent("hosky_mode_activate")
                     guard UIApplication.shared.alternateIconName != "hosky-icon" else { return }
 
                     UIApplication.shared.setAlternateIconName("hosky-icon") { error in
@@ -258,7 +259,7 @@ struct ProfileSheet: View {
             .preferredColorScheme(resolvedScheme())
         }
     }
-    
+
     private func authenticateAndDelete() {
         let ctx = LAContext()
         var authErr: NSError?
@@ -266,8 +267,7 @@ struct ProfileSheet: View {
             ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
                 localizedReason: "Let's confirm it’s you before we remove your account."
-            )
-            { success, _ in
+            ) { success, _ in
                 if success {
                     Task { await state.nukeAccount() }
                 }

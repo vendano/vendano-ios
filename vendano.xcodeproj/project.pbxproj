@@ -14,6 +14,7 @@
 		00A1E2112DEFDD3300065196 /* CardanoBlockfrost in Frameworks */ = {isa = PBXBuildFile; productRef = 00A1E2102DEFDD3300065196 /* CardanoBlockfrost */; };
 		00A1E2142DEFDD5B00065196 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 00A1E2132DEFDD5B00065196 /* FirebaseAuth */; };
 		00A1E2162DEFDD5B00065196 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 00A1E2152DEFDD5B00065196 /* FirebaseFirestore */; };
+		00DFFC272E35251500A1E371 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 00DFFC262E35251500A1E371 /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 			files = (
 				00A1E2112DEFDD3300065196 /* CardanoBlockfrost in Frameworks */,
 				006A8F3F2DF3C8470026A5DD /* PhoneNumberKit in Frameworks */,
+				00DFFC272E35251500A1E371 /* FirebaseAnalytics in Frameworks */,
 				0085AEBF2E197C8C00D5AB70 /* FirebaseMessaging in Frameworks */,
 				00A1E2162DEFDD5B00065196 /* FirebaseFirestore in Frameworks */,
 				00A1E2142DEFDD5B00065196 /* FirebaseAuth in Frameworks */,
@@ -102,6 +104,7 @@
 				006A8F3E2DF3C8470026A5DD /* PhoneNumberKit */,
 				006A8F682DF4E90C0026A5DD /* FirebaseStorage */,
 				0085AEBE2E197C8C00D5AB70 /* FirebaseMessaging */,
+				00DFFC262E35251500A1E371 /* FirebaseAnalytics */,
 			);
 			productName = vendano;
 			productReference = 00A1E1C12DEFA2F200065196 /* vendano.app */;
@@ -465,6 +468,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 00A1E2122DEFDD5B00065196 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		00DFFC262E35251500A1E371 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 00A1E2122DEFDD5B00065196 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

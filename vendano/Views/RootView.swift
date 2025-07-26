@@ -51,7 +51,8 @@ struct RootView: View {
                     // check for saved wallet first
 
                     if WalletService.shared.address == nil,
-                       let saved = loadSeedWords() {
+                       let saved = loadSeedWords()
+                    {
                         Task {
                             try? await WalletService.shared.importWallet(words: saved)
 

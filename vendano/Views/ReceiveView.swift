@@ -71,6 +71,7 @@ struct ReceiveView: View {
                     // Actions
                     HStack(spacing: 16) {
                         Button {
+                            AnalyticsManager.logEvent("receive_copy_address")
                             UIPasteboard.general.string = state.walletAddress
                         } label: {
                             Label("Copy", systemImage: "doc.on.doc")

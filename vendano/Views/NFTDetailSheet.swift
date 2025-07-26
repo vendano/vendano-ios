@@ -18,10 +18,9 @@ struct NFTDetailSheet: View {
     @State private var isUploading = false
 
     var body: some View {
-        
         ZStack {
             DarkGradientView().ignoresSafeArea()
-            
+
             VStack(spacing: 24) {
                 HStack {
                     Spacer()
@@ -31,7 +30,7 @@ struct NFTDetailSheet: View {
                             .foregroundColor(theme.color(named: "TextPrimary").opacity(0.7))
                     }
                 }
-                
+
                 AsyncImage(url: nft.imageURL) { phase in
                     switch phase {
                     case .empty:
@@ -47,20 +46,20 @@ struct NFTDetailSheet: View {
                     }
                 }
                 .frame(maxHeight: 300)
-                
+
                 Text(nft.name)
                     .vendanoFont(.headline, size: 20)
                     .foregroundColor(theme.color(named: "TextPrimary"))
-                
+
                 if let desc = nft.description {
                     Text(desc)
                         .vendanoFont(.body, size: 16)
                         .foregroundColor(theme.color(named: "TextSecondary"))
                 }
-                
+
                 if let traits = nft.traits, !traits.isEmpty {
                     let columns = [GridItem(.fixed(120)), GridItem(.fixed(120)), GridItem(.fixed(120))]
-                    
+
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(traits.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
                             VStack(spacing: 4) {
@@ -75,11 +74,10 @@ struct NFTDetailSheet: View {
                             .cornerRadius(12)
                         }
                     }
-                    
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     Task {
                         await MainActor.run { isUploading = true }
@@ -115,13 +113,11 @@ struct NFTDetailSheet: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(isUploading)
-
             }
             .padding()
             .background(theme.color(named: "BackgroundEnd"))
             .cornerRadius(16)
             .padding()
         }
-        
     }
 }

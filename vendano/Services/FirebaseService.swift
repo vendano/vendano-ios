@@ -202,22 +202,22 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Email link (OTP-ish) auth
-    
+
     func sendEmailLink(to email: String, completion: @escaping (Error?) -> Void) {
         let settings = ActionCodeSettings()
         settings.handleCodeInApp = true
         settings.setIOSBundleID(Bundle.main.bundleIdentifier!)
-        
+
         settings.url = URL(string: "https://signin.vendano.net/welcome")!
-        
+
         settings.linkDomain = "signin.vendano.net"
-        
+
         Auth.auth().sendSignInLink(
             toEmail: email,
             actionCodeSettings: settings,
             completion: completion
         )
-        
+
         // Save the email locally instead of on the URL
         UserDefaults.standard.set(email, forKey: "VendanoEmailForLink")
     }
@@ -306,22 +306,6 @@ final class FirebaseService: ObservableObject {
             "displayName": name,
             "updatedDate": FieldValue.serverTimestamp(),
         ], merge: true)
-    }
-
-    func uploadAvatar(from url: URL) async throws -> URL {
-        let (data, _) = try await URLSession.shared.data(from: url)
-        guard let image = UIImage(data: data) else {
-            throw FirebaseServiceError.pngEncodingFailed
-        }
-        // Reuse existing image-cropping + upload logic
-        let newURL = try await uploadAvatar(image)
-
-        // Update in-memory state
-        DispatchQueue.main.async {
-            AppState.shared.avatar = Image(uiImage: image)
-            AppState.shared.avatarUrl = newURL.absoluteString
-        }
-        return newURL
     }
 
     func uploadAvatar(_ image: UIImage) async throws -> URL {

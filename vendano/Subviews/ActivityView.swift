@@ -27,11 +27,11 @@ struct ActivityView: View {
         VStack(alignment: .leading, spacing: 16) {
             if state.checkingTxs {
                 Spacer()
-                
+
                 ProgressView()
                     .progressViewStyle(.circular)
                     .tint(theme.color(named: "TextPrimary"))
-                
+
                 Spacer()
             } else if state.recentTxs.isEmpty {
                 Spacer()

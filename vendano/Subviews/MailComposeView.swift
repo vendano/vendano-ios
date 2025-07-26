@@ -31,10 +31,13 @@ struct MailComposeView: UIViewControllerRepresentable {
     class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
         let parent: MailComposeView
         init(_ parent: MailComposeView) { self.parent = parent }
-        func mailComposeController(_: MFMailComposeViewController,
-                                   didFinishWith _: MFMailComposeResult,
-                                   error _: Error?)
-        {
+        func mailComposeController(_: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error _: Error?) {
+            if result == .sent {
+                AnalyticsManager.logEvent(
+                    "invite_friend_sent",
+                    parameters: ["medium": "email"]
+                )
+            }
             parent.presentation.wrappedValue.dismiss()
         }
     }

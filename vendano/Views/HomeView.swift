@@ -107,7 +107,7 @@ struct HomeView: View {
                     // TODO: enable NFT view
                     // - test with NFTs
                     // - view sheet, set PFP
-                    
+
                     if !nftVM.nfts.isEmpty {
                         NFTThumbnailRow(selectedNFT: $selectedNFT)
                     }
@@ -130,7 +130,10 @@ struct HomeView: View {
 
             if showSend {
                 SendView {
-                    withAnimation(.easeInOut) { showSend = false }
+                    withAnimation(.easeInOut) {
+                        AnalyticsManager.logEvent("send_view_display")
+                        showSend = false
+                    }
                 }
                 .transition(.move(edge: .top))
                 .zIndex(1)
@@ -138,7 +141,10 @@ struct HomeView: View {
 
             if showReceive {
                 ReceiveView {
-                    withAnimation(.easeInOut) { showReceive = false }
+                    withAnimation(.easeInOut) {
+                        AnalyticsManager.logEvent("receive_view_display")
+                        showReceive = false
+                    }
                 }
                 .transition(.move(edge: .bottom))
                 .zIndex(1)

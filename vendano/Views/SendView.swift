@@ -20,7 +20,7 @@ enum SendMethod: String, CaseIterable, Identifiable {
 
 struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
-    
+
     @StateObject private var state = AppState.shared
     @StateObject private var wallet = WalletService.shared
     @StateObject private var kb = KeyboardGuardian()
@@ -641,8 +641,7 @@ struct SendView: View {
             ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
                 localizedReason: "Let's confirm it’s you before you send ADA from your wallet."
-            )
-            { success, _ in
+            ) { success, _ in
                 if success {
                     Task { await sendTransaction() }
                 }
@@ -674,8 +673,10 @@ struct SendView: View {
             Task { @MainActor in
                 state.refreshOnChainData()
             }
+            AnalyticsManager.logEvent("send_success", parameters: ["amount": amount])
             sendSuccess = true
         } catch {
+            AnalyticsManager.logEvent("send_failure", parameters: ["errorMsg": error.localizedDescription])
             sendError = error.localizedDescription
         }
     }
@@ -718,6 +719,7 @@ struct SendView: View {
             }
 
             if let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: handle) {
+                AnalyticsManager.logEvent("send_lookup_success", parameters: ["type": sendMethod])
                 recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
                 recalcFee()
             } else {

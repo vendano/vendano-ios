@@ -66,6 +66,7 @@ struct ImportSeedView: View {
                                     state.walletAddress = addr
                                     try await FirebaseService.shared.saveAddress(addr)
                                 }
+                                AnalyticsManager.logEvent("onboard_seed_import")
                                 state.onboardingStep = .home
                             } catch {
                                 DebugLogger.log("⚠️ Wallet creation failed: \(error)")

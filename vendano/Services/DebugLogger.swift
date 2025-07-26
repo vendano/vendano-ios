@@ -53,8 +53,8 @@ enum DebugLogger {
 
     // Returns the app version and build.
     private static func appVersion() -> String {
-        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        return "\(v) (\(b))"
+        let shortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(shortVersion) (\(bundleVersion))"
     }
 }
