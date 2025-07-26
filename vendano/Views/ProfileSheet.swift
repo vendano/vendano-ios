@@ -5,6 +5,7 @@
 //  Created by Jeffrey Berthiaume on 6/7/25.
 //
 
+import LocalAuthentication
 import PhotosUI
 import SwiftUI
 
@@ -209,12 +210,10 @@ struct ProfileSheet: View {
                        actions: {
                            Button("Cancel", role: .cancel) {}
                            Button("Delete", role: .destructive) {
-                               Task {
-                                   await state.nukeAccount()
-                               }
+                               authenticateAndDelete()
                            }
                        }, message: {
-                           Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 24-word recovery phrase.")
+                           Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 12/15/24-word recovery phrase.")
                                .vendanoFont(.body, size: 16)
                        })
             }
@@ -257,6 +256,24 @@ struct ProfileSheet: View {
                 }
             }
             .preferredColorScheme(resolvedScheme())
+        }
+    }
+    
+    private func authenticateAndDelete() {
+        let ctx = LAContext()
+        var authErr: NSError?
+        if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
+            ctx.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Let's confirm it’s you before we remove your account."
+            )
+            { success, _ in
+                if success {
+                    Task { await state.nukeAccount() }
+                }
+            }
+        } else {
+            Task { await state.nukeAccount() }
         }
     }
 

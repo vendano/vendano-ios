@@ -9,6 +9,8 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
+import os
+
 final class AppState: ObservableObject {
     static let shared = AppState()
 
@@ -26,6 +28,7 @@ final class AppState: ObservableObject {
     @Published var walletAddress: String = "" {
         didSet {
             Task { @MainActor in
+                self.checkingTxs = true
                 WalletService.shared.clearCache()
                 refreshOnChainData()
             }
@@ -33,17 +36,23 @@ final class AppState: ObservableObject {
     }
 
     @Published var viewedFAQIDs: Set<UUID> = []
+    @Published var checkingTxs: Bool = false
     @Published var recentTxs: [TxRowViewModel] = []
 
     @MainActor func refreshOnChainData() {
         Task {
-            guard !walletAddress.isEmpty else { return }
+            guard !walletAddress.isEmpty else {
+                checkingTxs = false
+                return
+            }
             do {
                 await WalletService.shared.loadPrice()
                 
                 let ada = WalletService.shared.adaBalance
-                print ("ADAADAADA: \(ada)")
-                guard ada > 0 else { return }
+                guard ada > 0 else {
+                    checkingTxs = false
+                    return
+                }
 
                 let raws = try await WalletService.shared.fetchTransactionsOnce(for: walletAddress)
 
@@ -125,11 +134,13 @@ final class AppState: ObservableObject {
 //                    let v = vms[idx]
 //                    print("\(v.date) \(v.name ?? v.counterpartyAddress) \(v.outgoing ? "-" : "+")\(v.amount) \(v.balanceAfter)")
 //                }
-
+                
+                self.checkingTxs = false
                 self.recentTxs = vms
 
             } catch {
                 DebugLogger.log("⚠️ refreshOnChainData failed: \(error)")
+                self.checkingTxs = false
             }
         }
     }
@@ -181,16 +192,13 @@ final class AppState: ObservableObject {
             DebugLogger.log("⚠️ failed to reload avatar: \(error)")
         }
     }
-
-    func uploadAvatar(from item: PhotosPickerItem) async {
-        removeImage()
-
-        guard
-            let data = try? await item.loadTransferable(type: Data.self),
-            let uiImg = UIImage(data: data)
-        else { return }
+    
+    func uploadAvatar(from uiImg: UIImage) async {
+        
+        os_log("uploadAvatar called on main? %{public}@", #function)
 
         await MainActor.run {
+            removeImage()
             self.avatar = Image(uiImage: uiImg)
             saveImage(img: uiImg)
         }
@@ -203,6 +211,15 @@ final class AppState: ObservableObject {
         } catch {
             DebugLogger.log("❌ Upload failed: \(error)")
         }
+    }
+
+    func uploadAvatar(from item: PhotosPickerItem) async {
+        guard
+            let data = try? await item.loadTransferable(type: Data.self),
+            let uiImg = UIImage(data: data)
+        else { return }
+
+        await uploadAvatar(from: uiImg)
     }
 
     func removeImage() {
@@ -241,13 +258,15 @@ final class AppState: ObservableObject {
         
         onboardingStep = .splash
         
-        await FirebaseService.shared.removeUserData()
         FirebaseService.shared.deleteAvatarFolder { result in
             switch result {
             case .success:   print("Avatar folder cleared")
             case .failure(let err): DebugLogger.log("⚠️ Error clearing avatar folder: \(err)")
             }
         }
+        
+        await FirebaseService.shared.removeUserData()
+        
         FirebaseService.shared.logoutUser()
         
         avatar       = nil

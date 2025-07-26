@@ -202,23 +202,24 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Email link (OTP-ish) auth
-
+    
     func sendEmailLink(to email: String, completion: @escaping (Error?) -> Void) {
-        let actionCodeSettings = ActionCodeSettings()
-        actionCodeSettings.handleCodeInApp = true
-
-        // ✏️ Embed the address as a query-param instead of relying on UserDefaults
-        var comps = URLComponents(string: "https://signin.vendano.net")!
-        comps.queryItems = [URLQueryItem(name: "email", value: email)]
-        actionCodeSettings.url = comps.url!
-
-        actionCodeSettings.setIOSBundleID(Bundle.main.bundleIdentifier!)
-
-        Auth.auth().sendSignInLink(toEmail: email,
-                                   actionCodeSettings: actionCodeSettings)
-        { err in
-            completion(err)
-        }
+        let settings = ActionCodeSettings()
+        settings.handleCodeInApp = true
+        settings.setIOSBundleID(Bundle.main.bundleIdentifier!)
+        
+        settings.url = URL(string: "https://signin.vendano.net/welcome")!
+        
+        settings.linkDomain = "signin.vendano.net"
+        
+        Auth.auth().sendSignInLink(
+            toEmail: email,
+            actionCodeSettings: settings,
+            completion: completion
+        )
+        
+        // Save the email locally instead of on the URL
+        UserDefaults.standard.set(email, forKey: "VendanoEmailForLink")
     }
 
     func confirmEmailLink(link: String, email: String) async throws {

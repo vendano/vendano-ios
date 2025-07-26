@@ -42,48 +42,28 @@ struct VendanoApp: App {
                 }
         }
     }
-
+    
     func handleIncomingLink(_ url: URL) {
-        guard
-            (url.host?.contains("firebaseapp.com") != nil) ||
-            (url.host?.contains("vendano.net") != nil),
-            url.path.starts(with: "/__/auth/links"),
-            let outerComps = URLComponents(url: url, resolvingAgainstBaseURL: false),
+        if Auth.auth().canHandle(url) { return }
 
-            let signedInLink = outerComps.queryItems?
-            .first(where: { $0.name == "link" })?
-            .value,
-            let realLinkURL = URL(string: signedInLink),
+        guard Auth.auth().isSignIn(withEmailLink: url.absoluteString) else { return }
 
-            let authComps = URLComponents(url: realLinkURL, resolvingAgainstBaseURL: false),
-
-            let continueStr = authComps.queryItems?
-            .first(where: { $0.name == "continueUrl" })?
-            .value,
-            let continueURL = URL(string: continueStr),
-
-            let contComps = URLComponents(url: continueURL, resolvingAgainstBaseURL: false),
-            let email = contComps.queryItems?
-            .first(where: { $0.name == "email" })?
-            .value,
-
-            Auth.auth().isSignIn(withEmailLink: realLinkURL.absoluteString)
-        else {
-            return
-        }
+        let email = UserDefaults.standard.string(forKey: "VendanoEmailForLink") ?? ""
 
         Task {
             do {
                 try await FirebaseService.shared.confirmEmailLink(
-                    link: realLinkURL.absoluteString,
+                    link: url.absoluteString,
                     email: email
                 )
-                // At this point both Auth and Firestore have been updated
                 DispatchQueue.main.async {
-                    if AppState.shared.displayName == "" {
+                    if AppState.shared.displayName.isEmpty {
                         AppState.shared.onboardingStep = .profile
                     } else {
-                        NotificationCenter.default.post(name: .didCompleteContactAuth, object: nil)
+                        NotificationCenter.default.post(
+                            name: .didCompleteContactAuth,
+                            object: nil
+                        )
                     }
                 }
             } catch {
@@ -91,6 +71,56 @@ struct VendanoApp: App {
             }
         }
     }
+
+
+//    func handleIncomingLink(_ url: URL) {
+//        guard
+//            (url.host?.contains("firebaseapp.com") != nil) ||
+//            (url.host?.contains("vendano.net") != nil),
+//            url.path.starts(with: "/__/auth/links"),
+//            let outerComps = URLComponents(url: url, resolvingAgainstBaseURL: false),
+//
+//            let signedInLink = outerComps.queryItems?
+//            .first(where: { $0.name == "link" })?
+//            .value,
+//            let realLinkURL = URL(string: signedInLink),
+//
+//            let authComps = URLComponents(url: realLinkURL, resolvingAgainstBaseURL: false),
+//
+//            let continueStr = authComps.queryItems?
+//            .first(where: { $0.name == "continueUrl" })?
+//            .value,
+//            let continueURL = URL(string: continueStr),
+//
+//            let contComps = URLComponents(url: continueURL, resolvingAgainstBaseURL: false),
+//            let email = contComps.queryItems?
+//            .first(where: { $0.name == "email" })?
+//            .value,
+//
+//            Auth.auth().isSignIn(withEmailLink: realLinkURL.absoluteString)
+//        else {
+//            return
+//        }
+//
+//        Task {
+//            do {
+//                try await FirebaseService.shared.confirmEmailLink(
+//                    link: realLinkURL.absoluteString,
+//                    email: email
+//                )
+//                // At this point both Auth and Firestore have been updated
+//                DispatchQueue.main.async {
+//                    if AppState.shared.displayName == "" {
+//                        AppState.shared.onboardingStep = .profile
+//                    } else {
+//                        NotificationCenter.default.post(name: .didCompleteContactAuth, object: nil)
+//                    }
+//                }
+//            } catch {
+//                DebugLogger.log("❌ confirmEmailLink failed: \(error)")
+//            }
+//        }
+//    }
 
     private func resolvedScheme() -> ColorScheme? {
         switch appearancePref {

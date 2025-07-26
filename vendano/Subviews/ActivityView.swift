@@ -25,7 +25,15 @@ struct ActivityView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if state.recentTxs.isEmpty {
+            if state.checkingTxs {
+                Spacer()
+                
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(theme.color(named: "TextPrimary"))
+                
+                Spacer()
+            } else if state.recentTxs.isEmpty {
                 Spacer()
                 Text("No transaction history found.")
                     .vendanoFont(.headline, size: 18, weight: .semibold)

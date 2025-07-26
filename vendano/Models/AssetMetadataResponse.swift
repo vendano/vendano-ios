@@ -19,7 +19,7 @@ struct AssetMetadataResponse: Decodable {
         let image: String?
     }
 
-    struct Onchain: Decodable {
+    struct Onchain: Codable {
         let name: String?
         let description: String?
         let image: String?

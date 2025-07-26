@@ -111,7 +111,6 @@ struct HomeView: View {
                     if !nftVM.nfts.isEmpty {
                         NFTThumbnailRow(selectedNFT: $selectedNFT)
                     }
-                    
 
                     ActivityView()
 
@@ -144,6 +143,12 @@ struct HomeView: View {
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
             }
+        }
+        .task {
+            await nftVM.loadNFTs()
+        }
+        .onChange(of: state.walletAddress) { _, _ in
+            Task { await nftVM.loadNFTs() }
         }
         .toolbar {
             if showSend == false && showReceive == false {
@@ -196,7 +201,10 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showFeedback) { FeedbackSheet() }
         .sheet(item: $selectedNFT) { nft in
-            NFTDetailSheet(nft: nft)
+            NFTDetailSheet(nft: nft) {
+                withAnimation(.easeInOut) { selectedNFT = nil }
+            }
+            .zIndex(1)
         }
         .onChange(of: state.avatarUrl) { _, _ in
             Task { await state.reloadAvatarIfNeeded() }

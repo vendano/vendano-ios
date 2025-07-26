@@ -638,8 +638,10 @@ struct SendView: View {
         let ctx = LAContext()
         var authErr: NSError?
         if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
-            ctx.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                               localizedReason: "Let's confirm it’s you before you send ADA from your wallet.")
+            ctx.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Let's confirm it’s you before you send ADA from your wallet."
+            )
             { success, _ in
                 if success {
                     Task { await sendTransaction() }

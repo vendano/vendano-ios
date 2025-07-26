@@ -21,6 +21,7 @@ struct PlaceholderCell: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.black, lineWidth: 1)
+                    .opacity(0.3)
             )
     }
 }

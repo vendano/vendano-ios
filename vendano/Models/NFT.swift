@@ -7,10 +7,10 @@
 
 import Foundation
 
-/// Represents a Cardano NFT in the app
 struct NFT: Identifiable {
-    let id: String // policyId + assetName hex
-    let name: String // CIP-25 metadata name
-    let imageURL: Foundation.URL? // CIP-25 metadata image (ipfs:// or http)
-    let description: String? // Optional description
+    let id: String
+    let name: String
+    let imageURL: Foundation.URL?
+    let description: String?
+    let traits: [String: String]?
 }

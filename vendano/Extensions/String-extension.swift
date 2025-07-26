@@ -24,4 +24,17 @@ extension String {
             .map { String(format: "%02x", $0) }
             .joined()
     }
+    
+    var hexDecodedUTF8: String? {
+        var bytes = [UInt8](); bytes.reserveCapacity(count / 2)
+        var idx = startIndex
+        while idx < endIndex {
+            let next = index(idx, offsetBy: 2)
+            guard next <= endIndex,
+                  let b = UInt8(self[idx..<next], radix: 16) else { return nil }
+            bytes.append(b)
+            idx = next
+        }
+        return String(bytes: bytes, encoding: .utf8)
+    }
 }
