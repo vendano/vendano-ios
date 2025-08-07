@@ -209,7 +209,6 @@ final class FirebaseService: ObservableObject {
         settings.setIOSBundleID(Bundle.main.bundleIdentifier!)
 
         settings.url = URL(string: "https://signin.vendano.net/welcome")!
-
         settings.linkDomain = "signin.vendano.net"
 
         Auth.auth().sendSignInLink(

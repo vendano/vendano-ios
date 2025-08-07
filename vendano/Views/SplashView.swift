@@ -19,14 +19,15 @@ struct SplashView: View {
             DarkGradientView()
 
             VStack(spacing: 24) {
+                
                 Image(VendanoTheme.shared.isHosky() ? "vendoggo-logo" : "vendano-logo")
                     .resizable()
                     .renderingMode(.template)
                     .foregroundColor(theme.color(named: "TextReversed"))
                     .scaledToFit()
                     .frame(width: 120)
-                    .padding()
                     .scaleEffect(pulse ? 1.6 : 0.8)
+                    .padding()
                     .onAppear {
                         withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
                             pulse.toggle()
@@ -41,6 +42,7 @@ struct SplashView: View {
                     .vendanoFont(.body, size: 18, weight: .semibold)
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.color(named: "TextPrimary").opacity(0.85))
+                    .animation(nil, value: pulse)
 
                 Spacer()
                     .frame(height: 48)

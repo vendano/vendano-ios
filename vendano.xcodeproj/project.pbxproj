@@ -22,7 +22,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		006A8F6C2DF58DE70026A5DD /* Exceptions for "vendano" folder in "vendano" target */ = {
+		009B8DB32E444A830035D109 /* Exceptions for "vendano" folder in "vendano" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -35,7 +35,7 @@
 		00A1E1C32DEFA2F200065196 /* vendano */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				006A8F6C2DF58DE70026A5DD /* Exceptions for "vendano" folder in "vendano" target */,
+				009B8DB32E444A830035D109 /* Exceptions for "vendano" folder in "vendano" target */,
 			);
 			path = vendano;
 			sourceTree = "<group>";
