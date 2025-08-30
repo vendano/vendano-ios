@@ -16,16 +16,20 @@ struct ConfirmSeedView: View {
     @State private var selected: [String] = []
     @State private var error: Bool = false
 
+    @State private var isCreatingWallet: Bool = false
+    @State private var showErrorAlert: Bool = false
+    @State private var errorMessage: String = ""
+
     var body: some View {
         ZStack {
-            DarkGradientView()
+            LightGradientView()
                 .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
                     Text("Confirm Keys")
                         .vendanoFont(.title, size: 24, weight: .semibold)
-                        .foregroundColor(theme.color(named: "TextReversed"))
+                        .foregroundColor(theme.color(named: "Accent"))
 
                     Text("Tap your \(correctWords.count) recovery words in the correct order.")
                         .vendanoFont(.headline, size: 18, weight: .semibold)
@@ -73,10 +77,10 @@ struct ConfirmSeedView: View {
                             }) {
                                 Text("\(i + 1). \(selected[i])")
                                     .vendanoFont(.caption, size: 16)
-                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                                    .foregroundColor(theme.color(named: "TextReversed"))
                                     .padding(6)
                                     .frame(maxWidth: .infinity)
-                                    .background(theme.color(named: "Accent").opacity(0.15))
+                                    .background(theme.color(named: "Accent"))
                                     .cornerRadius(6)
                             }
                         }
@@ -97,6 +101,7 @@ struct ConfirmSeedView: View {
 
                         Button("Confirm") {
                             if selected == correctWords {
+                                isCreatingWallet = true
                                 // save and advance
                                 if let data = try? JSONEncoder().encode(selected) {
                                     KeychainWrapper.standard.set(data, forKey: "seedWords")
@@ -105,13 +110,37 @@ struct ConfirmSeedView: View {
                                     do {
                                         try await WalletService.shared.importWallet(words: selected)
                                         if let addr = WalletService.shared.address {
-                                            state.walletAddress = addr
-                                            try await FirebaseService.shared.saveAddress(addr)
+                                            // Try to load balance or any other setup here to ensure wallet is fully ready
+                                            // Assuming there's a method to await balance fetch, pseudo-code:
+                                            // try await WalletService.shared.loadBalance()
+                                            await MainActor.run {
+                                                // Only update state after successful import and balance load
+                                                state.walletAddress = addr
+                                                state.onboardingStep = .home
+                                                isCreatingWallet = false
+                                            }
+                                        } else {
+                                            // Address was not set, treat as failure
+                                            await MainActor.run {
+                                                isCreatingWallet = false
+                                                DebugLogger.log("❌ Wallet address missing after import")
+                                                errorMessage = "Wallet address not found after import."
+                                                showErrorAlert = true
+                                            }
                                         }
                                         AnalyticsManager.logEvent("onboard_seed_confirm")
-                                        state.onboardingStep = .home
                                     } catch {
-                                        DebugLogger.log("❌ Wallet creation failed: \(error)")
+                                        await MainActor.run {
+                                            isCreatingWallet = false
+                                            DebugLogger.log("❌ Wallet creation failed: \(error)")
+                                            errorMessage = error.localizedDescription
+                                            showErrorAlert = true
+                                            // Ensure onboardingStep and walletAddress are NOT changed on failure
+                                            // Explicitly keep onboardingStep at confirmSeed
+                                            state.onboardingStep = .confirmSeed
+                                            state.walletAddress = ""
+                                        }
+                                        print("Wallet creation/import failed with error: \(error)")
                                     }
                                 }
                             } else {
@@ -133,6 +162,19 @@ struct ConfirmSeedView: View {
                     }
                 }
                 .padding(24)
+                .alert("Error", isPresented: $showErrorAlert, actions: {
+                    Button("OK", role: .cancel) {}
+                }, message: {
+                    Text(errorMessage)
+                })
+            }
+
+            if isCreatingWallet {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(1.5)
             }
         }
         .onAppear {

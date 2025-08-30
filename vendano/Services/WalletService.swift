@@ -115,7 +115,7 @@ final class WalletService: ObservableObject {
         try await task.value
     }
 
-    func stakeAddress(from payment: String) async throws -> String {
+    func stakeAddress(from payment: String) async throws -> String? {
         if let s = cachedStake { return s }
 
         struct AddrInfo: Decodable {
@@ -126,13 +126,8 @@ final class WalletService: ObservableObject {
         let data = try await getJSON(url)
         let info = try JSONDecoder().decode(AddrInfo.self, from: data)
 
-        guard let stake = info.stake_address else {
-            throw NSError(domain: "Vendano", code: 90,
-                          userInfo: [NSLocalizedDescriptionKey:
-                              "Payment address has no stake key (enterprise addr)"])
-        }
-        cachedStake = stake
-        return stake
+        cachedStake = info.stake_address
+        return info.stake_address
     }
 
     func stakeBalances(stake: String) async throws -> (ada: Double, hosky: Double) {
@@ -230,13 +225,80 @@ final class WalletService: ObservableObject {
         self.cardano = cardano
         address = bech32
 
+        // Updated: stake is now optional
         let stake = try await stakeAddress(from: bech32)
-        print("⭐ stake address:", stake)
+        if let stake {
+            print("⭐ stake address:", stake)
+            let (ada, hosky) = try await stakeBalances(stake: stake)
+            adaBalance = ada
+            hoskyBalance = hosky
+            print("⭐ total ADA:", ada, "HOSKY:", hosky)
+        } else {
+            print("⚠️ No stake address found for payment address, fetching ADA from UTxOs only.")
 
-        let (ada, hosky) = try await stakeBalances(stake: stake)
-        adaBalance = ada
-        hoskyBalance = hosky
-        print("⭐ total ADA:", ada, "HOSKY:", hosky)
+            // Fetch UTxOs for payment address to sum ADA
+            struct UTXOEntry: Decodable {
+                let amount: [Amount]
+                struct Amount: Decodable {
+                    let unit: String
+                    let quantity: String
+                }
+            }
+
+            let utxoURL = URL(string: "\(apiBase)/addresses/\(bech32)/utxos")!
+            
+            // We need to fetch the raw response and check status code for 404 before decoding
+            do {
+                // Use a custom fetch so we can check for 404
+                var req = URLRequest(url: utxoURL)
+                req.setValue(Config.blockfrostKey, forHTTPHeaderField: "project_id")
+                let (data, response) = try await session.data(for: req)
+                let http = response as! HTTPURLResponse
+
+                if http.statusCode == 404 {
+                    // Treat as empty UTxOs and zero balance (new address)
+                    adaBalance = 0
+                    hoskyBalance = 0
+                    print("⭐ No UTxOs found (404) for address, setting ADA and HOSKY to zero.")
+                } else {
+                    do {
+                        let utxos = try JSONDecoder().decode([UTXOEntry].self, from: data)
+
+                        // Sum lovelace amounts from all UTxOs
+                        let totalLovelace = utxos.reduce(UInt64(0)) { partialResult, utxo in
+                            let adaAmount = utxo.amount.first(where: { $0.unit == "lovelace" })
+                            let qty = UInt64(adaAmount?.quantity ?? "0") ?? 0
+                            return partialResult + qty
+                        }
+                        adaBalance = Double(totalLovelace) / 1_000_000
+                        hoskyBalance = 0
+                        print("⭐ total ADA from UTxOs:", adaBalance, "HOSKY: 0")
+                    } catch {
+                        // Try to decode error response to check if it reports 404 status_code in JSON
+                        if let decodedError = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                           let statusCode = decodedError["status_code"] as? Int,
+                           statusCode == 404 {
+                            // Treat as empty UTxOs and zero balance (new address)
+                            adaBalance = 0
+                            hoskyBalance = 0
+                            print("⭐ No UTxOs found (404 in JSON) for address, setting ADA and HOSKY to zero.")
+                        } else {
+                            if let responseBody = String(data: data, encoding: .utf8) {
+                                print("❌ Failed to decode UTxOs JSON with error: \(error)")
+                                print("❌ Response body was: \(responseBody)")
+                            } else {
+                                print("❌ Failed to decode UTxOs JSON with error: \(error)")
+                                print("❌ Response body could not be decoded as UTF-8 string")
+                            }
+                            throw error
+                        }
+                    }
+                }
+            } catch {
+                // If the fetch itself fails, propagate error
+                throw error
+            }
+        }
 
         AnalyticsManager.logEvent("create_wallet")
     }
@@ -398,3 +460,4 @@ final class WalletService: ObservableObject {
         return result.sorted { $0.blockHeight > $1.blockHeight }
     }
 }
+

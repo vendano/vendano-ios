@@ -20,7 +20,7 @@ struct WalletChoiceView: View {
                 Spacer()
 
                 VStack(spacing: 20) {
-                    Text("Let’s begin!")
+                    Text("Let's begin!")
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
 
@@ -39,7 +39,7 @@ struct WalletChoiceView: View {
                     Button {
                         state.onboardingStep = .newSeed
                     } label: {
-                        Label("Create new wallet", systemImage: "sparkles")
+                        Label("Create new wallet", systemImage: "wallet.bifold")
                             .vendanoFont(.body, size: 16)
                     }
                     .buttonStyle(CapsuleButtonStyle())

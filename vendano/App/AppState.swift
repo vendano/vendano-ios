@@ -39,6 +39,44 @@ final class AppState: ObservableObject {
     @Published var checkingTxs: Bool = false
     @Published var recentTxs: [TxRowViewModel] = []
 
+    init() {
+        Task {
+            await self.evaluateOnboardingStepOnStartup()
+        }
+    }
+
+    @MainActor
+    func evaluateOnboardingStepOnStartup() async {
+        DebugLogger.log("🔄 Evaluating onboarding step on startup with walletAddress: \(walletAddress)")
+
+        guard !walletAddress.isEmpty else {
+            DebugLogger.log("⚠️ No wallet address found, setting onboardingStep to .walletChoice")
+            onboardingStep = .walletChoice
+            return
+        }
+
+        do {
+            DebugLogger.log("ℹ️ Wallet address found, loading ADA balance to validate wallet")
+            await WalletService.shared.loadPrice()
+            let ada = WalletService.shared.adaBalance
+
+            if ada > 0 {
+                DebugLogger.log("✅ Valid wallet detected with ADA balance: \(ada), setting onboardingStep to .home")
+                onboardingStep = .home
+            } else {
+                DebugLogger.log("⚠️ ADA balance is 0, wallet appears invalid or partial, clearing wallet and setting onboardingStep to .walletChoice")
+                walletAddress = ""
+                seedWords = []
+                onboardingStep = .walletChoice
+            }
+        } catch {
+            DebugLogger.log("❌ Error loading ADA balance or decoding wallet: \(error), clearing wallet and setting onboardingStep to .walletChoice")
+            walletAddress = ""
+            seedWords = []
+            onboardingStep = .walletChoice
+        }
+    }
+
     @MainActor func refreshOnChainData() {
         Task {
             guard !walletAddress.isEmpty else {
@@ -285,3 +323,4 @@ final class AppState: ObservableObject {
         removeImage()
     }
 }
+
