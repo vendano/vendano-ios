@@ -100,21 +100,7 @@ struct VendanoApp: App {
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         
-        
-        // TODO: remove all of this
         FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.debug) // Make sure this is present and before configure() for max verbosity
-        // Add this line after FirebaseApp.configure()
-        let authInstance = Auth.auth()
-        print("Firebase Auth instance: \(authInstance)")
-        if let currentUser = authInstance.currentUser {
-            print("Auth: Current user email: \(currentUser.email ?? "N/A")")
-        } else {
-            print("Auth: No current user.")
-        }
-        
-        //TODO: replace with this
-        //FirebaseApp.configure()
 
         AnalyticsManager.logOnce("first_open")
         AnalyticsManager.logEvent("general_app_open")

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0038778D2E6308F200128A81 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 0038778C2E6308F200128A81 /* FirebaseCrashlytics */; };
 		006A8F3F2DF3C8470026A5DD /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 006A8F3E2DF3C8470026A5DD /* PhoneNumberKit */; };
 		006A8F692DF4E90C0026A5DD /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 006A8F682DF4E90C0026A5DD /* FirebaseStorage */; };
 		0085AEBF2E197C8C00D5AB70 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 0085AEBE2E197C8C00D5AB70 /* FirebaseMessaging */; };
@@ -53,6 +54,7 @@
 				0085AEBF2E197C8C00D5AB70 /* FirebaseMessaging in Frameworks */,
 				00A1E2162DEFDD5B00065196 /* FirebaseFirestore in Frameworks */,
 				00A1E2142DEFDD5B00065196 /* FirebaseAuth in Frameworks */,
+				0038778D2E6308F200128A81 /* FirebaseCrashlytics in Frameworks */,
 				00A1E20F2DEFDD3300065196 /* Cardano in Frameworks */,
 				006A8F692DF4E90C0026A5DD /* FirebaseStorage in Frameworks */,
 			);
@@ -87,6 +89,7 @@
 				00A1E1BD2DEFA2F200065196 /* Sources */,
 				00A1E1BE2DEFA2F200065196 /* Frameworks */,
 				00A1E1BF2DEFA2F200065196 /* Resources */,
+				0038778E2E63097000128A81 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -105,6 +108,7 @@
 				006A8F682DF4E90C0026A5DD /* FirebaseStorage */,
 				0085AEBE2E197C8C00D5AB70 /* FirebaseMessaging */,
 				00DFFC262E35251500A1E371 /* FirebaseAnalytics */,
+				0038778C2E6308F200128A81 /* FirebaseCrashlytics */,
 			);
 			productName = vendano;
 			productReference = 00A1E1C12DEFA2F200065196 /* vendano.app */;
@@ -158,6 +162,31 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0038778E2E63097000128A81 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		00A1E1BD2DEFA2F200065196 /* Sources */ = {
@@ -303,6 +332,7 @@
 				CODE_SIGN_ENTITLEMENTS = vendano/vendano.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = T4VXPLC8GZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -434,6 +464,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0038778C2E6308F200128A81 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 00A1E2122DEFDD5B00065196 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 		006A8F3E2DF3C8470026A5DD /* PhoneNumberKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 006A8F3D2DF3C8470026A5DD /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;

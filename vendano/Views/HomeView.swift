@@ -104,10 +104,6 @@ struct HomeView: View {
                         .buttonStyle(PrimaryButtonStyle())
                     }
 
-                    // TODO: enable NFT view
-                    // - test with NFTs
-                    // - view sheet, set PFP
-
                     if !nftVM.nfts.isEmpty {
                         NFTThumbnailRow(selectedNFT: $selectedNFT)
                     }

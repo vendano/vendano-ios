@@ -60,12 +60,12 @@ struct OnboardingFAQCardView: View {
             .padding()
             .onAppear {
                 level = 0
-                // TODO: re-enable this to save history in database
-//                let item = faqs[currentIndex]
-//                if !state.viewedFAQIDs.contains(item.id) {
-//                    state.viewedFAQIDs.insert(item.id)
-//                    Task { await FirebaseService.shared.markFAQViewed(item.id) }
-//                }
+                
+                let item = faqs[currentIndex]
+                if !state.viewedFAQIDs.contains(item.id) {
+                    state.viewedFAQIDs.insert(item.id)
+                    Task { await FirebaseService.shared.markFAQViewed(item.id) }
+                }
             }
         }
     }
