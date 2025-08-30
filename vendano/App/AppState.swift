@@ -38,10 +38,22 @@ final class AppState: ObservableObject {
     @Published var viewedFAQIDs: Set<UUID> = []
     @Published var checkingTxs: Bool = false
     @Published var recentTxs: [TxRowViewModel] = []
+    
+    @Published var displayToast = false
+    @Published var toastMessage = ""
 
     init() {
         Task {
             await self.evaluateOnboardingStepOnStartup()
+        }
+    }
+    
+    @MainActor
+    func showToast(_ message: String, duration: TimeInterval = 2.0) {
+        toastMessage = message
+        withAnimation { displayToast = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation { self.displayToast = false }
         }
     }
 
