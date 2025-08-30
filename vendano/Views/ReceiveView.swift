@@ -18,6 +18,8 @@ struct ReceiveView: View {
     
     let onClose: () -> Void
 
+    @State private var qrImage: UIImage? = nil
+
     private let context = CIContext()
     private let filter = CIFilter.qrCodeGenerator()
 
@@ -66,14 +68,28 @@ struct ReceiveView: View {
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
                             
-                            Image(uiImage: generateQRCode())
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: min(UIScreen.main.bounds.width * 0.4, 280),
-                                       height: min(UIScreen.main.bounds.width * 0.4, 280))
-                                .padding(12)
-                                .background(theme.color(named: "CellBackground"))
-                                .accessibilityLabel("QR for your Cardano address")
+                            if let qr = qrImage {
+                                Image(uiImage: qr)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 200, height: 200)
+                                    .padding(12)
+                                    .background(theme.color(named: "CellBackground"))
+                                    .accessibilityLabel("QR for your Cardano address")
+                            } else {
+                                ProgressView()
+                                    .frame(width: 200, height: 200)
+                                    .padding(12)
+                                    .background(theme.color(named: "CellBackground"))
+                            }
+                        }
+                        .onAppear {
+                            DispatchQueue.global(qos: .userInitiated).async {
+                                let generated = generateQRCode()
+                                DispatchQueue.main.async {
+                                    qrImage = generated
+                                }
+                            }
                         }
                         
                         // Address box
