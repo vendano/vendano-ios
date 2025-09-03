@@ -98,9 +98,18 @@ struct VendanoApp: App {
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
+    
+    override init() {
+        _ = Auth.auth().addStateDidChangeListener { _, _ in
+            FCMTokenBuffer.shared.flushIfPossible()
+        }
+    }
+    
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         
         FirebaseApp.configure()
+        
+        ReinstallAuthEnforcer.run()
 
         AnalyticsManager.logOnce("first_open")
         AnalyticsManager.logEvent("general_app_open")
@@ -119,10 +128,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // Called when FCM token is refreshed or initially assigned
     func messaging(_: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
-
-        let db = Firestore.firestore()
-        let uid = Auth.auth().currentUser?.uid ?? "unknown"
-        db.collection("users").document(uid).setData(["fcmToken": fcmToken], merge: true)
+        FCMTokenBuffer.shared.pendingToken = fcmToken
+        FCMTokenBuffer.shared.flushIfPossible()
     }
 
     // Handle foreground notification
