@@ -66,7 +66,6 @@ final class FirebaseService: ObservableObject {
             DispatchQueue.main.async {
                 state.displayName = d["displayName"] as? String ?? ""
                 state.avatarUrl = d["avatarURL"] as? String
-                state.walletAddress = d["walletAddress"] as? String ?? ""
             }
         } catch {
             DebugLogger.log("❌ fetchPublicState: \(error)")
@@ -423,7 +422,6 @@ final class FirebaseService: ObservableObject {
 
     // MARK: – Handle lookup (name / avatar / address)
 
-    @MainActor
     func fetchRecipient(for handle: String) async -> (name: String, avatarURL: String?, address: String)? {
         let hash = handleHash(handle)
         let col = db.collection("public")
@@ -593,18 +591,27 @@ final class FirebaseService: ObservableObject {
     }
 
     func getUserStatus() async throws -> OnboardingStep {
-        guard let uid = Auth.auth().currentUser?.uid else {
+        guard let user = Auth.auth().currentUser else { return .auth }
+        let uid = user.uid
+        
+        async let pub = db.collection("public").document(uid).getDocument()
+        async let usr = db.collection("users").document(uid).getDocument()
+        let (p, u) = try await (pub, usr)
+        
+        let hasName = ((p.data()?["displayName"] as? String).map { !$0.isEmpty } ?? false)
+        let emails = (u.data()?["email"] as? [String]) ?? []
+        let phones = (u.data()?["phone"] as? [String]) ?? []
+        let hasHandle = !emails.isEmpty || !phones.isEmpty
+        
+        // Optional: require verified email if an email provider exists
+        if !emails.isEmpty,
+           user.providerData.contains(where: { $0.providerID == EmailAuthProviderID }),
+           user.isEmailVerified == false {
             return .auth
         }
-
-        let doc = try await db.collection("public").document(uid).getDocument()
-
-        if !doc.exists ||
-            doc["displayName"] == nil
-        {
-            return .profile
-        }
-
+        
+        guard hasHandle else { return .auth }
+        guard hasName else { return .profile }
         return .walletChoice
     }
 

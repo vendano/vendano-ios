@@ -41,12 +41,6 @@ final class AppState: ObservableObject {
     
     @Published var displayToast = false
     @Published var toastMessage = ""
-
-    init() {
-        Task {
-            await self.evaluateOnboardingStepOnStartup()
-        }
-    }
     
     @MainActor
     func showToast(_ message: String, duration: TimeInterval = 2.0) {
@@ -54,38 +48,6 @@ final class AppState: ObservableObject {
         withAnimation { displayToast = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             withAnimation { self.displayToast = false }
-        }
-    }
-
-    @MainActor
-    func evaluateOnboardingStepOnStartup() async {
-        DebugLogger.log("🔄 Evaluating onboarding step on startup with walletAddress: \(walletAddress)")
-
-        guard !walletAddress.isEmpty else {
-            DebugLogger.log("⚠️ No wallet address found, setting onboardingStep to .walletChoice")
-            onboardingStep = .walletChoice
-            return
-        }
-
-        do {
-            DebugLogger.log("ℹ️ Wallet address found, loading ADA balance to validate wallet")
-            await WalletService.shared.loadPrice()
-            let ada = WalletService.shared.adaBalance
-
-            if ada > 0 {
-                DebugLogger.log("✅ Valid wallet detected with ADA balance: \(ada), setting onboardingStep to .home")
-                onboardingStep = .home
-            } else {
-                DebugLogger.log("⚠️ ADA balance is 0, wallet appears invalid or partial, clearing wallet and setting onboardingStep to .walletChoice")
-                walletAddress = ""
-                seedWords = []
-                onboardingStep = .walletChoice
-            }
-        } catch {
-            DebugLogger.log("❌ Error loading ADA balance or decoding wallet: \(error), clearing wallet and setting onboardingStep to .walletChoice")
-            walletAddress = ""
-            seedWords = []
-            onboardingStep = .walletChoice
         }
     }
 
@@ -100,7 +62,7 @@ final class AppState: ObservableObject {
 
                 let ada = WalletService.shared.adaBalance
                 guard ada > 0 else {
-                    checkingTxs = false
+                    await MainActor.run { checkingTxs = false }
                     return
                 }
 
@@ -187,12 +149,14 @@ final class AppState: ObservableObject {
 //                    print("\(v.date) \(v.name ?? v.counterpartyAddress) \(v.outgoing ? "-" : "+")\(v.amount) \(v.balanceAfter)")
 //                }
 
-                self.checkingTxs = false
-                self.recentTxs = vms
+                await MainActor.run {
+                    self.checkingTxs = false
+                    self.recentTxs = vms
+                }
 
             } catch {
                 DebugLogger.log("⚠️ refreshOnChainData failed: \(error)")
-                self.checkingTxs = false
+                await MainActor.run { self.checkingTxs = false }
             }
         }
     }
@@ -328,8 +292,10 @@ final class AppState: ObservableObject {
         viewedFAQIDs = []
 
         UserDefaults.standard.removeObject(forKey: "EmailForSignIn")
+        UserDefaults.standard.removeObject(forKey: "VendanoEmailForLink")
         UserDefaults.standard.removeObject(forKey: "pendingEmail")
         UserDefaults.standard.removeObject(forKey: "PhoneForSignIn")
+        UserDefaults.standard.removeObject(forKey: "phoneNumber")
         UserDefaults.standard.removeObject(forKey: "phoneVID")
 
         removeImage()

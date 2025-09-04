@@ -107,20 +107,21 @@ struct ConfirmSeedView: View {
                                     KeychainWrapper.standard.set(data, forKey: "seedWords")
                                 }
                                 Task {
+                                    // async context already
                                     do {
                                         try await WalletService.shared.importWallet(words: selected)
                                         if let addr = WalletService.shared.address {
-                                            // Try to load balance or any other setup here to ensure wallet is fully ready
-                                            // Assuming there's a method to await balance fetch, pseudo-code:
-                                            // try await WalletService.shared.loadBalance()
+                                            // 1) Write to Firestore OFF the main actor
+                                            try? await FirebaseService.shared.saveAddress(addr)
+
+                                            // 2) Then update UI ON the main actor
                                             await MainActor.run {
-                                                // Only update state after successful import and balance load
                                                 state.walletAddress = addr
                                                 state.onboardingStep = .home
                                                 isCreatingWallet = false
                                             }
+                                            AnalyticsManager.logEvent("onboard_seed_confirm")
                                         } else {
-                                            // Address was not set, treat as failure
                                             await MainActor.run {
                                                 isCreatingWallet = false
                                                 DebugLogger.log("❌ Wallet address missing after import")
@@ -128,20 +129,17 @@ struct ConfirmSeedView: View {
                                                 showErrorAlert = true
                                             }
                                         }
-                                        AnalyticsManager.logEvent("onboard_seed_confirm")
                                     } catch {
                                         await MainActor.run {
                                             isCreatingWallet = false
                                             DebugLogger.log("❌ Wallet creation failed: \(error)")
                                             errorMessage = error.localizedDescription
                                             showErrorAlert = true
-                                            // Ensure onboardingStep and walletAddress are NOT changed on failure
-                                            // Explicitly keep onboardingStep at confirmSeed
                                             state.onboardingStep = .confirmSeed
                                             state.walletAddress = ""
                                         }
-                                        print("Wallet creation/import failed with error: \(error)")
                                     }
+
                                 }
                             } else {
                                 withAnimation {
