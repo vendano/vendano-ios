@@ -6,31 +6,56 @@
 //
 
 import Foundation
+import Cardano
 
 enum Config {
     static var vendanoAppFeePercent: Double { 0.01 }
     static var vendanoAppFeePercentFormatted: String { "1%" }
     
-    static var blockfrostAPIURL: String { "https://cardano-mainnet.blockfrost.io/api/v0" }
+    private static var env: AppEnvironment { AppState.shared.environment }
+    
+    static var blockfrostAPIURL: String {
+        switch env {
+        case .mainnet:
+            return "https://cardano-mainnet.blockfrost.io/api/v0"
+        case .testnet:
+            return "https://cardano-preprod.blockfrost.io/api/v0"
+        case .demo:
+            return "https://cardano-preprod.blockfrost.io/api/v0"
+        }
+    }
 
     static var vendanoFeeAddress: String {
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "VENDANO_WALLET") as? String else {
-            fatalError("VENDANO_WALLET not found in Info.plist")
+        let keyName = (env == .mainnet) ? "VENDANO_WALLET" : "VENDANO_WALLET_TESTNET"
+        guard let key = Bundle.main.object(forInfoDictionaryKey: keyName) as? String else {
+            fatalError("\(keyName) not found in Info.plist")
         }
         return key
     }
 
     static var vendanoDeveloperAddress: String {
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "DEV_WALLET") as? String else {
-            fatalError("DEV_WALLET not found in Info.plist")
+        let keyName = (env == .mainnet) ? "DEV_WALLET" : "DEV_WALLET_TESTNET"
+        guard let key = Bundle.main.object(forInfoDictionaryKey: keyName) as? String else {
+            fatalError("\(keyName) not found in Info.plist")
         }
         return key
     }
 
     static var blockfrostKey: String {
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "BLOCKFROST_KEY") as? String else {
-            fatalError("BLOCKFROST_KEY not found in Info.plist")
+        let keyName: String
+        switch env {
+        case .mainnet: keyName = "BLOCKFROST_KEY"
+        case .testnet: keyName = "BLOCKFROST_KEY_TESTNET"
+        case .demo:    keyName = "BLOCKFROST_KEY_TESTNET"
         }
-        return key
+        if let val = Bundle.main.object(forInfoDictionaryKey: keyName) as? String, !val.isEmpty {
+            return val
+        }
+        // Fallback to the legacy key if testnet/demo keys aren’t present yet
+        guard let fallback = Bundle.main.object(forInfoDictionaryKey: "BLOCKFROST_KEY") as? String else {
+            fatalError("\(keyName) / BLOCKFROST_KEY not found in Info.plist")
+        }
+        return fallback
     }
+    
 }
