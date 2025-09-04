@@ -81,10 +81,10 @@ struct ConfirmSeedView: View {
                             }) {
                                 Text("\(i + 1). \(correctWords[selectedIndices[i]])")
                                     .vendanoFont(.caption, size: 16)
-                                    .foregroundColor(theme.color(named: "TextReversed"))
+                                    .foregroundColor(theme.color(named: "TextPrimary"))
                                     .padding(6)
                                     .frame(maxWidth: .infinity)
-                                    .background(theme.color(named: "Accent"))
+                                    .background(theme.color(named: "CellBackground"))
                                     .cornerRadius(6)
                             }
                         }
