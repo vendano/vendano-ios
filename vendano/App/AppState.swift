@@ -42,6 +42,27 @@ final class AppState: ObservableObject {
     @Published var displayToast = false
     @Published var toastMessage = ""
     
+    @Published var environment: AppEnvironment = .mainnet
+    
+    func setEnvironment(_ env: AppEnvironment) {
+        environment = env
+        DebugLogger.log("🌐 Environment set to \(env.rawValue)")
+    }
+    
+    func resolveEnvironment(for identifier: String) -> AppEnvironment {
+        // Special demo account
+        if identifier.lowercased() == "demo@vendano.net" {
+            return .demo
+        }
+        
+        // hardcoded test users for staging
+        if identifier.lowercased().hasSuffix("@test.vendano.net") {
+            return .testnet
+        }
+        
+        return .mainnet
+    }
+    
     @MainActor
     func showToast(_ message: String, duration: TimeInterval = 2.0) {
         toastMessage = message

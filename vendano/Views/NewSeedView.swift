@@ -63,12 +63,15 @@ struct NewSeedView: View {
 
                     LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 12) {
                         ForEach(words.indices, id: \.self) { idx in
+                            let word = words[idx]
+                            let isDup = duplicateWords.contains(word)
+                            
                             HStack {
                                 Text("\(idx + 1).")
                                     .monospacedDigit()
                                     .vendanoFont(.body, size: 16)
 
-                                Text(words[idx])
+                                Text(word)
                                     .vendanoFont(.body, size: 16)
 
                                 Spacer()
@@ -76,7 +79,7 @@ struct NewSeedView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
                             .padding(8)
-                            .background(theme.color(named: "CellBackground"))
+                            .background(isDup ? theme.color(named: "FieldBackground") : theme.color(named: "CellBackground"))
                             .cornerRadius(8)
                         }
                     }
@@ -112,6 +115,15 @@ struct NewSeedView: View {
             }
             .onAppear { regenerate() }
         }
+    }
+    
+    private var duplicateWords: Set<String> {
+        var seen = Set<String>()
+        var dups = Set<String>()
+        for w in words {
+            if !seen.insert(w).inserted { dups.insert(w) }
+        }
+        return dups
     }
 
     private var wordDescription: String {

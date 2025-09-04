@@ -12,8 +12,8 @@ struct ConfirmSeedView: View {
     @StateObject private var state = AppState.shared
 
     @State private var correctWords: [String] = []
-    @State private var shuffledWords: [String] = []
-    @State private var selected: [String] = []
+    @State private var shuffledIndices: [Int] = []   // indexes into correctWords
+    @State private var selectedIndices: [Int] = []   // picked indexes, in order
     @State private var error: Bool = false
 
     @State private var isCreatingWallet: Bool = false
@@ -47,23 +47,27 @@ struct ConfirmSeedView: View {
 
                     // Tappable grid
                     LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 12) {
-                        ForEach(shuffledWords, id: \.self) { word in
-                            let isDisabled = selected.contains(word) || selected.count >= correctWords.count
-                            if !isDisabled {
-                                Button(action: {
-                                    withAnimation { selected.append(word) }
-                                }) {
-                                    Text(word)
-                                        .vendanoFont(.caption, size: 16)
-                                        .foregroundColor(theme.color(named: "TextPrimary"))
-                                        .padding(8)
-                                        .frame(maxWidth: .infinity)
-                                        .background(theme.color(named: "CellBackground"))
-                                        .cornerRadius(6)
-                                }
-                            } else {
-                                Spacer()
+                        ForEach(shuffledIndices, id: \.self) { idx in
+                            let word = correctWords[idx]
+                            let isPicked = selectedIndices.contains(idx)
+                            let isDisabled = isPicked || selectedIndices.count >= correctWords.count
+                            Button(action: {
+                                guard !isDisabled else { return }
+                                withAnimation { selectedIndices.append(idx) }
+                            }) {
+                                Text(word)
+                                    .vendanoFont(.caption, size: 16)
+                                    .foregroundColor(isPicked
+                                                     ? theme.color(named: "TextReversed")
+                                                     : theme.color(named: "TextPrimary"))
+                                    .padding(8)
+                                    .frame(maxWidth: .infinity)
+                                    .background(isPicked
+                                                ? theme.color(named: "Accent")
+                                                : theme.color(named: "CellBackground"))
+                                    .cornerRadius(6)
                             }
+                            .disabled(isDisabled)
                         }
                     }
 
@@ -71,11 +75,11 @@ struct ConfirmSeedView: View {
 
                     // Selected words
                     LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 3), spacing: 8) {
-                        ForEach(selected.indices, id: \.self) { i in
+                        ForEach(selectedIndices.indices, id: \.self) { i in
                             Button(action: {
-                                selected.remove(at: i)
+                                selectedIndices.remove(at: i)
                             }) {
-                                Text("\(i + 1). \(selected[i])")
+                                Text("\(i + 1). \(correctWords[selectedIndices[i]])")
                                     .vendanoFont(.caption, size: 16)
                                     .foregroundColor(theme.color(named: "TextReversed"))
                                     .padding(6)
@@ -91,7 +95,7 @@ struct ConfirmSeedView: View {
                     HStack {
                         Button("Clear") {
                             withAnimation {
-                                selected.removeAll()
+                                selectedIndices.removeAll()
                                 error = false
                             }
                         }
@@ -100,16 +104,17 @@ struct ConfirmSeedView: View {
                         Spacer()
 
                         Button("Confirm") {
-                            if selected == correctWords {
+                            let picked = selectedIndices.map { correctWords[$0] }
+                            if picked == correctWords {
                                 isCreatingWallet = true
                                 // save and advance
-                                if let data = try? JSONEncoder().encode(selected) {
+                                if let data = try? JSONEncoder().encode(picked) {
                                     KeychainWrapper.standard.set(data, forKey: "seedWords")
                                 }
                                 Task {
                                     // async context already
                                     do {
-                                        try await WalletService.shared.importWallet(words: selected)
+                                        try await WalletService.shared.importWallet(words: picked)
                                         if let addr = WalletService.shared.address {
                                             // 1) Write to Firestore OFF the main actor
                                             try? await FirebaseService.shared.saveAddress(addr)
@@ -144,12 +149,12 @@ struct ConfirmSeedView: View {
                             } else {
                                 withAnimation {
                                     error = true
-                                    selected.removeAll()
+                                    selectedIndices.removeAll()
                                 }
                             }
                         }
                         .buttonStyle(PrimaryButtonStyle())
-                        .disabled(selected.count != correctWords.count)
+                        .disabled(selectedIndices.count != correctWords.count)
                     }
 
                     if error {
@@ -177,7 +182,9 @@ struct ConfirmSeedView: View {
         }
         .onAppear {
             correctWords = state.seedWords
-            shuffledWords = correctWords.shuffled()
+            shuffledIndices = Array(correctWords.indices).shuffled()
+            selectedIndices.removeAll()
+            error = false
         }
     }
 }

@@ -17,9 +17,11 @@ final class FCMTokenBuffer {
     func flushIfPossible() {
         guard let token = pendingToken,
               let uid = Auth.auth().currentUser?.uid else { return }
-        Firestore.firestore()
-            .collection("users").document(uid)
-            .setData(["fcmToken": token], merge: true)
+
+        Task {
+            await FirebaseService.shared.setUserData(uid: uid, data: ["fcmToken": token])
+        }
         pendingToken = nil
     }
+
 }

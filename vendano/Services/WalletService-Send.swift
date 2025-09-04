@@ -127,6 +127,8 @@ extension WalletService {
                 with: signers,
                 auxiliaryData: nil
             ) { res in
+                AnalyticsManager.logEvent("sent_ada", parameters: ["lovelace": required])
+                
                 cont.resume(with: res)
             }
         }

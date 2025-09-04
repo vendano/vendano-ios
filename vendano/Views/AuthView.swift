@@ -141,6 +141,11 @@ struct AuthView: View {
     private func sendCode() {
         isLoading = true
         errorMessage = nil
+        
+        let phone = "\(dialCode) \(localNumber)".trimmingCharacters(in: .whitespaces)
+        
+        let env = state.resolveEnvironment(for: useEmail ? email : phone)
+        state.setEnvironment(env)
 
         if useEmail {
             state.otpEmail = email
@@ -153,7 +158,6 @@ struct AuthView: View {
                 }
             }
         } else {
-            let phone = "\(dialCode) \(localNumber)".trimmingCharacters(in: .whitespaces)
             state.otpPhone = phone
             FirebaseService.shared.sendPhoneOTP(e164: phone) {
                 isLoading = false

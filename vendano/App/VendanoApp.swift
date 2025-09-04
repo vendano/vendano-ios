@@ -103,19 +103,33 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         
-        FirebaseApp.configure()
+        let env = AppState.shared.environment
         
-        authListenerHandle = Auth.auth().addStateDidChangeListener { _, _ in
-            FCMTokenBuffer.shared.flushIfPossible()
+        switch env {
+        case .demo:
+            // Don’t configure Firebase at all
+            DebugLogger.log("⚠️ Running in DEMO environment - no Firebase configured")
+        case .testnet:
+            // Configure with your testnet Firebase plist
+            if let filePath = Bundle.main.path(forResource: "GoogleService-Info-Testnet", ofType: "plist"),
+               let options = FirebaseOptions(contentsOfFile: filePath) {
+                FirebaseApp.configure(options: options)
+            }
+        case .mainnet:
+            FirebaseApp.configure()
+            
+            authListenerHandle = Auth.auth().addStateDidChangeListener { _, _ in
+                FCMTokenBuffer.shared.flushIfPossible()
+            }
+            
+            ReinstallAuthEnforcer.run()
+
+            AnalyticsManager.logOnce("first_open")
+            AnalyticsManager.logEvent("general_app_open")
+
+            UNUserNotificationCenter.current().delegate = self
+            Messaging.messaging().delegate = self
         }
-        
-        ReinstallAuthEnforcer.run()
-
-        AnalyticsManager.logOnce("first_open")
-        AnalyticsManager.logEvent("general_app_open")
-
-        UNUserNotificationCenter.current().delegate = self
-        Messaging.messaging().delegate = self
 
         return true
     }
@@ -128,10 +142,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // Called when FCM token is refreshed or initially assigned
     func messaging(_: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
-        
+
         if let uid = Auth.auth().currentUser?.uid {
-            Firestore.firestore().collection("users").document(uid)
-                .setData(["fcmToken": fcmToken], merge: true)
+            Task {
+                await FirebaseService.shared.setUserData(uid: uid, data: ["fcmToken": fcmToken])
+            }
         } else {
             FCMTokenBuffer.shared.pendingToken = fcmToken
         }

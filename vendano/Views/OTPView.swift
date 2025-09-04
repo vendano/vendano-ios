@@ -153,6 +153,9 @@ struct OTPView: View {
         }
         .onAppear {
             // if already signed in via email link on device
+            if state.environment == .demo {
+                state.onboardingStep = .profile
+            }
             if isEmail, Auth.auth().currentUser != nil {
                 state.onboardingStep = .profile
             }
