@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "1024.png",
+      "filename" : "vendano-icon-any.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "AppIconDark-1024.png",
+      "filename" : "vendano-icon-dark.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "vendano-1024-tinted.png",
+      "filename" : "vendano-icon-tinted.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

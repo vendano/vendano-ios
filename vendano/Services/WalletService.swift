@@ -40,7 +40,7 @@ final class WalletService: ObservableObject {
         config.urlCache = URLCache(
             memoryCapacity: 20 * 1024 * 1024,
             diskCapacity: 200 * 1024 * 1024,
-            diskPath: "blockfrost-cache"
+            diskPath: "blockfrost-cache-\(Config.environmentName)"
         )
 
         config.requestCachePolicy = .useProtocolCachePolicy
@@ -181,7 +181,7 @@ final class WalletService: ObservableObject {
         // Init Cardano + Blockfrost
         let cardano = try Cardano(
             blockfrost: Config.blockfrostKey,
-            info: .mainnet,
+            info: Config.cardanoInfo,
             signer: keychain
         )
 

@@ -14,6 +14,15 @@ enum Config {
     
     private static var env: AppEnvironment { AppState.shared.environment }
     
+    static var cardanoInfo: NetworkApiInfo {
+        switch env {
+        case .mainnet:
+            return .mainnet
+        case .testnet, .demo:
+            return .testnet
+        }
+    }
+    
     static var blockfrostAPIURL: String {
         switch env {
         case .mainnet:
@@ -56,6 +65,14 @@ enum Config {
             fatalError("\(keyName) / BLOCKFROST_KEY not found in Info.plist")
         }
         return fallback
+    }
+    
+    static var environmentName: String {
+        switch env {
+            case .mainnet: return "mainnet"
+            case .testnet: return "testnet"
+            case .demo:    return "demo"
+        }
     }
     
 }
