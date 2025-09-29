@@ -98,7 +98,8 @@ struct AuthView: View {
                             .cornerRadius(8)
                             .foregroundColor(theme.color(named: "TextPrimary"))
 
-                        AuthPhoneField(localNumber: $localNumber)
+                        // Validate phone number with dial code
+                        AuthPhoneField(dialCode: $dialCode, localNumber: $localNumber)
                             .vendanoFont(.body, size: 18)
                             .padding()
                             .background(theme.color(named: "FieldBackground"))
