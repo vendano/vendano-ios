@@ -25,7 +25,6 @@ struct CreateProfileView: View {
             VStack(spacing: 32) {
                 Spacer()
 
-                // ① Title + blurb
                 VStack(spacing: 8) {
                     Text("Tell us about you")
                         .vendanoFont(.title, size: 24, weight: .semibold)
@@ -33,12 +32,13 @@ struct CreateProfileView: View {
 
                     Text("Add a name and picture so senders can be sure it’s you.")
                         .vendanoFont(.body, size: 16)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(theme.color(named: "TextReversed").opacity(0.85))
                         .padding(.horizontal, 24)
                 }
 
-                // ② Avatar + name field
                 HStack(spacing: 20) {
                     AvatarThumb(
                         localImage: state.avatar,
@@ -66,7 +66,6 @@ struct CreateProfileView: View {
 
                 Spacer()
 
-                // ③ Continue button
                 Button {
                     state.displayName = name
                     Task {
@@ -105,6 +104,7 @@ struct CreateProfileView: View {
     }
 }
 
-// #Preview {
-//    CreateProfileView()
-// }
+ #Preview {
+    CreateProfileView()
+         .environmentObject(VendanoTheme.shared)
+ }

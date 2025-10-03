@@ -34,6 +34,8 @@ struct ImportSeedView: View {
 
                     TextEditor(text: $phraseText)
                         .vendanoFont(.body, size: 16)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
                         .frame(height: 120)
                         .padding(4)
                         .background(theme.color(named: "FieldBackground"))
@@ -98,6 +100,7 @@ struct ImportSeedView: View {
     }
 }
 
-// #Preview {
-//    ImportSeedView()
-// }
+#Preview {
+    ImportSeedView()
+        .environmentObject(VendanoTheme.shared)
+}
