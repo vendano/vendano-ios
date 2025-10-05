@@ -191,7 +191,7 @@ struct SendView: View {
                                     }
                             }
                         case .address:
-                            TextField("Paste a Cardano address", text: $addressText)
+                            TextField("Paste a Cardano address or $handle", text: $addressText)
                                 .vendanoFont(.body, size: 18)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -206,6 +206,7 @@ struct SendView: View {
                                         recalcFee()
                                     }
                                 }
+
                         }
 
                         if let rec = recipient {
@@ -680,6 +681,14 @@ struct SendView: View {
             sendError = error.localizedDescription
         }
     }
+    
+    private func isValidAdaHandle(_ raw: String) -> Bool {
+        let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let noDollar = s.hasPrefix("$") ? String(s.dropFirst()) : s
+        // allowed: a-z 0-9 . _ -
+        let regex = try! NSRegularExpression(pattern: "^[a-z0-9._-]{1,15}$")
+        return regex.firstMatch(in: noDollar.lowercased(), range: NSRange(location: 0, length: noDollar.count)) != nil
+    }
 
     private func lookupRecipient() {
         lookupTask?.cancel()
@@ -703,19 +712,36 @@ struct SendView: View {
                     return
                 }
                 handle = "\(dialCode)\(digits)"
-
+                
             case .address:
-                let a = addressText.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard a.hasPrefix("addr") && a.count > 50 else {
-                    recipient = nil
+                let input = addressText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                // If it looks like a raw address, require normal validation
+                if input.hasPrefix("addr") || input.hasPrefix("stake") {
+                    guard isValidCardanoAddress(input) else { recipient = nil; return }
+                    // If you still want to pull Vendano profile data for known addresses, keep this:
+                    if let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: input) {
+                        recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
+                    } else {
+                        // show bare address but still allow sending
+                        recipient = Recipient(name: "Cardano Address", avatarURL: nil, address: input)
+                    }
+                    recalcFee()
                     return
                 }
-                guard let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: a) else {
-                    recipient = nil
-                    return
+
+                // Otherwise treat as ADA Handle (with or without $)
+                guard isValidAdaHandle(input) else { recipient = nil; return }
+
+                if let chainAddr = try? await WalletService.shared.resolveAdaHandle(input) {
+                    let display = input.hasPrefix("$") ? input : "$" + input
+                    recipient = Recipient(name: display.lowercased(), avatarURL: nil, address: chainAddr)
+                    recalcFee()
+                } else {
+                    recipient = nil // unknown / not found
                 }
-                recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
                 return
+
             }
 
             if let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: handle) {
