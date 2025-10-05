@@ -459,5 +459,42 @@ final class WalletService: ObservableObject {
         // already descending, but just to be safe:
         return result.sorted { $0.blockHeight > $1.blockHeight }
     }
+    
+    // MARK: – ADA Handle
+
+    private let adaHandlePolicy = "f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a"
+
+    // 1 hour cache of resolved handles
+    private var handleCache = [String: (address: String, expires: Date)]()
+
+    func resolveAdaHandle(_ raw: String) async throws -> String? {
+        var name = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.hasPrefix("$") { name.removeFirst() }
+        name = name.lowercased()
+
+        if let cached = handleCache[name], cached.expires > Date() {
+            return cached.address
+        }
+
+        // build Blockfrost asset unit: <policy><assetNameHex>
+        let unit = adaHandlePolicy + name.hexEncoded
+
+        struct Holder: Decodable { let address: String; let quantity: String }
+        let url = URL(string: "\(apiBase)/assets/\(unit)/addresses?count=100&order=desc")!
+        let data = try await getJSON(url)
+        let holders = try JSONDecoder().decode([Holder].self, from: data)
+
+        // Find the first address with quantity > 0 (should be exactly one for classic handles)
+        guard let holder = holders.first(where: { UInt64($0.quantity) ?? 0 > 0 }) else {
+            return nil // handle exists? if not, nil
+        }
+
+        // optionally sanity-check it is a valid bech32 address
+        _ = try? Address(bech32: holder.address)
+
+        handleCache[name] = (address: holder.address, expires: Date().addingTimeInterval(3600))
+        return holder.address
+    }
+
 }
 
