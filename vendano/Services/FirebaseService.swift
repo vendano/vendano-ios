@@ -578,7 +578,7 @@ final class FirebaseService: ObservableObject {
     func addPendingContact(_ handle: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { throw FirebaseServiceError.userNotSignedIn }
         let userRef = db?.collection("users").document(uid)
-        let norm = handle.lowercased()
+        let norm = normalizePhone(handle)
         let hash = handleHash(norm)
         try await safeUpdate(userRef, [
             "pendingContacts": FieldValue.arrayUnion([hash]),
