@@ -253,7 +253,7 @@ struct NewContactAuthView: View {
                 if let e = err { errorMessage = e.localizedDescription } else { sent = true }
             }
         } else {
-            let phone = "\(dialCode)\(localNumber)"
+            let phone = "\(dialCode) \(localNumber)".trimmingCharacters(in: .whitespaces)
             FirebaseService.shared.sendPhoneOTP(e164: phone) {
                 sent = true
             }
