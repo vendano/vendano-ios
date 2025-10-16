@@ -418,7 +418,7 @@ struct SendView: View {
                                 let handle: String
                                 switch sendMethod {
                                 case .email: handle = email.lowercased()
-                                case .phone: handle = dialCode + localNumber.filter(\.isWholeNumber)
+                                case .phone: handle = "\(dialCode) \(localNumber)".trimmingCharacters(in: .whitespaces)
                                 default: handle = ""
                                 }
                                 var adaMsg = adaText
