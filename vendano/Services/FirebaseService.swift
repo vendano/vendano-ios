@@ -277,6 +277,7 @@ final class FirebaseService: ObservableObject {
         guard let uid = user?.uid else { return }
         guard let db = db else { return } // demo: no-op
         try await db.collection("public").document(uid).setData(["walletAddress": addr], merge: true)
+        try await db.collection("users").document(uid).setData(["walletAddress": addr], merge: true)
     }
 
     func updateDisplayName(_ name: String) async throws {
@@ -597,6 +598,36 @@ final class FirebaseService: ObservableObject {
             try await db.collection("users").document(uid).setData(data, merge: merge)
         } catch {
             DebugLogger.log("❌ Firestore setData failed: \(error)")
+        }
+    }
+    
+    func recordTransaction(
+        recipientAddress: String,
+        amount: Double,
+        txHash: String
+    ) async {
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            print("No authenticated user")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        
+        do {
+            let transactionData: [String: Any] = [
+                "recipientAddress": recipientAddress,
+                "amount": amount,
+                "senderUid": currentUserId,
+                "txHash": txHash,
+                "timestamp": FieldValue.serverTimestamp(),
+                "notificationSent": false,
+            ]
+            
+            let docRef = try await db.collection("transactionRecords").addDocument(data: transactionData)
+            print("Transaction record created: \(docRef.documentID)")
+            
+        } catch {
+            print("Error creating transaction record: \(error)")
         }
     }
 }
