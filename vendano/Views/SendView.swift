@@ -666,7 +666,7 @@ struct SendView: View {
         let dest = (recipient?.address ?? addressText).trimmingCharacters(in: .whitespacesAndNewlines)
 
         do {
-            _ = try await WalletService.shared.sendMultiTransaction(
+            let txHash = try await WalletService.shared.sendMultiTransaction(
                 to: dest,
                 amount: amount,
                 tip: tip
@@ -676,6 +676,11 @@ struct SendView: View {
             }
             AnalyticsManager.logEvent("send_success", parameters: ["amount": amount])
             sendSuccess = true
+            await FirebaseService.shared.recordTransaction(
+                recipientAddress: dest,
+                amount: amount,
+                txHash: txHash
+            )
         } catch {
             AnalyticsManager.logEvent("send_failure", parameters: ["errorMsg": error.localizedDescription])
             sendError = error.localizedDescription
