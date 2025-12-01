@@ -8,7 +8,7 @@
 import Foundation
 
 enum AppEnvironment: String {
-    case demo
+    case appstorereview
     case testnet
     case mainnet
 }

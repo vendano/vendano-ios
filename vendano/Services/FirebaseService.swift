@@ -24,7 +24,7 @@ final class FirebaseService: ObservableObject {
     @Published private(set) var user: User?
 
     // MARK: - Env helpers
-    private var isDemo: Bool { AppState.shared.environment == .demo }
+    private var isDemo: Bool { AppState.shared.environment == .appstorereview }
 
     private var db: Firestore? {
         isDemo ? nil : Firestore.firestore()

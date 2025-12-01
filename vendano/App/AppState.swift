@@ -51,8 +51,8 @@ final class AppState: ObservableObject {
     
     func resolveEnvironment(for identifier: String) -> AppEnvironment {
         // Special demo account
-        if identifier.lowercased() == "demo@vendano.net" {
-            return .demo
+        if identifier.lowercased() == "apple@vendano.net" {
+            return .appstorereview
         }
         
         // hardcoded test users for staging

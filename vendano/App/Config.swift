@@ -16,20 +16,18 @@ enum Config {
     
     static var cardanoInfo: NetworkApiInfo {
         switch env {
-        case .mainnet:
+        case .mainnet, .appstorereview:
             return .mainnet
-        case .testnet, .demo:
+        case .testnet:
             return .testnet
         }
     }
     
     static var blockfrostAPIURL: String {
         switch env {
-        case .mainnet:
+        case .mainnet, .appstorereview:
             return "https://cardano-mainnet.blockfrost.io/api/v0"
         case .testnet:
-            return "https://cardano-preprod.blockfrost.io/api/v0"
-        case .demo:
             return "https://cardano-preprod.blockfrost.io/api/v0"
         }
     }
@@ -53,9 +51,8 @@ enum Config {
     static var blockfrostKey: String {
         let keyName: String
         switch env {
-        case .mainnet: keyName = "BLOCKFROST_KEY"
+        case .mainnet, .appstorereview: keyName = "BLOCKFROST_KEY"
         case .testnet: keyName = "BLOCKFROST_KEY_TESTNET"
-        case .demo:    keyName = "BLOCKFROST_KEY_TESTNET"
         }
         if let val = Bundle.main.object(forInfoDictionaryKey: keyName) as? String, !val.isEmpty {
             return val
@@ -69,9 +66,9 @@ enum Config {
     
     static var environmentName: String {
         switch env {
-            case .mainnet: return "mainnet"
-            case .testnet: return "testnet"
-            case .demo:    return "demo"
+            case .mainnet:        return "mainnet"
+            case .testnet:        return "testnet"
+            case .appstorereview: return "app-store-review"
         }
     }
     

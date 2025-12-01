@@ -106,7 +106,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let env = AppState.shared.environment
         
         switch env {
-        case .demo:
+        case .appstorereview:
             // Don’t configure Firebase at all
             DebugLogger.log("⚠️ Running in DEMO environment - no Firebase configured")
         case .testnet:

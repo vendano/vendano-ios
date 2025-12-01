@@ -137,8 +137,31 @@ struct ConfirmSeedView: View {
                                     } catch {
                                         await MainActor.run {
                                             isCreatingWallet = false
-                                            DebugLogger.log("❌ Wallet creation failed: \(error)")
-                                            errorMessage = error.localizedDescription
+
+                                            if let decodingError = error as? DecodingError {
+                                                switch decodingError {
+                                                case .keyNotFound(let key, let context):
+                                                    DebugLogger.log("❌ Wallet creation failed – missing key: \(key.stringValue), path: \(context.codingPath.map(\.stringValue))")
+                                                    errorMessage = "Wallet import failed: missing key \(key.stringValue)"
+                                                case .valueNotFound(let type, let context):
+                                                    DebugLogger.log("❌ Wallet creation failed – missing value for type \(type), path: \(context.codingPath.map(\.stringValue))")
+                                                    errorMessage = "Wallet import failed: missing value for \(type)"
+                                                case .dataCorrupted(let context):
+                                                    DebugLogger.log("❌ Wallet creation failed – data corrupted: \(context.debugDescription)")
+                                                    errorMessage = "Wallet import failed: corrupted data"
+                                                case .typeMismatch(let type, let context):
+                                                    DebugLogger.log("❌ Wallet creation failed – type mismatch \(type): \(context.debugDescription), path: \(context.codingPath.map(\.stringValue))")
+                                                    errorMessage = "Wallet import failed: data in wrong format"
+                                                @unknown default:
+                                                    DebugLogger.log("❌ Wallet creation failed – unknown DecodingError: \(decodingError)")
+                                                    errorMessage = "Wallet import failed due to an unknown decoding error."
+                                                }
+                                            } else {
+                                                let nsError = error as NSError
+                                                DebugLogger.log("❌ Wallet creation failed: \(nsError) (domain: \(nsError.domain), code: \(nsError.code))")
+                                                errorMessage = nsError.localizedDescription
+                                            }
+
                                             showErrorAlert = true
                                             state.onboardingStep = .confirmSeed
                                             state.walletAddress = ""
