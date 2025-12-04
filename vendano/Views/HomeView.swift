@@ -25,10 +25,31 @@ struct HomeView: View {
     // how far the main card moves while an overlay is on-screen
     private var verticalOffset: CGFloat {
         switch (showSend, showReceive) {
-        case (true, _): return 200 // slide wallet up when Send appears
-        case (_, true): return -200 // slide wallet down when Receive appears
+        case (true, _): return 200   // slide wallet up when Send appears
+        case (_, true): return -200  // slide wallet down when Receive appears
         default: return 0
         }
+    }
+
+    /// Formats an ADA amount into a string like:
+    /// "≈ ₩12,345.67 KRW" using the current fiatCurrency and device locale.
+    private func fiatLabel(for adaAmount: Double) -> Text? {
+        // For zero, we can show a nice "0.00" even if we haven't loaded a rate yet.
+        if adaAmount == 0 {
+            let zeroFormatted = 0.0.formatted(
+                .number.precision(.fractionLength(2))
+            )
+            return Text("≈ \(wallet.fiatCurrency.symbol)\(zeroFormatted) \(wallet.fiatCurrency.rawValue)")
+        }
+
+        guard let rate = wallet.adaFiatRate else { return nil }
+
+        let fiatValue = adaAmount * rate
+        let formatted = fiatValue.formatted(
+            .number.precision(.fractionLength(2))
+        )
+        // Example: "≈ ₩1,234,567.89 KRW"
+        return Text("≈ \(wallet.fiatCurrency.symbol)\(formatted) \(wallet.fiatCurrency.rawValue)")
     }
 
     var body: some View {
@@ -37,6 +58,7 @@ struct HomeView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
+                    // Header: avatar + name + handle
                     HStack {
                         AvatarThumb(
                             localImage: state.avatar,
@@ -64,28 +86,51 @@ struct HomeView: View {
                         showProfile = true
                     }
 
-                    VStack(spacing: 2) {
-                        Text("\(wallet.adaBalance.truncating(toPlaces: 1)) ADA")
-                            .vendanoFont(.title, size: 48, weight: .heavy)
-                            .foregroundColor(theme.color(named: "TextPrimary"))
-                        if let usdRate = WalletService.shared.adaUsdRate {
-                            Text("≈ $\(wallet.adaBalance * usdRate, format: .number.precision(.fractionLength(2))) USD")
+                    // Main balance card
+                    VStack(spacing: 4) {
+                        // This is always the honest, stable on-chain total
+                        let total = wallet.totalAdaBalance ?? wallet.adaBalance
+
+                        Text(
+                            total.formatted(.number.precision(.fractionLength(1)))
+                            + " ADA"
+                        )
+                        .vendanoFont(.title, size: 48, weight: .heavy)
+                        .foregroundColor(theme.color(named: "TextPrimary"))
+
+                        Text("Total on chain (incl. staking & tokens)")
+                            .vendanoFont(.caption, size: 13)
+                            .foregroundColor(theme.color(named: "TextSecondary"))
+
+                        if let fiatText = fiatLabel(for: total) {
+                            fiatText
                                 .vendanoFont(.headline, size: 18, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                     }
 
+                    // HOSKY section
                     if wallet.hoskyBalance > 0 {
                         VStack(spacing: 2) {
-                            Text("HOSKY \(wallet.hoskyBalance, format: .number.precision(.fractionLength(0)))")
-                                .vendanoFont(.headline, size: 18, weight: .semibold)
-                                .foregroundColor(theme.color(named: "TextPrimary"))
-                            Text("≈ $\(wallet.hoskyBalance * 0, format: .number.precision(.fractionLength(2))) USD")
-                                .vendanoFont(.body, size: 16)
-                                .foregroundColor(theme.color(named: "TextSecondary"))
+                            Text(
+                                "HOSKY " +
+                                wallet.hoskyBalance.formatted(
+                                    .number.precision(.fractionLength(0))
+                                )
+                            )
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
+
+                            // Still worth 0, but in their chosen fiat with proper formatting
+                            if let hoskyFiatText = fiatLabel(for: 0) {
+                                hoskyFiatText
+                                    .vendanoFont(.body, size: 16)
+                                    .foregroundColor(theme.color(named: "TextSecondary"))
+                            }
                         }
                     }
 
+                    // Send / Receive buttons
                     HStack(spacing: 16) {
                         Button {
                             withAnimation(.easeInOut) { showSend = true }
@@ -124,6 +169,7 @@ struct HomeView: View {
             .scrollContentBackground(.hidden)
             .ignoresSafeArea(edges: .bottom)
 
+            // Overlays: Send / Receive
             if showSend {
                 SendView {
                     withAnimation(.easeInOut) {
@@ -153,7 +199,7 @@ struct HomeView: View {
             Task { await nftVM.loadNFTs() }
         }
         .toolbar {
-            if showSend == false && showReceive == false {
+            if !showSend && !showReceive {
                 // feedback “!” button
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -173,7 +219,6 @@ struct HomeView: View {
                     .foregroundColor(theme.color(named: "Accent"))
                 }
                 // Logout button
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showLogoutAlert = true
@@ -181,13 +226,13 @@ struct HomeView: View {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                     }
                     .foregroundColor(theme.color(named: "Accent"))
-                    .alert("Remove your wallet?", isPresented: $showLogoutAlert) {
+                    .alert("Remove this wallet from this device?", isPresented: $showLogoutAlert) {
                         Button("Cancel", role: .cancel) {}
                         Button("Remove", role: .destructive) {
                             state.removeWallet()
                         }
                     } message: {
-                        Text("This app will forget your wallet. Your funds remain secure on the blockchain, but you won’t see your balance until you restore it with your 24-word recovery phrase.")
+                        Text("This app will forget your wallet on this device. Your funds remain secure on the blockchain, but you won’t see your balance again until you restore it with your 12/15/24-word recovery phrase.")
                             .vendanoFont(.body, size: 16)
                     }
                 }

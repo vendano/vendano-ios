@@ -42,6 +42,12 @@ final class AppState: ObservableObject {
     @Published var displayToast = false
     @Published var toastMessage = ""
     
+    @Published var isExpertMode: Bool = UserDefaults.standard.bool(forKey: "VendanoExpertMode") {
+        didSet {
+            UserDefaults.standard.set(isExpertMode, forKey: "VendanoExpertMode")
+        }
+    }
+    
     @Published var environment: AppEnvironment = .mainnet
     
     func setEnvironment(_ env: AppEnvironment) {
@@ -79,6 +85,9 @@ final class AppState: ObservableObject {
                 return
             }
             do {
+                // 1) Refresh balances first (spendable + expert totals)
+                await WalletService.shared.refreshBalancesFromChain()
+                // 2) Price
                 await WalletService.shared.loadPrice()
 
                 let ada = WalletService.shared.adaBalance

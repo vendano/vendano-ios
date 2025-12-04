@@ -11,10 +11,6 @@ import Foundation
 
 @MainActor
 extension WalletService {
-    // Sends in one atomic transaction:
-    //  1) `amount` ADA to `dest`
-    //  2) the network fee as a donation to vendanoFeeAddress
-    //  3) any `tip` ADA to vendanoDeveloperAddress
     func sendMultiTransaction(
         to dest: String,
         amount: Double,
@@ -50,18 +46,256 @@ extension WalletService {
                 userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
             )
         }
-        let changeAddrs = try cardano.addresses.get(cached: acct)
-        let changeAddr = changeAddrs.first!
 
-        let utxos = try await collectAllUTXOs(
-            from: cardano.utxos.get(for: [changeAddr], asset: nil)
-        )
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 5,
+                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+            )
+        }
+        
+        let utxos: [CardanoCore.TransactionUnspentOutput]
+        if !currentUtxos.isEmpty {
+            utxos = currentUtxos
+        } else {
+            utxos = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+            currentUtxos = utxos
+        }
+        
+        debugLogUtxos(utxos, context: "sendMultiTransaction")
+        
         let totalLovelace = utxos.reduce(UInt64(0)) { $0 + $1.output.amount.coin }
 
+        let toAddr = try CardanoCore.Address(bech32: dest)
+
+        let sendCoin = VendanoWalletMath.adaToLovelace(amount)
+        
+        let tipCoin: UInt64
+        if tip < 1 {
+            tipCoin = 0
+        } else {
+            tipCoin = VendanoWalletMath.adaToLovelace(tip)
+        }
+
+        let (txBody, required, feeCoin, vendanoFeeCoin) =
+            try buildCandidateTransaction(
+                cardano: cardano,
+                utxos: utxos,
+                changeAddr: changeAddr,
+                toAddr: toAddr,
+                sendCoin: sendCoin,
+                tipCoin: tipCoin
+            )
+
+        guard totalLovelace >= required else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 4,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "Insufficient funds: have \(Double(totalLovelace)/1_000_000) ADA, need \(Double(required)/1_000_000) ADA including fees."
+                ]
+            )
+        }
+
+        DebugLogger.log(
+            "⭐ sendMultiTransaction total=\(Double(totalLovelace)/1_000_000) " +
+            "send=\(amount) fee=\(Double(feeCoin)/1_000_000) " +
+            "vendanoFee=\(Double(vendanoFeeCoin)/1_000_000) tip=\(tip) " +
+            "required=\(Double(required)/1_000_000)"
+        )
+
+        DebugLogger.log("💸 txBody.fee = \(txBody.fee) lovelace (\(Double(txBody.fee) / 1_000_000) ADA)")
+
+        // 🔐 Minimal signer set: only addresses that actually hold UTxOs
+        let signerBaseAddrs: [CardanoCore.Address] = {
+            var seen = Set<String>()
+            var result: [CardanoCore.Address] = []
+
+            for u in utxos {
+                // UTxO output address is where the coins currently live
+                let bech = (try? u.output.address.bech32()) ?? ""
+                guard !bech.isEmpty else { continue }
+                if seen.insert(bech).inserted {
+                    if let addr = try? CardanoCore.Address(bech32: bech) {
+                        result.append(addr)
+                    }
+                }
+            }
+
+            return result
+        }()
+
+        let signers = try cardano.addresses
+            .extended(addresses: signerBaseAddrs)
+            .map(\.address)
+
+        DebugLogger.log("💸 [send] signing with \(signers.count) addresses (utxo-backed)")
+
+        let txHash = try await withCheckedThrowingContinuation { cont in
+            cardano.tx.signAndSubmit(
+                tx: txBody,
+                with: signers,
+                auxiliaryData: nil
+            ) { res in
+                AnalyticsManager.logEvent(
+                    "sent_ada",
+                    parameters: ["lovelace": required]
+                )
+                cont.resume(with: res)
+            }
+        }
+
+        await refreshBalancesFromChain()
+
+        return txHash.hex
+    }
+}
+
+
+extension WalletService {
+    /// Compute Vendano fee in lovelace (same as you already had)
+    func vendanoFeeLovelace(for sendCoin: UInt64) -> UInt64 {
+        let raw = Double(sendCoin) * Config.vendanoAppFeePercent
+        let fee = UInt64(raw)
+        
+        let minUtxoLovelace: UInt64 = 1_000_000 // ≈ 1 ADA
+        if fee < minUtxoLovelace {
+            return 0
+        }
+        return fee
+    }
+}
+
+extension WalletService {
+    func maxSendableAda(to dest: String, tipAda: Double) async throws -> Double {
+        guard let cardano = cardano else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 10,
+                userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"]
+            )
+        }
+
+        guard let acct = cardano.addresses.fetchedAccounts().first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 11,
+                userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
+            )
+        }
+
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 12,
+                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+            )
+        }
+
+        let utxos = try await collectAllUTXOs(
+            from: cardano.utxos.get(for: allAddrs, asset: nil)
+        )
+
+        debugLogUtxos(utxos, context: "maxSendableAda")
+
+        let totalLovelace = utxos.reduce(UInt64(0)) { $0 &+ $1.output.amount.coin }
+        if totalLovelace == 0 { return 0 }
+
+        let toAddr = try CardanoCore.Address(bech32: dest)
+
+        let tipCoin: UInt64
+        if tipAda < 1 {
+            tipCoin = 0
+        } else {
+            tipCoin = VendanoWalletMath.adaToLovelace(tipAda)
+        }
+
+        func canSend(_ sendCoin: UInt64) -> Bool {
+            do {
+                let (_, required, _, _) = try buildCandidateTransaction(
+                    cardano: cardano,
+                    utxos: utxos,
+                    changeAddr: changeAddr,
+                    toAddr: toAddr,
+                    sendCoin: sendCoin,
+                    tipCoin: tipCoin
+                )
+                return required <= totalLovelace
+            } catch {
+                DebugLogger.log("⚠️ maxSendableAda.canSend failed: \(error)")
+                return false
+            }
+        }
+
+        var low: UInt64 = 0
+        var high: UInt64 = totalLovelace
+        var best: UInt64 = 0
+
+        while low <= high {
+            let mid = (low + high) / 2
+            if canSend(mid) {
+                best = mid
+                low = mid &+ 1
+            } else {
+                if mid == 0 { break }
+                high = mid &- 1
+            }
+        }
+
+        let bestAda = Double(best) / 1_000_000
+        DebugLogger.log(
+            "⭐ maxSendableAda total=\(Double(totalLovelace)/1_000_000) " +
+            "tip=\(tipAda) best=\(bestAda)"
+        )
+        return bestAda
+    }
+
+    
+}
+
+// MARK: - Shared Tx Builder Helper
+
+extension WalletService {
+    /// Single source of truth for building a balanced transaction and
+    /// computing "required" lovelace (send + Vendano fee + tip + network fee).
+    func buildCandidateTransaction(
+        cardano: Cardano,
+        utxos: [CardanoCore.TransactionUnspentOutput],
+        changeAddr: CardanoCore.Address,
+        toAddr: CardanoCore.Address,
+        sendCoin: UInt64,
+        tipCoin: UInt64
+    ) throws -> (
+        txBody: CardanoCore.TransactionBody,
+        required: UInt64,
+        feeCoin: UInt64,
+        vendanoFeeCoin: UInt64
+    ) {
         let info = cardano.info
 
+        DebugLogger.log(
+            "💸 [build] start utxos=\(utxos.count) " +
+            "send=\(Double(sendCoin) / 1_000_000) " +
+            "tip=\(Double(tipCoin) / 1_000_000) " +
+            "linearFee=(const:\(info.linearFee.constant), coeff:\(info.linearFee.coefficient)) " +
+            "coinsPerUtxoWord=\(info.coinsPerUtxoWord)"
+        )
+
+        // 🚧 Pad the fee constant so our fee is always *higher* than the node’s minimum.
+        // The mismatch you’re seeing is ~13k–22k lovelace, so +50k is a safe cushion.
+        let paddedLinearFee = LinearFee(
+            constant: info.linearFee.constant + 50_000,   // +0.05 ADA
+            coefficient: info.linearFee.coefficient       // keep slope identical
+        )
+
         var builder = try TransactionBuilder(
-            feeAlgo: info.linearFee,
+            feeAlgo: paddedLinearFee,
             poolDeposit: BigNum(info.poolDeposit),
             keyDeposit: BigNum(info.keyDeposit),
             maxValueSize: info.maxValueSize,
@@ -70,10 +304,10 @@ extension WalletService {
             preferPureChange: false
         )
 
-        try builder.addInputsFrom(inputs: utxos, strategy: .randomImprove)
+        // Inputs
+        try builder.addInputsFrom(inputs: utxos, strategy: .largestFirst)
 
-        let toAddr = try CardanoCore.Address(bech32: dest)
-        let sendCoin = UInt64(amount * 1_000_000)
+        // Main payment output
         try builder.addOutput(
             output: TransactionOutput(
                 address: toAddr,
@@ -81,59 +315,90 @@ extension WalletService {
             )
         )
 
-        let vendanoFeeCoin = UInt64(amount * Config.vendanoAppFeePercent * 1_000_000)
-        let vendanoFeeAddr = try CardanoCore.Address(bech32: Config.vendanoFeeAddress)
-        try builder.addOutput(
-            output: TransactionOutput(
-                address: vendanoFeeAddr,
-                amount: Value(coin: vendanoFeeCoin)
+        // Vendano fee (waived < 1 ADA as before)
+        let vendanoFeeCoin = vendanoFeeLovelace(for: sendCoin)
+        if vendanoFeeCoin > 0 {
+            let vendanoFeeAddr = try CardanoCore.Address(
+                bech32: Config.vendanoFeeAddress
             )
-        )
+            try builder.addOutput(
+                output: TransactionOutput(
+                    address: vendanoFeeAddr,
+                    amount: Value(coin: vendanoFeeCoin)
+                )
+            )
+            DebugLogger.log(
+                "💸 [build] added Vendano fee output = \(Double(vendanoFeeCoin) / 1_000_000) ADA"
+            )
+        } else {
+            DebugLogger.log("💸 [build] Vendano fee waived for sendCoin=\(sendCoin)")
+        }
 
-        if tip > 0 {
-            let tipCoin = UInt64(tip * 1_000_000)
-            let devAddr = try CardanoCore.Address(bech32: Config.vendanoDeveloperAddress)
+        // Optional tip
+        if tipCoin > 0 {
+            let devAddr = try CardanoCore.Address(
+                bech32: Config.vendanoDeveloperAddress
+            )
             try builder.addOutput(
                 output: TransactionOutput(
                     address: devAddr,
                     amount: Value(coin: tipCoin)
                 )
             )
+            DebugLogger.log("💸 [build] added tip output = \(Double(tipCoin) / 1_000_000) ADA")
         }
 
-        let feeCoin = try builder.minFee()
-        let required = sendCoin + feeCoin + vendanoFeeCoin + UInt64(tip * 1_000_000)
-        guard totalLovelace >= required else {
-            throw NSError(
-                domain: "Vendano.Send",
-                code: 4,
-                userInfo: [
-                    NSLocalizedDescriptionKey:
-                        "Insufficient funds: have \(totalLovelace), need \(required)",
-                ]
-            )
-        }
-
-        _ = try builder.addChangeIfNeeded(address: changeAddr)
-
-        let txBody = try builder.build()
-
-        let signers = try cardano.addresses
-            .extended(addresses: [changeAddr])
-            .map(\.address)
-        let txHash = try await withCheckedThrowingContinuation { cont in
-            cardano.tx.signAndSubmit(
-                tx: txBody,
-                with: signers,
-                auxiliaryData: nil
-            ) { res in
-                AnalyticsManager.logEvent("sent_ada", parameters: ["lovelace": required])
-                
-                cont.resume(with: res)
+        // Balance inputs vs outputs and create change
+        do {
+            DebugLogger.log("💸 [build] calling addChangeIfNeeded")
+            _ = try builder.addChangeIfNeeded(address: changeAddr)
+        } catch {
+            DebugLogger.log("💥 [build] addChangeIfNeeded threw: \(error)")
+            if let rustError = error as? CardanoRustError,
+               case let .common(message) = rustError {
+                DebugLogger.log("💥 [build] addChangeIfNeeded Rust message: \(message)")
             }
+            throw error
         }
 
-        let hex = txHash.hex
-        return hex
+        // 🔑 Canonical source of truth: the built txBody’s fee
+        let txBody: CardanoCore.TransactionBody
+        do {
+            txBody = try builder.build()
+        } catch {
+            DebugLogger.log("💥 [build] builder.build() threw: \(error)")
+            throw error
+        }
+
+        let feeCoin = txBody.fee
+        DebugLogger.log("💸 [build] txBody.fee = \(feeCoin) lovelace (\(Double(feeCoin) / 1_000_000) ADA)")
+
+        let required = sendCoin &+ vendanoFeeCoin &+ tipCoin &+ feeCoin
+
+        DebugLogger.log(
+            "💸 [build] required total ADA = \(Double(required) / 1_000_000) " +
+            "(send=\(Double(sendCoin) / 1_000_000), fee=\(Double(feeCoin) / 1_000_000), " +
+            "vendanoFee=\(Double(vendanoFeeCoin) / 1_000_000), tip=\(Double(tipCoin) / 1_000_000))"
+        )
+
+        return (txBody, required, feeCoin, vendanoFeeCoin)
+    }
+
+}
+
+extension WalletService {
+    func debugLogUtxos(_ utxos: [CardanoCore.TransactionUnspentOutput], context: String) {
+        print("🔎 UTxO dump (\(context)) count=\(utxos.count)")
+
+        for (idx, utxo) in utxos.enumerated() {
+            let coin = utxo.output.amount.coin
+            let ada = Double(coin) / 1_000_000
+
+            // Very rough check: does this UTxO carry *any* native tokens?
+            let hasMultiAsset = (utxo.output.amount.multiasset != nil)
+
+            print("   [\(idx)] \(coin) lovelace (\(ada) ADA) " +
+                  "tokens=\(hasMultiAsset ? "yes" : "no")")
+        }
     }
 }

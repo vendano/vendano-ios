@@ -6,34 +6,54 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class KeyboardGuardian: ObservableObject {
     @Published var height: CGFloat = 0
 
-    private var show: NSObjectProtocol?
-    private var hide: NSObjectProtocol?
+    private var showObserver: NSObjectProtocol?
+    private var hideObserver: NSObjectProtocol?
 
     init() {
         let nc = NotificationCenter.default
 
-        show = nc.addObserver(
+        showObserver = nc.addObserver(
             forName: UIResponder.keyboardWillShowNotification,
-            object: nil, queue: .main
-        ) { note in
-            guard let frame =
-                note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey]
-                    as? CGRect else { return }
-            self.height = frame.height
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            guard
+                let self,
+                let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+            else { return }
+
+            // Defer the @Published change to the next run loop
+            DispatchQueue.main.async {
+                self.height = frame.height
+            }
         }
 
-        hide = nc.addObserver(
+        hideObserver = nc.addObserver(
             forName: UIResponder.keyboardWillHideNotification,
-            object: nil, queue: .main
-        ) { _ in self.height = 0 }
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+
+            // Same: update outside the current view update cycle
+            DispatchQueue.main.async {
+                self.height = 0
+            }
+        }
     }
 
     deinit {
-        if let show { NotificationCenter.default.removeObserver(show) }
-        if let hide { NotificationCenter.default.removeObserver(hide) }
+        let nc = NotificationCenter.default
+        if let showObserver {
+            nc.removeObserver(showObserver)
+        }
+        if let hideObserver {
+            nc.removeObserver(hideObserver)
+        }
     }
 }

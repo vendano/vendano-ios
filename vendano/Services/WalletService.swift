@@ -16,10 +16,32 @@ final class WalletService: ObservableObject {
     @Published private(set) var address: String?
     @Published private(set) var allAddresses: [String] = []
 
+    /// Spendable ADA based on UTxOs (what Send should trust)
     @Published private(set) var adaBalance: Double = 0
+    /// Optional: total ADA including staking/rewards (for expert UI)
+    @Published private(set) var totalAdaBalance: Double?
+    /// Optional: HOSKY balance if available in this wallet
     @Published private(set) var hoskyBalance: Double = 0
+    
+    /// “Real” sendable ADA for a *single* tx, after tokens/min-UTxO/etc.
+    @Published private(set) var spendableAda: Double? = nil
 
-    @Published var adaUsdRate: Double?
+    /// Last fetched UTxOs used for balances / spendable calculations.
+    var currentUtxos: [TransactionUnspentOutput] = []
+
+    @Published var adaFiatRate: Double?
+    
+    @Published var fiatCurrency: FiatCurrency = {
+        if let code = UserDefaults.standard.string(forKey: "VendanoFiatCurrency"),
+           let currency = FiatCurrency(rawValue: code) {
+            return currency
+        }
+        return .usd
+    }() {
+        didSet {
+            UserDefaults.standard.set(fiatCurrency.rawValue, forKey: "VendanoFiatCurrency")
+        }
+    }
 
     var cardano: Cardano?
     private var keychain: Keychain?
@@ -55,6 +77,7 @@ final class WalletService: ObservableObject {
         cachedStake = nil
         if preserveBalances == false {
             adaBalance = 0
+            totalAdaBalance = nil
             hoskyBalance = 0
         }
         bfCache = BFCache()
@@ -218,87 +241,13 @@ final class WalletService: ObservableObject {
         }
 
         let bech32 = try addrObj.bech32()
-
         print("⛏️ using first external address:", bech32)
 
         self.keychain = keychain
         self.cardano = cardano
         address = bech32
-
-        // Updated: stake is now optional
-        let stake = try await stakeAddress(from: bech32)
-        if let stake {
-            print("⭐ stake address:", stake)
-            let (ada, hosky) = try await stakeBalances(stake: stake)
-            adaBalance = ada
-            hoskyBalance = hosky
-            print("⭐ total ADA:", ada, "HOSKY:", hosky)
-        } else {
-            print("⚠️ No stake address found for payment address, fetching ADA from UTxOs only.")
-
-            // Fetch UTxOs for payment address to sum ADA
-            struct UTXOEntry: Decodable {
-                let amount: [Amount]
-                struct Amount: Decodable {
-                    let unit: String
-                    let quantity: String
-                }
-            }
-
-            let utxoURL = URL(string: "\(apiBase)/addresses/\(bech32)/utxos")!
-            
-            // We need to fetch the raw response and check status code for 404 before decoding
-            do {
-                // Use a custom fetch so we can check for 404
-                var req = URLRequest(url: utxoURL)
-                req.setValue(Config.blockfrostKey, forHTTPHeaderField: "project_id")
-                let (data, response) = try await session.data(for: req)
-                let http = response as! HTTPURLResponse
-
-                if http.statusCode == 404 {
-                    // Treat as empty UTxOs and zero balance (new address)
-                    adaBalance = 0
-                    hoskyBalance = 0
-                    print("⭐ No UTxOs found (404) for address, setting ADA and HOSKY to zero.")
-                } else {
-                    do {
-                        let utxos = try JSONDecoder().decode([UTXOEntry].self, from: data)
-
-                        // Sum lovelace amounts from all UTxOs
-                        let totalLovelace = utxos.reduce(UInt64(0)) { partialResult, utxo in
-                            let adaAmount = utxo.amount.first(where: { $0.unit == "lovelace" })
-                            let qty = UInt64(adaAmount?.quantity ?? "0") ?? 0
-                            return partialResult + qty
-                        }
-                        adaBalance = Double(totalLovelace) / 1_000_000
-                        hoskyBalance = 0
-                        print("⭐ total ADA from UTxOs:", adaBalance, "HOSKY: 0")
-                    } catch {
-                        // Try to decode error response to check if it reports 404 status_code in JSON
-                        if let decodedError = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let statusCode = decodedError["status_code"] as? Int,
-                           statusCode == 404 {
-                            // Treat as empty UTxOs and zero balance (new address)
-                            adaBalance = 0
-                            hoskyBalance = 0
-                            print("⭐ No UTxOs found (404 in JSON) for address, setting ADA and HOSKY to zero.")
-                        } else {
-                            if let responseBody = String(data: data, encoding: .utf8) {
-                                print("❌ Failed to decode UTxOs JSON with error: \(error)")
-                                print("❌ Response body was: \(responseBody)")
-                            } else {
-                                print("❌ Failed to decode UTxOs JSON with error: \(error)")
-                                print("❌ Response body could not be decoded as UTF-8 string")
-                            }
-                            throw error
-                        }
-                    }
-                }
-            } catch {
-                // If the fetch itself fails, propagate error
-                throw error
-            }
-        }
+        
+        await refreshBalancesFromChain()
 
         AnalyticsManager.logEvent("create_wallet")
     }
@@ -330,56 +279,90 @@ final class WalletService: ObservableObject {
 
     func loadPrice() async {
         do {
-            adaUsdRate = try await priceService.fetchPrice(for: "ADA-USD")
+            let pair = fiatCurrency.pricePair   // "ADA-USD", "ADA-EUR", etc.
+            adaFiatRate = try await priceService.fetchPrice(for: pair)
         } catch {
-            print("Failed to fetch ADA price:", error)
+            print("Failed to fetch ADA price for \(fiatCurrency.rawValue):", error)
         }
-    }
-
-    func estimateFee(
-        to destination: Address,
-        lovelace amount: UInt64,
-        from account: Account
-    ) async throws -> UInt64 {
-        print("Attempting to estimate fee to address:", destination)
-        guard let c = cardano else {
-            throw NSError(domain: "Vendano", code: -1,
-                          userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"])
-        }
-
-        return try await c.send.estimateFee(
-            to: destination,
-            lovelace: amount,
-            from: account
-        )
     }
 
     @MainActor
     func estimateNetworkFee(
         to destination: String,
-        ada amount: Double
+        ada amount: Double,
+        tip: Double
     ) async throws -> Double {
         guard let cardano = cardano else {
-            throw NSError(domain: "Vendano", code: 0,
-                          userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"])
+            throw NSError(
+                domain: "Vendano",
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"]
+            )
         }
 
-        let toAddr = try Address(bech32: destination)
+        let sendCoin = VendanoWalletMath.adaToLovelace(amount)
 
-        let lovelace = UInt64(amount * 1_000_000)
+        // 👇 Tip handling should match sendMultiTransaction semantics exactly
+        let tipCoin: UInt64
+        if tip < 1 {
+            tipCoin = 0
+        } else {
+            tipCoin = VendanoWalletMath.adaToLovelace(tip)
+        }
+
+        let toAddr = try CardanoCore.Address(bech32: destination)
+
+        DebugLogger.log("💸 [fee-core] estimateNetworkFee start ada=\(amount) lovelace=\(sendCoin) dest=\(destination.prefix(20))…")
 
         guard let acct = cardano.addresses.fetchedAccounts().first else {
-            throw NSError(domain: "Vendano", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "No account loaded"])
+            throw NSError(
+                domain: "Vendano",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
+            )
         }
 
-        let feeLovelace = try await estimateFee(
-            to: toAddr,
-            lovelace: lovelace,
-            from: acct
-        )
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+            )
+        }
 
-        return Double(feeLovelace) / 1_000_000
+        let utxos: [TransactionUnspentOutput]
+        if !currentUtxos.isEmpty {
+            utxos = currentUtxos
+            DebugLogger.log("💸 [fee-core] estimateNetworkFee using cached UTxOs count=\(utxos.count)")
+        } else {
+            utxos = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+            DebugLogger.log("💸 [fee-core] estimateNetworkFee fetched UTxOs count=\(utxos.count)")
+            currentUtxos = utxos
+        }
+
+        do {
+            let (_, _, feeCoin, _) = try buildCandidateTransaction(
+                cardano: cardano,
+                utxos: utxos,
+                changeAddr: changeAddr,
+                toAddr: toAddr,
+                sendCoin: sendCoin,
+                tipCoin: tipCoin
+            )
+
+            let feeAda = VendanoWalletMath.lovelaceToAda(feeCoin)
+            DebugLogger.log("💸 [fee-core] estimateNetworkFee success feeAda=\(feeAda)")
+            return feeAda
+        } catch {
+            DebugLogger.log("💥 [fee-core] estimateNetworkFee error: \(error)")
+            if let rustError = error as? CardanoRustError, case let .common(message) = rustError {
+                DebugLogger.log("💥 [fee-core] Rust error message: \(message)")
+            }
+            throw error
+        }
     }
 
     func fetchTransactionsOnce(for addr: String) async throws -> [RawTx] {
@@ -495,6 +478,129 @@ final class WalletService: ObservableObject {
         handleCache[name] = (address: holder.address, expires: Date().addingTimeInterval(3600))
         return holder.address
     }
+    
+    @MainActor
+    func refreshBalancesFromChain() async {
+        guard let cardano = cardano,
+              let bech32 = address else {
+            // No wallet loaded – reset balances
+            adaBalance = 0
+            totalAdaBalance = nil
+            hoskyBalance = 0
+            return
+        }
+
+        do {
+            // 1) Find the account
+            let accounts = cardano.addresses.fetchedAccounts()
+            guard let account = accounts.first else {
+                DebugLogger.log("⚠️ refreshBalancesFromChain: no account found")
+                adaBalance = 0
+                totalAdaBalance = nil
+                hoskyBalance = 0
+                return
+            }
+
+            // 2) Get all known addresses for this account
+            let cached = try cardano.addresses.get(cached: account)
+
+            // If for some reason there are none (should be rare), derive one
+            let addrObj: Address
+            if let first = cached.first {
+                addrObj = first
+            } else {
+                addrObj = try cardano.addresses.new(for: account, change: false)
+            }
+
+            let allAddrs: [Address] = cached.isEmpty ? [addrObj] : cached
+            self.allAddresses = try allAddrs.map { try $0.bech32() }
+
+            // 3) Spendable ADA: sum lovelace from all UTxOs on all account addresses
+            let utxos = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+
+            // Cache UTxOs so Home + Send share the same view of the world
+            currentUtxos = utxos
+            
+            debugLogUtxos(utxos, context: "refreshBalancesFromChain")
+
+            // Raw “on UTxOs” ADA (for debug / comparison only)
+            let totalLovelace = utxos.reduce(UInt64(0)) { partial, utxo in
+                partial &+ utxo.output.amount.coin
+            }
+            adaBalance = Double(totalLovelace) / 1_000_000
+            print("⭐ [refresh] raw UTxO ADA:", adaBalance)
+
+            // Compute max sendable using the same builder flow
+            do {
+                let maxLovelace = try SpendableCalculator.maxSendableLovelace(
+                    cardano: cardano,
+                    utxos: utxos,
+                    changeAddress: addrObj,
+                    destAddress: addrObj, // any valid address is fine here
+                    vendanoFeeForAmount: self.vendanoFeeLovelace(for:),
+                    tipLovelace: 0
+                )
+
+                let maxAda = Double(maxLovelace) / 1_000_000
+                spendableAda = maxAda
+                print("⭐ [refresh] max spendable ADA:", maxAda)
+            } catch {
+                DebugLogger.log("⚠️ refreshBalancesFromChain: failed to compute spendableAda: \(error)")
+                spendableAda = nil
+            }
+
+            // 4) Optional: staking/rewards view for experts
+            let stake = try await stakeAddress(from: bech32)
+            if let stake {
+                let (totalAda, hosky) = try await stakeBalances(stake: stake)
+                totalAdaBalance = totalAda
+                hoskyBalance = hosky
+                print("⭐ [refresh] total ADA (incl. staking & rewards):", totalAda, "HOSKY:", hosky)
+            } else {
+                // Fall back to the same UTxO-based balance we show everywhere else
+                totalAdaBalance = adaBalance
+                hoskyBalance = 0
+                print("⚠️ [refresh] No stake address found; using UTxO ADA as total")
+            }
+
+            await recomputeSendableAda()
+            
+        } catch {
+            DebugLogger.log("⚠️ refreshBalancesFromChain failed: \(error)")
+            // Don’t blow away balances on transient errors; better to keep last known values.
+        }
+    }
+    
+    func effectiveAppFee(for amount: Double) -> Double {
+        VendanoWalletMath.vendanoFeeAda(
+            forSendAda: amount,
+            percent: Config.vendanoAppFeePercent
+        )
+    }
+    
+    @MainActor
+    func recomputeSendableAda() async {
+        guard let bech32 = address else {
+            adaBalance = 0
+            return
+        }
+
+        do {
+            // Use the same logic as the Send “All” button, but
+            // with our own address and tip = 0 as a neutral case.
+            let max = try await maxSendableAda(to: bech32, tipAda: 0)
+            adaBalance = max
+            DebugLogger.log("⭐ [wallet] recomputed sendable ADA (adaBalance): \(max)")
+        } catch {
+            DebugLogger.log("⚠️ recomputeSendableAda failed: \(error)")
+
+            // Fallback so the UI isn’t blank or 0 in weird cases:
+            if let total = totalAdaBalance {
+                adaBalance = total
+            }
+        }
+    }
 
 }
-

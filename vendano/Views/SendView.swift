@@ -50,10 +50,15 @@ struct SendView: View {
 
     private var recipientOK: Bool {
         switch sendMethod {
-        case .email: return emailOK
-        case .phone: return phoneOK
+        case .email:
+            return emailOK
+        case .phone:
+            return phoneOK
         case .address:
-            return isValidCardanoAddress(addressText)
+            let trimmed = addressText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let hasRawAddress = isValidCardanoAddress(trimmed)
+            let hasResolvedRecipient = !(recipient?.address ?? "").isEmpty
+            return hasRawAddress || hasResolvedRecipient
         }
     }
 
@@ -67,7 +72,10 @@ struct SendView: View {
     @State private var feeLoading = false
 
     private var adaValue: Double? { Double(adaText) }
-    private var appFee: Double { (adaValue ?? 0) * Config.vendanoAppFeePercent } // 1 %
+    private var appFee: Double {
+        guard let ada = adaValue else { return 0 }
+        return wallet.effectiveAppFee(for: ada)
+    }
 
     //    private let phoneKit = PhoneNumberUtility()
     //    private let phoneFmt = PartialFormatter()
@@ -93,9 +101,11 @@ struct SendView: View {
     }
 
     private var tipValue: Double { Double(tipText) ?? 0 }
+    
     private var amountOK: Bool {
         let base = (adaValue ?? 0) + netFee + appFee + tipValue
-        return (adaValue ?? 0) > 0 && base <= wallet.adaBalance
+        let maxSpendable = wallet.spendableAda ?? wallet.adaBalance
+        return (adaValue ?? 0) > 0 && base <= maxSpendable
     }
 
     var body: some View {
@@ -252,29 +262,40 @@ struct SendView: View {
                             Spacer()
 
                             if let ada = adaValue,
-                               let usdRate = WalletService.shared.adaUsdRate
+                               let fiatRate = wallet.adaFiatRate
                             {
-                                Text("₳ ≈ $\(ada * usdRate, specifier: "%.2f")")
+                                Text("₳ ≈ \(wallet.fiatCurrency.symbol)\(ada * fiatRate, specifier: "%.2f")")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
                             }
 
                             Button("All") {
-                                var available = wallet.adaBalance - tipValue - netFee
-                                if netFee == 0 {
-                                    available -= 0.17 // estimated
+                                // Single source of truth: Home + Send both trust adaBalance
+                                let available = wallet.adaBalance
+
+                                // Leave headroom for network fee + Vendano fee.
+                                // For small wallets this is conservative; for bigger ones it’s still tiny.
+                                let headroom = 1.0  // 1 ADA safety margin
+
+                                var maxAmount = max(available - headroom - tipValue, 0)
+
+                                // Avoid negative/tiny dust values
+                                if maxAmount < 0.000_001 {
+                                    maxAmount = 0
                                 }
-                                let maxAmount = available > 0 ? (available / (1 + Config.vendanoAppFeePercent)) : 0
 
                                 adaText = String(format: "%.6f", maxAmount)
 
-                                print(adaText)
+                                // Recalculate fee for the new amount
+                                recalcFee()
                             }
                             .vendanoFont(.body, size: 16, weight: .semibold)
                             .padding()
                             .background(theme.color(named: "Accent"))
                             .foregroundColor(theme.color(named: "TextReversed"))
                             .clipShape(Capsule())
+
+
                         }
 
                         if let ada = adaValue, ada > 0 {
@@ -349,7 +370,7 @@ struct SendView: View {
                                 }
                             }
 
-                            VStack {
+                            VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Text("Network fee")
                                         .vendanoFont(.body, size: 16)
@@ -357,15 +378,28 @@ struct SendView: View {
 
                                     Spacer()
 
-                                    if netFee == 0 {
+                                    if feeLoading {
                                         ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: theme.color(named: "Accent")))
-                                    } else {
+                                            .progressViewStyle(
+                                                CircularProgressViewStyle(
+                                                    tint: theme.color(named: "Accent")
+                                                )
+                                            )
+                                    } else if netFee > 0 {
                                         Text("\(netFee, specifier: "%.2f") ₳")
                                             .vendanoFont(.body, size: 16)
                                             .foregroundColor(theme.color(named: "TextPrimary"))
+                                    } else if feeError != nil {
+                                        Text("—")
+                                            .vendanoFont(.body, size: 16)
+                                            .foregroundColor(theme.color(named: "TextSecondary"))
+                                    } else {
+                                        Text("—")
+                                            .vendanoFont(.body, size: 16)
+                                            .foregroundColor(theme.color(named: "TextSecondary"))
                                     }
                                 }
+
                                 if let err = feeError {
                                     Text(err)
                                         .vendanoFont(.caption, size: 13)
@@ -374,16 +408,26 @@ struct SendView: View {
                                 }
                             }
 
-                            HStack {
-                                Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))")
-                                    .vendanoFont(.body, size: 16)
-                                    .foregroundColor(theme.color(named: "TextPrimary"))
-
-                                Spacer()
-
-                                Text("\(appFee, specifier: "%.2f") ₳")
-                                    .vendanoFont(.body, size: 16)
-                                    .foregroundColor(theme.color(named: "TextPrimary"))
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(appFee, specifier: "%.2f") ₳")
+                                        .vendanoFont(.body, size: 16)
+                                        .foregroundColor(theme.color(named: "TextPrimary"))
+                                }
+                                
+                                if appFee == 0 {
+                                    Text("Vendano fee waived - the Cardano network doesn't allow amounts smaller than 1 ADA.")
+                                        .vendanoFont(.caption, size: 13)
+                                        .foregroundColor(theme.color(named: "TextSecondary"))
+                                        .padding(.top, 4)
+                                }
                             }
 
                             HStack {
@@ -590,34 +634,48 @@ struct SendView: View {
 
     @MainActor
     private func recalcFee() {
-        let dest = (recipient?.address ?? addressText).trimmingCharacters(in: .whitespacesAndNewlines)
+        let dest = (recipient?.address ?? addressText)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard
             let ada = Double(adaText),
             ada > 0,
             !dest.isEmpty
         else {
+            DebugLogger.log("💸 [fee-ui] recalcFee: cleared (adaText=\(adaText), dest='\(dest)')")
+            feeLoading = false
+            feeError = nil
             netFee = 0
             return
         }
 
+        let destPreview = dest.count > 20
+            ? dest.prefix(10) + "…" + dest.suffix(10)
+            : Substring(dest)
+
+        DebugLogger.log("💸 [fee-ui] recalcFee start ada=\(ada) dest=\(destPreview)")
+
         feeLoading = true
+        feeError = nil
+        netFee = 0
+
         Task {
             do {
-                let feeAda = try await WalletService.shared
-                    .estimateNetworkFee(to: dest, ada: ada)
+                let feeAda = try await wallet.estimateNetworkFee(to: dest, ada: ada, tip: tipValue)
+                DebugLogger.log("💸 [fee-ui] recalcFee success feeAda=\(feeAda) for ada=\(ada) dest=\(destPreview)")
                 netFee = feeAda
                 feeError = nil
             } catch {
-                DebugLogger.log("⚠️ Failed to estimate fee: \(error)")
+                DebugLogger.log("💥 [fee-ui] recalcFee error: \(error)")
 
                 if let rustError = error as? CardanoRustError {
                     switch rustError {
                     case let .common(message):
-                        DebugLogger.log("⚠️ CardanoRustError.common: \(message)")
+                        DebugLogger.log("💥 [fee-ui] CardanoRustError.common: \(message)")
                         if message.contains("UTxO Balance Insufficient") {
                             feeError = "There is not enough ADA in your wallet to cover this transaction."
                         } else {
+                            // 👇 this is the string you’re currently seeing
                             feeError = "Couldn’t estimate the fee: \(message)"
                         }
                     default:
@@ -629,6 +687,7 @@ struct SendView: View {
 
                 netFee = 0
             }
+
             feeLoading = false
         }
     }
@@ -663,27 +722,61 @@ struct SendView: View {
         }
         let tip = Double(tipText) ?? 0
 
-        let dest = (recipient?.address ?? addressText).trimmingCharacters(in: .whitespacesAndNewlines)
+        let dest = (recipient?.address ?? addressText)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
         do {
+            // 🔒 HARD GATE: don’t try to send more than the chain will accept
+            let maxAda = try await WalletService.shared
+                .maxSendableAda(to: dest, tipAda: tip)
+
+            if amount > maxAda {
+                let formatted = String(format: "%.6f", maxAda)
+                sendError =
+                """
+                Because this wallet is holding tokens that need ADA to stay with them,
+                you can currently send up to \(formatted) ADA from this wallet.
+                Try entering a smaller amount or use the “All” button.
+                """
+                return
+            }
+
             let txHash = try await WalletService.shared.sendMultiTransaction(
                 to: dest,
                 amount: amount,
                 tip: tip
             )
+
             Task { @MainActor in
                 state.refreshOnChainData()
             }
+
             AnalyticsManager.logEvent("send_success", parameters: ["amount": amount])
             sendSuccess = true
+
             await FirebaseService.shared.recordTransaction(
                 recipientAddress: dest,
                 amount: amount,
                 txHash: txHash
             )
         } catch {
-            AnalyticsManager.logEvent("send_failure", parameters: ["errorMsg": error.localizedDescription])
-            sendError = error.localizedDescription
+            var friendly = error.localizedDescription
+
+            // 🧠 Translate the FeeTooSmallUTxO noise into human language
+            let lower = friendly.lowercased()
+            if lower.contains("feettoosmallutxo") {
+                friendly =
+                """
+                Cardano rejected this transaction because the ADA left behind with your tokens
+                would fall below the minimum the network allows. In practice, that means you’re
+                trying to send a bit more ADA than this wallet can safely spare while still
+                holding all of those tokens. Try sending a smaller amount or use the “All” button.
+                """
+            }
+
+            debugPrint("❌ Raw Blockfrost error:", error as Error)
+            AnalyticsManager.logEvent("send_failure", parameters: ["errorMsg": friendly])
+            sendError = friendly
         }
     }
     
@@ -738,7 +831,7 @@ struct SendView: View {
                 // Otherwise treat as ADA Handle (with or without $)
                 guard isValidAdaHandle(input) else { recipient = nil; return }
 
-                if let chainAddr = try? await WalletService.shared.resolveAdaHandle(input) {
+                if let chainAddr = try? await wallet.resolveAdaHandle(input) {
                     let display = input.hasPrefix("$") ? input : "$" + input
                     recipient = Recipient(name: display.lowercased(), avatarURL: nil, address: chainAddr)
                     recalcFee()
@@ -758,4 +851,24 @@ struct SendView: View {
             }
         }
     }
+    
+    @MainActor
+    private func fillMaxAmount() async {
+        let dest = (recipient?.address ?? addressText)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !dest.isEmpty else { return }
+
+        do {
+            let maxAda = try await WalletService.shared
+                .maxSendableAda(to: dest, tipAda: tipValue)
+
+            adaText = String(format: "%.6f", maxAda)
+            recalcFee()
+        } catch {
+            DebugLogger.log("⚠️ Failed to compute max sendable ADA: \(error)")
+            feeError = "Couldn't calculate the maximum amount you can send right now."
+        }
+    }
+
 }

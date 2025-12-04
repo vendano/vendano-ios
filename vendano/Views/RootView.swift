@@ -13,6 +13,7 @@ struct RootView: View {
     @EnvironmentObject var theme: VendanoTheme
     @StateObject private var state = AppState.shared
     @StateObject private var network = NetworkMonitor()
+    @StateObject private var blurOverlay = BlurOverlay()
 
     var body: some View {
         ZStack {
@@ -38,8 +39,6 @@ struct RootView: View {
             }
         }
         .task {
-            _ = BlurOverlay()
-
             guard Auth.auth().currentUser != nil else { return }
 
             state.onboardingStep = .loading

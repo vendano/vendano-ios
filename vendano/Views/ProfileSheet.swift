@@ -174,6 +174,32 @@ struct ProfileSheet: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
+                    
+                    Section(
+                        header:
+                        Text("Advanced")
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
+                    ) {
+                        Toggle("Show staking & rewards details", isOn: $state.isExpertMode)
+                            .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
+                        
+                        Picker("Currency", selection: $wallet.fiatCurrency) {
+                            ForEach(FiatCurrency.allCases) { currency in
+                                Text(currency.displayName)
+                                    .vendanoFont(.body, size: 16)
+                                    .tag(currency)
+                            }
+                        }
+                    }
+                    .listRowBackground(theme.color(named: "CellBackground"))
+                    .onChange(of: wallet.fiatCurrency) { _, _ in
+                        Task {
+                            await wallet.loadPrice()
+                        }
+                    }
 
                     Section(
                         header:
