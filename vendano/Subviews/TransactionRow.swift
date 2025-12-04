@@ -39,10 +39,14 @@ struct TransactionRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text("\(tx.outgoing ? "+" : "-")\(tx.amount, specifier: "%.1f")₳")
+                Text("\(tx.outgoing ? "-" : "+")\(tx.amount, specifier: "%.1f")₳")
                     .monospacedDigit()
                     .vendanoFont(.body, size: 16)
-                    .foregroundColor(tx.outgoing ? theme.color(named: "Positive") : theme.color(named: "Negative"))
+                    .foregroundColor(
+                        tx.outgoing
+                        ? theme.color(named: "Negative")   // sent
+                        : theme.color(named: "Positive")   // received
+                    )
 
                 Text("\(tx.balanceAfter, specifier: "%.1f")₳")
                     .vendanoFont(.caption, size: 13)
