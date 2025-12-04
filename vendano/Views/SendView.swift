@@ -47,6 +47,8 @@ struct SendView: View {
     @State private var inviteTitle = ""
     @State private var inviteMessage = ""
     @State private var shareInvite: ShareMessage?
+    
+    @State private var didApplyDraft: Bool = false
 
     private var recipientOK: Bool {
         switch sendMethod {
@@ -489,7 +491,18 @@ struct SendView: View {
                 .padding(.bottom, kb.height)
             }
             .task {
-                if sendMethod == .email {
+                // Apply “send to” draft once when this view appears
+                if !didApplyDraft, let addr = state.sendToAddress {
+                    didApplyDraft = true
+
+                    // Use Address mode and prefill just the address text
+                    sendMethod = .address
+                    addressText = addr
+
+                    // Clear the draft so manual Send opens clean next time
+                    state.sendToAddress = nil
+                } else if sendMethod == .email {
+                    // Fallback: normal behavior – focus email field on first open
                     emailFocus = true
                 }
             }

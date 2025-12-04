@@ -198,6 +198,13 @@ struct HomeView: View {
         .onChange(of: state.walletAddress) { _, _ in
             Task { await nftVM.loadNFTs() }
         }
+        .onChange(of: state.sendToAddress) { _, newDraft in
+            if newDraft != nil {
+                withAnimation(.easeInOut) {
+                    showSend = true
+                }
+            }
+        }
         .toolbar {
             if !showSend && !showReceive {
                 // feedback “!” button

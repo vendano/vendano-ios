@@ -60,7 +60,13 @@ struct ActivityView: View {
                                             Divider()
                                                 .padding(.vertical, 8)
                                         }
+                                        
                                         TransactionRow(tx: tx)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                // Start a Send to this address
+                                                state.sendToAddress = tx.counterpartyAddress
+                                            }
                                     }
                                 }
                                 .padding()

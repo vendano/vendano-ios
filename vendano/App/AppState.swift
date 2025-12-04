@@ -42,6 +42,8 @@ final class AppState: ObservableObject {
     @Published var displayToast = false
     @Published var toastMessage = ""
     
+    @Published var sendToAddress: String? = nil
+    
     @Published var isExpertMode: Bool = UserDefaults.standard.bool(forKey: "VendanoExpertMode") {
         didSet {
             UserDefaults.standard.set(isExpertMode, forKey: "VendanoExpertMode")
@@ -115,44 +117,105 @@ final class AppState: ObservableObject {
                     }
                 }
 
+                // Treat *all* our account addresses as ours, not just walletAddress.
+                let myAddresses = Set(WalletService.shared.allAddresses + [walletAddress])
+                DebugLogger.log("🔎 WalletAddress = \(walletAddress)")
+                DebugLogger.log("🔎 Known account addresses (\(myAddresses.count)):")
+                for addr in myAddresses {
+                    DebugLogger.log("   • \(addr)")
+                }
+
                 var running = ada
                 var vms: [TxRowViewModel] = []
 
                 for tx in sortedByBlockAndTime {
-                    // how much _net_ moved (positive = incoming, negative = outgoing)
-                    let inSum = tx.inputs.filter { $0.address == walletAddress }.map(\.amount).reduce(0, +)
-                    let outSum = tx.outputs.filter { $0.address == walletAddress }.map(\.amount).reduce(0, +)
-                    let netLovelace = Int64(inSum) - Int64(outSum)
+                    DebugLogger.log("🔍 --- TX \(tx.hash) height=\(tx.blockHeight) date=\(tx.date)")
+
+                    // Dump raw inputs/outputs so we can inspect every UTxO
+                    for input in tx.inputs {
+                        let mineMark = myAddresses.contains(input.address) ? "*" : " "
+                        DebugLogger.log(
+                            "    IN \(mineMark) \(input.address) \(Double(input.amount) / 1_000_000) ADA"
+                        )
+                    }
+                    for output in tx.outputs {
+                        let mineMark = myAddresses.contains(output.address) ? "*" : " "
+                        DebugLogger.log(
+                            "    OUT\(mineMark) \(output.address) \(Double(output.amount) / 1_000_000) ADA"
+                        )
+                    }
+
+                    // Net movement for THIS WALLET (all its addresses):
+                    // +ve = incoming, -ve = outgoing
+                    let myInputSum = tx.inputs
+                        .filter { myAddresses.contains($0.address) }
+                        .map(\.amount)
+                        .reduce(0, +)
+
+                    let myOutputSum = tx.outputs
+                        .filter { myAddresses.contains($0.address) }
+                        .map(\.amount)
+                        .reduce(0, +)
+
+                    let netLovelace = Int64(myOutputSum) - Int64(myInputSum)
                     let netAda = Double(netLovelace) / 1_000_000
 
-                    // apply net change to running balance
-                    let balanceAfter = running
-                    running += netAda
+                    DebugLogger.log(
+                        "    myInputSum=\(Double(myInputSum)/1_000_000) " +
+                        "myOutputSum=\(Double(myOutputSum)/1_000_000) netAda=\(netAda)"
+                    )
 
-                    // pick the “other” party
+                    // Skip pure no-op txs
+                    guard netAda != 0 else {
+                        DebugLogger.log("    (ignored: netAda == 0)")
+                        continue
+                    }
+
+                    let outgoing = netAda < 0
+                    let movedAda = abs(netAda)
+
+                    // We're iterating newest -> oldest, so:
+                    // running = current balance *after* all later txs
+                    // balanceAfter = what wallet shows right after THIS tx
+                    let balanceAfter = running
+                    running -= netAda  // undo this tx going backwards
+
+                    // Counterparty: any address not in myAddresses
                     let peers: [String]
-                    if netAda < 0 {
-                        // outgoing: look at all the outputs not equal to you
-                        peers = tx.outputs.map(\.address).filter { $0 != walletAddress }
+                    if outgoing {
+                        // Outgoing: look at outputs that are not us
+                        peers = tx.outputs.map(\.address).filter { !myAddresses.contains($0) }
                     } else {
-                        // incoming: look at all the inputs not equal to you
-                        peers = tx.inputs.map(\.address).filter { $0 != walletAddress }
+                        // Incoming: look at inputs that are not us
+                        peers = tx.inputs.map(\.address).filter { !myAddresses.contains($0) }
                     }
 
                     let outTx = tx.outputs.first?.address
                     let inTx = tx.inputs.first?.address
 
-                    let counterparty = peers.first
-                        ?? (netAda < 0
-                            ? (outTx != walletAddress ? outTx : inTx)
-                            : (inTx != walletAddress ? inTx : outTx))
-                        ?? "Unknown"
+                    let fallbackCounterparty: String? = {
+                        if outgoing {
+                            if let o = outTx, !myAddresses.contains(o) { return o }
+                            if let i = inTx, !myAddresses.contains(i) { return i }
+                        } else {
+                            if let i = inTx, !myAddresses.contains(i) { return i }
+                            if let o = outTx, !myAddresses.contains(o) { return o }
+                        }
+                        return nil
+                    }()
+
+                    let counterparty = peers.first ?? fallbackCounterparty ?? "Unknown"
+
+                    DebugLogger.log(
+                        "    -> outgoing=\(outgoing) moved=\(movedAda) " +
+                        "balanceAfter=\(balanceAfter) counterparty=\(counterparty)"
+                    )
 
                     vms.append(.init(
                         id: tx.hash,
                         date: tx.date,
-                        outgoing: netAda < 0,
-                        amount: abs(netAda),
+                        outgoing: outgoing,
+                        amount: movedAda,
                         counterpartyAddress: counterparty,
                         name: nil,
                         avatarURL: nil,
