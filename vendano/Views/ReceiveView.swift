@@ -19,6 +19,8 @@ struct ReceiveView: View {
     let onClose: () -> Void
 
     @State private var qrImage: UIImage? = nil
+    
+    @State private var isShowingShareSheet = false
 
     private let context = CIContext()
     private let filter = CIFilter.qrCodeGenerator()
@@ -116,21 +118,13 @@ struct ReceiveView: View {
                             
                             Button {
                                 AnalyticsManager.logEvent("receive_share_walletaddress")
-                                let sheet = UIActivityViewController(
-                                    activityItems: [state.walletAddress],
-                                    applicationActivities: nil
-                                )
-                                let allScenes = UIApplication.shared.connectedScenes
-                                let scene = allScenes.first { $0.activationState == .foregroundActive }
-                                
-                                if let windowScene = scene as? UIWindowScene {
-                                    windowScene.keyWindow?.rootViewController?.present(sheet, animated: true, completion: nil)
-                                }
-                                
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                isShowingShareSheet = true
                             } label: {
                                 Label("Share", systemImage: "square.and.arrow.up")
                             }
                             .buttonStyle(PrimaryButtonStyle())
+
                         }
                         
                         if wallet.adaBalance == 0 {
@@ -189,6 +183,11 @@ struct ReceiveView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: state.displayToast)
+        .sheet(isPresented: $isShowingShareSheet) {
+            ShareActivityView(activityItems: [state.walletAddress])
+                .environmentObject(theme)
+        }
+
     }
     
     private struct SafetyTipCard: View {
