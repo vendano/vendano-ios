@@ -20,14 +20,14 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Amount must be > 0"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.amountMustBeGreaterThanZero]
             )
         }
         guard tip >= 0 else {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Tip cannot be negative"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.tipCannotBeNegative]
             )
         }
 
@@ -35,7 +35,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 2,
-                userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
             )
         }
 
@@ -43,7 +43,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 3,
-                userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noAccountLoaded]
             )
         }
 
@@ -52,7 +52,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 5,
-                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
             )
         }
         
@@ -92,13 +92,14 @@ extension WalletService {
             )
 
         guard totalLovelace >= required else {
+            let haveAda = Double(totalLovelace) / 1_000_000
+            let needAda = Double(required) / 1_000_000
+            let msg = L10n.WalletService.insufficientFunds(haveAda, needAda)
+
             throw NSError(
                 domain: "Vendano.Send",
                 code: 4,
-                userInfo: [
-                    NSLocalizedDescriptionKey:
-                        "Insufficient funds: have \(Double(totalLovelace)/1_000_000) ADA, need \(Double(required)/1_000_000) ADA including fees."
-                ]
+                userInfo: [NSLocalizedDescriptionKey: msg]
             )
         }
 
@@ -177,7 +178,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 10,
-                userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
             )
         }
 
@@ -185,7 +186,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 11,
-                userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noAccountLoaded]
             )
         }
 
@@ -194,7 +195,7 @@ extension WalletService {
             throw NSError(
                 domain: "Vendano.Send",
                 code: 12,
-                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
             )
         }
 

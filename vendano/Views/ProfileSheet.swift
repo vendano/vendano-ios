@@ -46,7 +46,7 @@ struct ProfileSheet: View {
                 HStack {
                     Spacer()
 
-                    Button(textChanged ? "Save" : "Done") {
+                    Button(textChanged ? L10n.Common.save : L10n.Common.done) {
                         if textChanged {
                             Task {
                                 do {
@@ -71,7 +71,7 @@ struct ProfileSheet: View {
                 Form {
                     Section(
                         header:
-                        Text("Name & photo")
+                        Text(L10n.ProfileSheet.namePhoto)
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
@@ -100,7 +100,7 @@ struct ProfileSheet: View {
                             }
                             .disabled(uploading)
 
-                            TextField("Display name", text: $name)
+                            TextField(L10n.ProfileSheet.displayName, text: $name)
                                 .vendanoFont(.body, size: 18)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
                                 .padding(12)
@@ -118,7 +118,7 @@ struct ProfileSheet: View {
 
                     Section(
                         header:
-                        Text("Logins")
+                        Text(L10n.ProfileSheet.logins)
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
@@ -136,7 +136,7 @@ struct ProfileSheet: View {
                                     .disabled(state.email.count == 1)
                             }
                         }
-                        Button("Add Email") { authPurpose = .email }
+                        Button(L10n.ProfileSheet.addEmail) { authPurpose = .email }
 
                         ForEach(state.phone, id: \.self) { handle in
                             HStack {
@@ -148,16 +148,16 @@ struct ProfileSheet: View {
                             }
                         }
                         if state.phone.isEmpty {
-                            Button("Add Phone") { authPurpose = .phone }
+                            Button(L10n.ProfileSheet.addPhone) { authPurpose = .phone }
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
 
-                    Section(header: Text("Appearance")
+                    Section(header: Text(L10n.ProfileSheet.appearance)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
-                        Picker("Appearance", selection: $appearancePrefRaw) {
+                        Picker(L10n.ProfileSheet.appearance, selection: $appearancePrefRaw) {
                             ForEach(AppearancePreference.allCases) { option in
                                 Text(option.displayName)
                                     .vendanoFont(.body, size: 16)
@@ -167,7 +167,7 @@ struct ProfileSheet: View {
                         .pickerStyle(.segmented)
 
                         if wallet.hoskyBalance > 0 {
-                            Toggle("HOSKYfy my app", isOn: $useHoskyTheme)
+                            Toggle(L10n.ProfileSheet.hoskyfyMyApp, isOn: $useHoskyTheme)
                                 .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
                                 .vendanoFont(.body, size: 16)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
@@ -177,16 +177,16 @@ struct ProfileSheet: View {
                     
                     Section(
                         header:
-                        Text("Advanced")
+                        Text(L10n.ProfileSheet.advanced)
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
-                        Toggle("Show staking & rewards details", isOn: $state.isExpertMode)
+                        Toggle(L10n.ProfileSheet.showStakingRewardsDetails, isOn: $state.isExpertMode)
                             .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                         
-                        Picker("Currency", selection: $wallet.fiatCurrency) {
+                        Picker(L10n.ProfileSheet.currency, selection: $wallet.fiatCurrency) {
                             ForEach(FiatCurrency.allCases) { currency in
                                 Text(currency.displayName)
                                     .vendanoFont(.body, size: 16)
@@ -203,11 +203,11 @@ struct ProfileSheet: View {
 
                     Section(
                         header:
-                        Text("Danger Zone")
+                        Text(L10n.ProfileSheet.dangerZone)
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
-                        Button("Delete account", role: .destructive) {
+                        Button(L10n.ProfileSheet.deleteAccount, role: .destructive) {
                             showDel = true
                         }
                         .vendanoFont(.body, size: 16)
@@ -231,15 +231,15 @@ struct ProfileSheet: View {
                     }
                     .presentationDetents([.fraction(0.4)])
                 }
-                .alert("Delete account?",
+                .alert(L10n.ProfileSheet.deleteAccountConfirm,
                        isPresented: $showDel,
                        actions: {
-                           Button("Cancel", role: .cancel) {}
-                           Button("Delete", role: .destructive) {
-                               authenticateAndDelete()
-                           }
+                        Button(L10n.Common.cancel, role: .cancel) {}
+                        Button(L10n.Common.delete, role: .destructive) {
+                            authenticateAndDelete()
+                        }
                        }, message: {
-                           Text("This removes your name, picture, and profile info from our app and database. You won’t be searchable here until you register again, but your wallet and ADA stay safe on the blockchain. You can always recover your funds in this or any other wallet using your 12/15/24-word recovery phrase.")
+                           Text(L10n.ProfileSheet.thisRemovesYourNamePictureAndProfileInfo)
                                .vendanoFont(.body, size: 16)
                        })
             }
@@ -257,7 +257,7 @@ struct ProfileSheet: View {
 
                     UIApplication.shared.setAlternateIconName("hosky-icon") { error in
                         if let error = error {
-                            print("Failed request to update the app’s icon: \(error)")
+                            DebugLogger.log("Failed request to update the app’s icon: \(error)")
                         }
                     }
                 } else {
@@ -292,7 +292,7 @@ struct ProfileSheet: View {
         if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
             ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Let's confirm it’s you before we remove your account."
+                localizedReason: L10n.ProfileSheet.confirmIdentityBeforeDeleteReason
             ) { success, _ in
                 if success {
                     Task { await state.nukeAccount() }

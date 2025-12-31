@@ -26,7 +26,7 @@ struct AuthPhoneField: View {
     }
 
     var body: some View {
-        TextField("(555) 123-4567", text: $rawInput)
+        TextField(L10n.AuthPhoneField.text5551234567, text: $rawInput)
             .vendanoFont(.body, size: 18)
             .keyboardType(.phonePad)
             .onChange(of: rawInput) { _, new in

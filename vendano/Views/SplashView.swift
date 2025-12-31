@@ -38,7 +38,7 @@ struct SplashView: View {
                     .vendanoFont(.title, size: 48, weight: .heavy)
                     .foregroundColor(theme.color(named: "TextReversed"))
 
-                Text("Easy ADA transfers\nby phone or email.")
+                Text(L10n.SplashView.easyAdaTransfersByPhoneOrEmail)
                     .vendanoFont(.body, size: 18, weight: .semibold)
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.color(named: "TextPrimary").opacity(0.85))
@@ -52,7 +52,7 @@ struct SplashView: View {
                         .progressViewStyle(.circular)
                         .tint(theme.color(named: "TextReversed"))
                 } else {
-                    Button("Get started") {
+                    Button(L10n.SplashView.getStarted) {
                         state.onboardingStep = .faq
                     }
                     .buttonStyle(.plain)

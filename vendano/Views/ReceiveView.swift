@@ -43,11 +43,11 @@ struct ReceiveView: View {
                     VStack(spacing: 8) {
                         
                         HStack(spacing: 8) {
-                            Text("Receive ADA")
+                            Text(L10n.ReceiveView.receiveAda)
                                 .vendanoFont(.title, size: 24, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextReversed"))
                             
-                            Text("Cardano • Mainnet")
+                            Text(L10n.ReceiveView.cardanoMainnet)
                                 .vendanoFont(.caption, size: 12, weight: .semibold)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
@@ -57,7 +57,7 @@ struct ReceiveView: View {
                                 .accessibilityHidden(true)
                         }
                         
-                        Text("Scan with any Cardano wallet or exchange app to receive ADA for this account.")
+                        Text(L10n.ReceiveView.scanWithAnyCardanoWalletOrExchangeApp)
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextReversed").opacity(0.8))
                             .multilineTextAlignment(.center)
@@ -66,7 +66,7 @@ struct ReceiveView: View {
                     VStack(spacing: 24) {
                         // QR section
                         VStack(spacing: 8) {
-                            Text("Your Cardano address (for ADA)")
+                            Text(L10n.ReceiveView.yourCardanoAddressForAda)
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
                             
@@ -77,7 +77,7 @@ struct ReceiveView: View {
                                     .frame(width: 200, height: 200)
                                     .padding(12)
                                     .background(theme.color(named: "CellBackground"))
-                                    .accessibilityLabel("QR for your Cardano address")
+                                    .accessibilityLabel(L10n.ReceiveView.qrAccessibilityLabel)
                             } else {
                                 ProgressView()
                                     .frame(width: 200, height: 200)
@@ -110,9 +110,9 @@ struct ReceiveView: View {
                                 AnalyticsManager.logEvent("receive_copy_walletaddress")
                                 UIPasteboard.general.string = state.walletAddress
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                AppState.shared.showToast("Wallet address copied")
+                                AppState.shared.showToast(L10n.ReceiveView.walletAddressCopiedToast)
                             } label: {
-                                Label("Copy", systemImage: "doc.on.doc")
+                                Label(L10n.ReceiveView.copy, systemImage: "doc.on.doc")
                             }
                             .buttonStyle(PrimaryButtonStyle())
                             
@@ -121,7 +121,7 @@ struct ReceiveView: View {
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 isShowingShareSheet = true
                             } label: {
-                                Label("Share", systemImage: "square.and.arrow.up")
+                                Label(L10n.ReceiveView.share, systemImage: "square.and.arrow.up")
                             }
                             .buttonStyle(PrimaryButtonStyle())
 
@@ -131,13 +131,13 @@ struct ReceiveView: View {
                             DisclosureGroup(
                                 content: {
                                     VStack(alignment: .leading, spacing: 8) {
-                                        Text("1. Create an account at a trusted exchange (for example: Coinbase or Kraken).")
-                                        Text("2. Buy ADA with your bank or card.")
-                                        Text("3. In the exchange, choose **Send** or **Withdraw**, paste the address above, and confirm.")
-                                        Text("Optional: Start with a small test amount if you’d like.")
+                                        Text(L10n.ReceiveView.text1CreateAnAccountAtATrustedExchange)
+                                        Text(L10n.ReceiveView.text2BuyAdaWithYourBankOrCard)
+                                        Text(L10n.ReceiveView.text3InTheExchangeChooseSendOrWithdraw)
+                                        Text(L10n.ReceiveView.optionalStartWithASmallTestAmountIf)
                                             .foregroundColor(theme.color(named: "TextSecondary"))
                                         
-                                        Button("Step-by-step guide →") {
+                                        Button(L10n.ReceiveView.stepByStepGuide) {
                                             guard let url = URL(string: "https://vendano.net/getting-ada.html") else { return }
                                             openURL(url)
                                         }
@@ -151,7 +151,7 @@ struct ReceiveView: View {
                                     .padding(.top, 8)
                                 },
                                 label: {
-                                    Text("New here? Add ADA in three easy steps")
+                                    Text(L10n.ReceiveView.newHereAddAdaInThreeEasySteps)
                                         .vendanoFont(.headline, size: 18, weight: .semibold)
                                         .multilineTextAlignment(.leading)
                                 }
@@ -199,11 +199,11 @@ struct ReceiveView: View {
                     .padding(.top, 2)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Safety tip")
+                    Text(L10n.ReceiveView.safetyTip)
                         .font(.system(size: 15, weight: .semibold))
 
                     // Calm, non-alarmist copy
-                    Text("Keep your recovery phrase (12–24 words) written down in a safe place. You only use it to restore your wallet in a wallet app. No one - including Vendano support or exchanges - will ask for it in chat or email.")
+                    Text(L10n.ReceiveView.keepYourRecoveryPhrase1224WordsWritten)
                         .font(.system(size: 13))
                 }
             }

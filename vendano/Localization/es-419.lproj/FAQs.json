@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "sections": [
+    {
+      "id": "onboarding",
+      "title": "Primeros pasos",
+      "items": [
+        {
+          "id": "cardano_ada",
+          "icon": "₳",
+          "question": "¿Qué es Cardano/ADA?",
+          "tldr": "Una criptomoneda.",
+          "answer": "Cardano es una blockchain pública (un registro abierto) y ADA es su moneda.",
+          "clarify": "Cardano es una blockchain de código abierto. Cada transacción se registra en un libro público. ADA es la moneda que usas y transfieres en ese libro.",
+          "details": "Piensa en Cardano como una gran hoja de cálculo que todos pueden ver, pero nadie puede modificar en secreto. Cada transferencia de ADA se escribe ahí para siempre, por lo que ningún banco puede borrar o “deshacer” tu dinero. ADA es simplemente la unidad registrada en cada celda, como el dinero en un registro bancario. Lo que distingue a Cardano es su diseño científico de \"prueba de participación\" (eficiente en energía y revisado por expertos), a diferencia de la minería intensiva de Bitcoin."
+        },
+        {
+          "id": "safety",
+          "icon": "shield",
+          "question": "¿Es seguro?",
+          "tldr": "Tu frase de palabras protege todo.",
+          "answer": "Solo tu frase secreta de 12/15/24 palabras puede mover tu ADA. Guárdala fuera de línea.",
+          "clarify": "Tu ADA solo puede moverse con tu frase secreta de recuperación de 12/15/24 palabras. Guarda una copia física en un lugar seguro. Vendano nunca almacena claves privadas en sus servidores.",
+          "details": "Esas 12/15/24 palabras son tu clave privada. Si las pierdes, nadie —ni siquiera Vendano— puede recuperar tus fondos; si las compartes, cualquiera puede vaciar tu wallet. Solo almacenamos información pública cifrada en nuestros servidores; las claves privadas nunca salen de tu dispositivo. El modelo de prueba de participación de Cardano elimina ataques como el \"51 %\", pero el cuidado de tu frase (escribirla en papel, no tomar capturas de pantalla) es el paso de seguridad más importante."
+        },
+        {
+          "id": "storage",
+          "icon": "folder",
+          "question": "¿Dónde se guarda mi ADA?",
+          "tldr": "En tu dirección de Cardano en la blockchain.",
+          "answer": "En la blockchain de Cardano, dentro de la dirección de tu wallet. Vendano nunca tiene tus fondos.",
+          "clarify": "Los fondos viven en la blockchain de Cardano en la dirección de tu wallet. Vendano solo es una herramienta que crea y firma transacciones desde tu dispositivo.",
+          "details": "Imagina tu dirección de wallet como un apartado postal impreso en cada paquete (transacción) que envías o recibes. El apartado existe en la red global de Cardano, no dentro de la app. Vendano te ayuda a crear nuevas transacciones y a firmarlas digitalmente con tu frase de 12/15/24 palabras; nunca toca los fondos. Si borras la app, la reinstalas en otro dispositivo y escribes tu frase, tu wallet y tu ADA reaparecen."
+        },
+        {
+          "id": "privacy",
+          "icon": "lock.doc",
+          "question": "¿Quién puede ver mis datos?",
+          "tldr": "Solo tú.",
+          "answer": "Solo tú. Vendano guarda únicamente un hash con sal de tu correo o teléfono — ningún dato personal en la blockchain.",
+          "clarify": "Vendano convierte tu correo o teléfono en un hash antes de guardarlo, de modo que nadie (ni siquiera Vendano) puede usarlo para identificarte.",
+          "details": "Pedimos tu correo o teléfono para que otras personas puedan encontrarte. Antes de guardarlo, lo ciframos con una sal aleatoria; ni el equipo de Vendano puede revertirlo. En la blockchain no se publica información personal — solo direcciones de Cardano y datos de transacciones requeridos por la red. Tu avatar y nombre visible son lo único que Vendano guarda para que otros puedan confirmar que te están enviando ADA a ti."
+        },
+        {
+          "id": "get_ada",
+          "icon": "arrow.right.arrow.left",
+          "question": "¿Cómo puedo obtener ADA?",
+          "tldr": "Compra en un exchange y transfiérelo.",
+          "answer": "Crea un wallet aquí, luego compra ADA en un exchange (por ejemplo, Coinbase) y envíalo a tu dirección de Vendano.",
+          "clarify": "Crea o carga un wallet de Cardano aquí, copia la dirección para recibir, compra ADA en un exchange como Coinbase o Kraken y transfiérelo a la dirección de tu wallet Vendano.",
+          "details": "Los exchanges convierten monedas locales a ADA, de forma similar a una casa de cambio. Después de comprar, usa la opción \"enviar\" o \"retirar\", pega tu dirección de Vendano y confirma. En uno o dos minutos verás el ADA en tu pantalla principal. Las comisiones varían según el exchange; la pequeña comisión de la blockchain de Cardano ya viene incluida en la transacción."
+        }
+      ]
+    },
+    {
+      "id": "additional",
+      "title": "Información adicional",
+      "items": [
+        {
+          "id": "why_cardano",
+          "icon": "bolt.circle",
+          "question": "¿Por qué Cardano en lugar de Bitcoin o Ethereum?",
+          "tldr": "Más eficiente, económico y programable.",
+          "answer": "Cardano usa prueba de participación, consume poca energía y tiene comisiones bajas por transacción.",
+          "clarify": "Bitcoin es lento y consume mucha energía; Ethereum es flexible pero suele tener comisiones altas. Cardano ofrece contratos inteligentes con costos predecibles.",
+          "details": "La prueba de participación de Cardano elimina la necesidad de minería intensiva, reduciendo costos y consumo energético. Su plataforma de contratos inteligentes (Plutus) permite NFTs y DeFi, con tarifas estables y actualizaciones basadas en investigación académica."
+        },
+        {
+          "id": "lost_phone",
+          "icon": "iphone.slash",
+          "question": "¿Qué pasa si pierdo mi teléfono?",
+          "tldr": "Reinstala y escribe tus 12/15/24 palabras.",
+          "answer": "Los fondos viven en la blockchain, no en el dispositivo.",
+          "clarify": "Tu frase de 12/15/24 palabras restaura tu wallet en cualquier dispositivo compatible con Cardano.",
+          "details": "Perder tu teléfono o borrar Vendano no afecta tu ADA en la blockchain. Instala cualquier wallet de Cardano, escribe tu frase y tus direcciones y saldo se sincronizarán automáticamente. Sin la frase, nadie puede acceder a tus fondos."
+        },
+        {
+          "id": "vendano_fee",
+          "icon": "percent",
+          "question": "¿Por qué Vendano cobra {{vendanoFeePercent}}?",
+          "tldr": "Costos de operación y soporte.",
+          "answer": "Ese porcentaje mantiene el servicio activo y es menor que muchas apps tradicionales.",
+          "clarify": "Las apps financieras tradicionales suelen cobrar tarifas más altas y costos ocultos. La baja comisión de Cardano nos permite cobrar una tarifa fija de {{vendanoFeePercent}}.",
+          "details": "Cada transacción en Cardano cuesta aproximadamente 0.17 ADA. Vendano agrega {{vendanoFeePercent}} para operar servidores seguros, enviar códigos por SMS o correo, y mejorar funciones como staking o biometría. No hay cargos ocultos ni suscripciones mensuales."
+        },
+        {
+          "id": "use_other_wallet",
+          "icon": "arrow.triangle.2.circlepath.circle",
+          "question": "¿Puedo usar mis fondos de Vendano en otro wallet?",
+          "tldr": "Sí, restaura con tus 12/15/24 palabras.",
+          "answer": "Cualquier wallet compatible con Cardano puede cargar tus fondos. Elige \"Restaurar wallet\" y escribe tu frase de recuperación.",
+          "clarify": "Tu frase de 12/15/24 palabras funciona en cualquier wallet de Cardano.",
+          "details": "1. Abre un wallet compatible\n2. Selecciona \"Restaurar\"\n3. Escribe tus 12/15/24 palabras\n4. Asigna un nombre y contraseña opcional\n5. Confirma y espera a que se sincronice tu saldo"
+        },
+        {
+          "id": "delete_account",
+          "icon": "trash.circle",
+          "question": "¿Cómo elimino mi cuenta y datos de Vendano?",
+          "tldr": "Usa el botón \"Eliminar cuenta\" en Configuración.",
+          "answer": "Ve a Perfil → Zona de riesgo → Eliminar cuenta. Esto borra los datos de la app y elimina tu correo o teléfono de nuestros servidores.",
+          "clarify": "Eliminar tu cuenta solo borra los datos de la app. Tu ADA permanece seguro en la blockchain.",
+          "details": "• En la app: toca tu avatar → baja a \"Zona de riesgo\" → toca \"Eliminar cuenta\"\n• Confirma la acción; se eliminarán los datos locales y remotos\n• Para usar Vendano nuevamente, reinstala la app y restaura con tu frase de recuperación"
+        },
+        {
+          "id": "if_vendano_shutdown",
+          "icon": "building.columns",
+          "question": "¿Qué pasa si Vendano deja de operar?",
+          "tldr": "Usa cualquier wallet de Cardano.",
+          "answer": "Tu frase de recuperación es estándar BIP-39.",
+          "clarify": "Importa tu frase en cualquier wallet compatible y tus fondos estarán disponibles.",
+          "details": "Como tus fondos viven en la blockchain y tu clave usa un estándar abierto, nunca quedas atrapado. Incluso si Vendano dejara de operar, podrías seguir usando tu ADA en otro wallet sin interrupciones."
+        },
+        {
+          "id": "verify_everything",
+          "icon": "magnifyingglass",
+          "question": "¿Dónde puedo verificar toda esta información?",
+          "tldr": "cardano.org, cardanoscan.io.",
+          "answer": "Todo es público: revisa comisiones, documentación y transacciones.",
+          "clarify": "Cardano es de código abierto; los exploradores te permiten ver direcciones y bloques.",
+          "details": "• Aprende en cardano.org (documentación oficial)\n• Revisa cualquier transacción en cardanoscan.io\n• Compara comisiones en fees.cardano.org\nLos datos abiertos te permiten verificar todo directamente, sin depender solo de Vendano."
+        }
+      ]
+    }
+  ]
+}

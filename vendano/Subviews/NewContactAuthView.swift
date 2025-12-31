@@ -45,6 +45,18 @@ struct NewContactAuthView: View {
         let digits = localNumber.filter(\.isWholeNumber)
         return digits.count >= 6 && digits.count <= 15 && dialCode.starts(with: "+")
     }
+    
+    private var titleKey: LocalizedStringKey {
+        if sent {
+            return method == .email
+                ? L10n.NewContactAuthView.verifyYourEmail
+                : L10n.NewContactAuthView.enterYourCode
+        } else {
+            return method == .email
+                ? L10n.NewContactAuthView.addEmail
+                : L10n.NewContactAuthView.addPhone
+        }
+    }
 
     #if targetEnvironment(simulator)
         private let isSimulator = true
@@ -59,23 +71,21 @@ struct NewContactAuthView: View {
 
             VStack(spacing: 32) {
                 VStack(spacing: 8) {
-                    Text(sent
-                        ? (method == .email ? "Verify your email" : "Enter your code")
-                        : (method == .email ? "Add Email" : "Add Phone"))
+                    Text(titleKey)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextPrimary"))
 
                     if !sent {
                         Text(method == .email
-                            ? "Enter the email you’d like to add."
-                            : "Enter the phone number you’d like to add.")
+                            ? L10n.NewContactAuthView.enterEmailToAdd
+                            : L10n.NewContactAuthView.enterPhoneToAdd)
                             .vendanoFont(.body, size: 16)
                             .multilineTextAlignment(.center)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                     } else {
                         Text(method == .email
-                            ? "Tap the link we sent to:"
-                            : "We sent a 6-digit code to:")
+                            ? L10n.NewContactAuthView.tapLinkWeSentTo
+                            : L10n.NewContactAuthView.sentSixDigitCodeTo)
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                         Text(method == .email ? email : "\(dialCode) \(localNumber)")
@@ -117,7 +127,7 @@ struct NewContactAuthView: View {
             }
 
             if method == .email {
-                TextField("you\u{200B}@example.com", text: $email)
+                TextField(L10n.NewContactAuthView.youExampleCom, text: $email)
                     .vendanoFont(.body, size: 18)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
@@ -131,7 +141,7 @@ struct NewContactAuthView: View {
                     .focused($entryFieldIsFocused)
             } else {
                 HStack(spacing: 12) {
-                    TextField("+1", text: $dialCode)
+                    TextField(L10n.NewContactAuthView.text1, text: $dialCode)
                         .vendanoFont(.body, size: 18)
                         .frame(width: 60)
                         .keyboardType(.phonePad)
@@ -139,7 +149,7 @@ struct NewContactAuthView: View {
                         .background(theme.color(named: "FieldBackground"))
                         .cornerRadius(8)
 
-                    TextField("5551234567", text: $localNumber)
+                    TextField(L10n.NewContactAuthView.text5551234567, text: $localNumber)
                         .vendanoFont(.body, size: 18)
                         .keyboardType(.phonePad)
                         .padding()
@@ -149,7 +159,7 @@ struct NewContactAuthView: View {
                 }
             }
 
-            Button("Send Code") {
+            Button(L10n.NewContactAuthView.sendCode) {
                 sendCode()
             }
             .buttonStyle(CapsuleButtonStyle())
@@ -164,11 +174,11 @@ struct NewContactAuthView: View {
         VStack(spacing: 16) {
             if method == .email {
                 if isSimulator {
-                    Text("Simulator can’t open universal links. Paste it here:")
+                    Text(L10n.NewContactAuthView.simulatorCanTOpenUniversalLinksPasteIt)
                         .vendanoFont(.caption, size: 13)
                         .foregroundColor(theme.color(named: "TextSecondary"))
 
-                    TextField("Paste sign-in link", text: $code)
+                    TextField(L10n.NewContactAuthView.pasteSignInLink, text: $code)
                         .vendanoFont(.body, size: 18)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
@@ -178,7 +188,7 @@ struct NewContactAuthView: View {
                         .cornerRadius(8)
                         .focused($verifyFieldIsFocused)
 
-                    Button("Confirm") {
+                    Button(L10n.Common.confirm) {
                         Task {
                             do {
                                 try await FirebaseService.shared.confirmEmailLink(link: code, email: email)
@@ -191,7 +201,7 @@ struct NewContactAuthView: View {
                     .buttonStyle(CapsuleButtonStyle())
                     .disabled(code.isEmpty)
                 } else {
-                    ProgressView("Waiting for confirmation…")
+                    ProgressView(L10n.NewContactAuthView.waitingForConfirmation)
                         .progressViewStyle(.circular)
                         .tint(theme.color(named: "TextPrimary"))
                         .onAppear { /* your onOpenURL handler will finish() */ }
@@ -234,7 +244,7 @@ struct NewContactAuthView: View {
                 .contentShape(Rectangle())
                 .onTapGesture { keyboardFocused = true }
 
-                Button("Verify") {
+                Button(L10n.NewContactAuthView.verify) {
                     confirmCode()
                 }
                 .buttonStyle(PrimaryButtonStyle())

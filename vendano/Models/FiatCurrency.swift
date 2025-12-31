@@ -33,14 +33,14 @@ enum FiatCurrency: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .usd: return "US Dollar (USD)"
-        case .eur: return "Euro (EUR)"
-        case .gbp: return "British Pound (GBP)"
-        case .jpy: return "Japanese Yen (JPY)"
-        case .mxn: return "Mexican Peso (MXN)"
-        case .krw: return "South Korean Won (KRW)"
-        case .php: return "Philippine Peso (PHP)"
-        case .inr: return "Indian Rupee (INR)"
+        case .usd: return L10n.FiatCurrency.usd
+        case .eur: return L10n.FiatCurrency.eur
+        case .gbp: return L10n.FiatCurrency.gbp
+        case .jpy: return L10n.FiatCurrency.jpy
+        case .mxn: return L10n.FiatCurrency.mxn
+        case .krw: return L10n.FiatCurrency.krw
+        case .php: return L10n.FiatCurrency.php
+        case .inr: return L10n.FiatCurrency.inr
         }
     }
 

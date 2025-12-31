@@ -17,17 +17,17 @@ struct OnboardingFAQCardView: View {
     // Local-only "viewed" tracking for this onboarding screen
     @State private var locallyViewed = Set<FAQItem.ID>()
 
-    let faqs: [FAQItem]
+    let faqs: [FAQItem]?
     let onSkip: (() -> Void)?
     @StateObject private var state = AppState.shared
 
-    private var hasFAQs: Bool { !faqs.isEmpty }
+    private var hasFAQs: Bool { !(faqs?.isEmpty ?? false) }
 
     private var promptText: String {
         switch level {
-        case 0: return "Tap for clarity"
-        case 1: return "Tap for details"
-        default: return "Tap for summary"
+        case 0: return L10n.OnboardingFAQCardView.tapForClarity
+        case 1: return L10n.OnboardingFAQCardView.tapForDetails
+        default: return L10n.OnboardingFAQCardView.tapForSummary
         }
     }
 
@@ -35,7 +35,7 @@ struct OnboardingFAQCardView: View {
         ZStack {
             LightGradientView().ignoresSafeArea()
 
-            if hasFAQs {
+            if hasFAQs, let faqs {
                 VStack(spacing: 20) {
                     Spacer(minLength: 0)
 
@@ -89,11 +89,11 @@ struct OnboardingFAQCardView: View {
 
                     Spacer(minLength: 0)
 
-                    Button("Skip", action: onSkip ?? { state.onboardingStep = .auth })
+                    Button(L10n.Common.skip, action: onSkip ?? { state.onboardingStep = .auth })
                         .buttonStyle(.borderedProminent)
                         .tint(theme.color(named: "Accent"))
 
-                    Text("(or swipe for more)")
+                    Text(L10n.OnboardingFAQCardView.orSwipeForMore)
                         .vendanoFont(.caption, size: 13)
                         .foregroundColor(theme.color(named: "TextSecondary"))
                 }
@@ -112,7 +112,7 @@ struct OnboardingFAQCardView: View {
                     locallyViewed.insert(item.id)
                 }
             } else {
-                Text("No FAQs available.")
+                Text(L10n.OnboardingFAQCardView.noFaqsAvailable)
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(theme.color(named: "TextPrimary"))
                     .padding()
@@ -187,6 +187,7 @@ struct OnboardingFAQCardView: View {
 
     private func arrowButton(direction: Int, currentViewed: Bool) -> some View {
         Button {
+            guard let faqs else { return }
             let count = faqs.count
             guard count > 0 else { return }
             let target = (currentIndex + direction + count) % count // wrap
@@ -208,7 +209,7 @@ struct OnboardingFAQCardView: View {
     // MARK: – Logic
 
     private func clampIndexToBounds() {
-        guard !faqs.isEmpty else {
+        guard hasFAQs, let faqs else {
             currentIndex = 0
             return
         }

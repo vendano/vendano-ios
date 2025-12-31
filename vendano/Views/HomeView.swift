@@ -68,7 +68,7 @@ struct HomeView: View {
                             tap: { showProfile = true }
                         )
                         VStack(alignment: .leading) {
-                            Text(state.displayName.isEmpty ? "Unnamed" : state.displayName)
+                            Text(state.displayName.isEmpty ? L10n.Common.unnamed : state.displayName)
                                 .vendanoFont(.title, size: 24, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
                             Text((state.email.count > 0 ? state.email.first : state.phone.first) ?? "")
@@ -76,7 +76,7 @@ struct HomeView: View {
                                 .foregroundColor(theme.color(named: "TextSecondary"))
                         }
                         Spacer()
-                        Text("Edit")
+                        Text(L10n.Common.edit)
                             .vendanoFont(.body, size: 16, weight: .semibold)
                             .foregroundColor(theme.color(named: "Accent"))
                     }
@@ -93,12 +93,12 @@ struct HomeView: View {
 
                         Text(
                             total.formatted(.number.precision(.fractionLength(1)))
-                            + " ADA"
+                            + " " + L10n.Common.adaUnit
                         )
                         .vendanoFont(.title, size: 48, weight: .heavy)
                         .foregroundColor(theme.color(named: "TextPrimary"))
 
-                        Text("Total on chain (incl. staking & tokens)")
+                        Text(L10n.HomeView.totalOnChainInclStakingTokens)
                             .vendanoFont(.caption, size: 13)
                             .foregroundColor(theme.color(named: "TextSecondary"))
 
@@ -113,7 +113,7 @@ struct HomeView: View {
                     if wallet.hoskyBalance > 0 {
                         VStack(spacing: 2) {
                             Text(
-                                "HOSKY " +
+                                L10n.Common.hoskyToken + " " +
                                 wallet.hoskyBalance.formatted(
                                     .number.precision(.fractionLength(0))
                                 )
@@ -135,7 +135,7 @@ struct HomeView: View {
                         Button {
                             withAnimation(.easeInOut) { showSend = true }
                         } label: {
-                            Label("Send", systemImage: "arrow.up")
+                            Label(L10n.HomeView.send, systemImage: "arrow.up")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(PrimaryButtonStyle())
@@ -143,7 +143,7 @@ struct HomeView: View {
                         Button {
                             withAnimation(.easeInOut) { showReceive = true }
                         } label: {
-                            Label("Receive", systemImage: "arrow.down")
+                            Label(L10n.HomeView.receive, systemImage: "arrow.down")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(PrimaryButtonStyle())
@@ -233,13 +233,13 @@ struct HomeView: View {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                     }
                     .foregroundColor(theme.color(named: "Accent"))
-                    .alert("Remove this wallet from this device?", isPresented: $showLogoutAlert) {
-                        Button("Cancel", role: .cancel) {}
-                        Button("Remove", role: .destructive) {
+                    .alert(L10n.HomeView.removeThisWalletFromThisDevice, isPresented: $showLogoutAlert) {
+                        Button(L10n.Common.cancel, role: .cancel) {}
+                        Button(L10n.Common.remove, role: .destructive) {
                             state.removeWallet()
                         }
                     } message: {
-                        Text("This app will forget your wallet on this device. Your funds remain secure on the blockchain, but you won’t see your balance again until you restore it with your 12/15/24-word recovery phrase.")
+                        Text(L10n.HomeView.thisAppWillForgetYourWalletOnThis)
                             .vendanoFont(.body, size: 16)
                     }
                 }
@@ -250,7 +250,7 @@ struct HomeView: View {
         .toolbarBackground(.hidden, for: .automatic)
         .sheet(isPresented: $showProfile) { ProfileSheet() }
         .sheet(isPresented: $showFAQ) {
-            FAQView(faqs: FAQs.shared.fullFAQs(), onFinish: { showFAQ = false })
+            FAQView(faqs: state.allFAQs, onFinish: { showFAQ = false })
                 .environmentObject(state)
         }
         .sheet(isPresented: $showFeedback) { FeedbackSheet() }

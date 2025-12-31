@@ -20,17 +20,17 @@ struct WalletChoiceView: View {
                 Spacer()
 
                 VStack(spacing: 20) {
-                    Text("Let's begin!")
+                    Text(L10n.WalletChoiceView.letSBegin)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
 
-                    Text("To send or receive ADA, you first need a wallet address.")
+                    Text(L10n.WalletChoiceView.toSendOrReceiveAdaYouFirstNeed)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Text("Create a new wallet and we’ll give you a secure recovery phrase.")
+                    Text(L10n.WalletChoiceView.createANewWalletAndWeLlGive)
                         .vendanoFont(.body, size: 16)
                         .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
@@ -39,12 +39,12 @@ struct WalletChoiceView: View {
                     Button {
                         state.onboardingStep = .newSeed
                     } label: {
-                        Label("Create new wallet", systemImage: "wallet.bifold")
+                        Label(L10n.WalletChoiceView.createNewWallet, systemImage: "wallet.bifold")
                             .vendanoFont(.body, size: 16)
                     }
                     .buttonStyle(CapsuleButtonStyle())
 
-                    Text("Import an existing wallet by entering your 12-, 15-, or 24-word recovery phrase.")
+                    Text(L10n.WalletChoiceView.importAnExistingWalletByEnteringYour12)
                         .vendanoFont(.body, size: 16)
                         .foregroundColor(theme.color(named: "TextReversed"))
                         .padding([.leading, .trailing], 20)
@@ -53,7 +53,7 @@ struct WalletChoiceView: View {
                     Button {
                         state.onboardingStep = .importSeed
                     } label: {
-                        Label("Import seed phrase", systemImage: "arrow.up.doc")
+                        Label(L10n.WalletChoiceView.importSeedPhrase, systemImage: "arrow.up.doc")
                             .vendanoFont(.body, size: 16)
                     }
                     .buttonStyle(PrimaryButtonStyle())

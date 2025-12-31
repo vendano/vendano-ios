@@ -14,13 +14,13 @@ struct FeedbackSheet: View {
     @State private var text = ""
     @State private var prompt = ""
     @FocusState private var focus: Bool
-
+    
     private let emptyPrompts = [
-        "Got feedback or ideas? We’d love to hear how we can make Vendano better for you.",
-        "Questions, praise, bugs - everything helps. Share what’s on your mind!",
-        "Your insight shapes this app. Tell us what’s working or where we can improve...",
-        "Wondering how to use Vendano? Ask away or let us know what you think so far.",
-        "Help us build a better experience - your feedback makes a difference!",
+        L10n.FeedbackSheet.emptyPrompt1,
+        L10n.FeedbackSheet.emptyPrompt2,
+        L10n.FeedbackSheet.emptyPrompt3,
+        L10n.FeedbackSheet.emptyPrompt4,
+        L10n.FeedbackSheet.emptyPrompt5
     ]
 
     var body: some View {
@@ -30,7 +30,7 @@ struct FeedbackSheet: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Contact Us")
+                    Text(L10n.FeedbackSheet.contactUs)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                     Spacer()

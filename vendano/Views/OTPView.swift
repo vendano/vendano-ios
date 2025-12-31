@@ -35,15 +35,15 @@ struct OTPView: View {
                 Spacer()
 
                 VStack(spacing: 8) {
-                    Text(isEmail ? "Verify your email" : "Enter your code")
+                    Text(isEmail ? L10n.OTPView.verifyYourEmail : L10n.OTPView.enterYourCode)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
 
                     if isEmail {
-                        Text("Tap the sign-in link we sent to:")
+                        Text(L10n.OTPView.tapTheSignInLinkWeSentTo)
                             .vendanoFont(.body, size: 16)
                     } else {
-                        Text("We sent a 6-digit code to:")
+                        Text(L10n.OTPView.weSentA6DigitCodeTo)
                             .vendanoFont(.body, size: 16)
                     }
                     Text(isEmail ? (state.otpEmail ?? "") : (state.otpPhone ?? ""))
@@ -56,11 +56,11 @@ struct OTPView: View {
                 if isEmail {
                     if isSimulator {
                         VStack(spacing: 16) {
-                            Text("Simulator can’t open universal links. Paste it here:")
+                            Text(L10n.OTPView.simulatorCanTOpenUniversalLinksPasteIt)
                                 .vendanoFont(.caption, size: 13)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
 
-                            TextField("Paste sign-in link", text: $pastedLink)
+                            TextField(L10n.OTPView.pasteSignInLink, text: $pastedLink)
                                 .vendanoFont(.body, size: 18)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .autocapitalization(.none)
@@ -68,7 +68,7 @@ struct OTPView: View {
                                 .textInputAutocapitalization(.never)
                                 .padding(.horizontal, 24)
 
-                            Button("Confirm") {
+                            Button(L10n.Common.confirm) {
                                 Task {
                                     do {
                                         try await FirebaseService.shared.confirmEmailLink(link: pastedLink, email: state.otpEmail ?? "")
@@ -83,7 +83,7 @@ struct OTPView: View {
                             .padding(.horizontal, 24)
                         }
                     } else {
-                        ProgressView("Waiting for confirmation…")
+                        ProgressView(L10n.OTPView.waitingForConfirmation)
                             .progressViewStyle(.circular)
                             .foregroundColor(theme.color(named: "TextReversed"))
                             .padding(.top, 16)
@@ -131,7 +131,7 @@ struct OTPView: View {
                         .onTapGesture { keyboardFocused = true }
 
                         // verify button
-                        Button("Verify") {
+                        Button(L10n.OTPView.verify) {
                             FirebaseService.shared.confirmPhoneOTP(code: code) { err in
                                 if let err = err {
                                     errorMessage = err

@@ -1,0 +1,245 @@
+"ActivityView.noTransactionHistoryFound" = "No se encontró historial de transacciones.";
+"ActivityView.recentActivity" = "Actividad reciente";
+
+"AuthPhoneField.text5551234567" = "(555) 123-4567";
+
+"AuthView.email" = "Correo electrónico";
+"AuthView.enterYourEmailOrPhoneNumberAndWe" = "Ingresa tu correo electrónico o número de teléfono y te enviaremos un código de un solo uso por SMS o correo — sin contraseñas.";
+"AuthView.ifYouReNewWeLlCreateAn" = "(Si eres nuevo, crearemos una cuenta automáticamente.)";
+"AuthView.loginRegister" = "Iniciar sesión / Registrarse";
+"AuthView.phone" = "Teléfono";
+"AuthView.sendCode" = "Enviar código";
+"AuthView.text1" = "+1";
+"AuthView.youExampleCom" = "tu@ejemplo.com";
+"AuthView.errorSendingEmailLink" = "Error al enviar el enlace por correo: %@";
+
+"CardanoRustError.dataError" = "Error de datos: %@";
+"CardanoRustError.textEncodingError" = "Error de codificación de texto: %@";
+"CardanoRustError.internalError" = "Error interno: %@";
+"CardanoRustError.unexpectedDataLength" = "Longitud de datos inesperada.";
+"CardanoRustError.internalNullPointerError" = "Error interno de puntero nulo.";
+"CardanoRustError.unknownError" = "Error desconocido.";
+
+"Common.adaUnit" = "ADA";
+"Common.back" = "Atrás";
+"Common.cancel" = "Cancelar";
+"Common.close" = "Cerrar";
+"Common.confirm" = "Confirmar";
+"Common.continue" = "Continuar";
+"Common.delete" = "Eliminar";
+"Common.done" = "Listo";
+"Common.edit" = "Editar";
+"Common.token.hosky" = "HOSKY";
+"Common.next" = "Siguiente";
+"Common.ok" = "Aceptar";
+"Common.remove" = "Quitar";
+"Common.retry" = "Reintentar";
+"Common.save" = "Guardar";
+"Common.skip" = "Omitir";
+"Common.unnamed" = "Sin nombre";
+"Common.unknownError" = "Error desconocido";
+
+"ConfirmSeedView.clear" = "Borrar";
+"ConfirmSeedView.confirmKeys" = "Confirmar claves";
+"ConfirmSeedView.error" = "Error";
+"ConfirmSeedView.incorrectOrderTryAgain" = "Orden incorrecto. Intenta de nuevo.";
+"ConfirmSeedView.tapRecoveryWordsInstruction" = "Toca tus %d palabras de recuperación en el orden correcto.";
+"ConfirmSeedView.theseWordsAreNeverSentToOurServers" = "Estas palabras nunca se envían a nuestros servidores; permanecen solo en tu dispositivo. Solo necesitamos confirmar que las escribiste correctamente, porque si las pierdes no podrás recuperar tu wallet.";
+"ConfirmSeedView.walletAddressNotFound" = "No se encontró la dirección del wallet después de la importación.";
+"ConfirmSeedView.walletImportFailedMissingKey" = "La importación del wallet falló: falta la clave %@.";
+"ConfirmSeedView.walletImportFailedMissingValue" = "La importación del wallet falló: falta el valor para %@.";
+"ConfirmSeedView.walletImportFailedCorruptedData" = "La importación del wallet falló: datos corruptos.";
+"ConfirmSeedView.walletImportFailedWrongFormat" = "La importación del wallet falló: el formato de los datos es incorrecto.";
+"ConfirmSeedView.walletImportFailedUnknownDecodingError" = "La importación del wallet falló debido a un error de decodificación desconocido.";
+
+"CreateProfileView.addANameAndPictureSoSendersCan" = "Agrega un nombre y una foto para que quien te envíe ADA pueda confirmar que eres tú.";
+"CreateProfileView.tellUsAboutYou" = "Cuéntanos sobre ti";
+"CreateProfileView.yourName" = "Tu nombre";
+
+"FAQLoader.missingJSONInBundle" = "Falta %@.json en el paquete";
+
+"FAQSheet.segment.quick" = "Rápido";
+"FAQSheet.segment.explain" = "Explicación";
+"FAQSheet.segment.deepDive" = "A fondo";
+
+"FAQView.titleOnboarding" = "Algunas cosas rápidas antes de comenzar…";
+"FAQView.titleCommonQuestions" = "Preguntas frecuentes:";
+
+"FeedbackSheet.contactUs" = "Contáctanos";
+"FeedbackSheet.emptyPrompt.1" = "¿Tienes comentarios o ideas? Nos encantaría saber cómo podemos mejorar Vendano para ti.";
+"FeedbackSheet.emptyPrompt.2" = "Preguntas, felicitaciones, errores… todo ayuda. ¡Cuéntanos qué piensas!";
+"FeedbackSheet.emptyPrompt.3" = "Tu opinión da forma a esta app. Dinos qué funciona o qué podemos mejorar…";
+"FeedbackSheet.emptyPrompt.4" = "¿No sabes cómo usar Vendano? Pregunta lo que quieras o dinos qué te parece hasta ahora.";
+"FeedbackSheet.emptyPrompt.5" = "Ayúdanos a crear una mejor experiencia: tus comentarios hacen la diferencia.";
+
+"FiatCurrency.usd" = "Dólar estadounidense (USD)";
+"FiatCurrency.eur" = "Euro (EUR)";
+"FiatCurrency.gbp" = "Libra esterlina (GBP)";
+"FiatCurrency.jpy" = "Yen japonés (JPY)";
+"FiatCurrency.mxn" = "Peso mexicano (MXN)";
+"FiatCurrency.krw" = "Won surcoreano (KRW)";
+"FiatCurrency.php" = "Peso filipino (PHP)";
+"FiatCurrency.inr" = "Rupia india (INR)";
+
+"FirebaseService.error.notSignedIn" = "No hay ningún usuario con sesión iniciada.";
+"FirebaseService.error.onlyProvider" = "No se puede eliminar el único método de inicio de sesión. Agrega otro antes de quitarlo.";
+"FirebaseService.error.handleNotFound" = "No se encontró el identificador en el perfil.";
+
+"HomeView.receive" = "Recibir";
+"HomeView.removeThisWalletFromThisDevice" = "¿Eliminar este wallet de este dispositivo?";
+"HomeView.send" = "Enviar";
+"HomeView.thisAppWillForgetYourWalletOnThis" = "Esta app eliminará tu wallet de este dispositivo. Tus fondos permanecen seguros en la blockchain, pero no volverás a ver tu saldo hasta que lo restaures con tu frase de recuperación de 12/15/24 palabras.";
+"HomeView.totalOnChainInclStakingTokens" = "Total en la blockchain (incl. staking y tokens)";
+
+"ImportSeedView.import" = "Importar";
+"ImportSeedView.invalidRecoveryPhrase" = "Frase de recuperación no válida";
+"ImportSeedView.pasteYour1215Or24WordRecovery" = "Pega tu frase de recuperación de 12, 15 o 24 palabras.";
+"ImportSeedView.walletImport" = "Importar wallet";
+"ImportSeedView.invalidWordCount" = "Cantidad de palabras no válida.";
+"ImportSeedView.recoveryPhraseNotValidAnyLanguage" = "La frase de recuperación no es válida en ningún idioma compatible.";
+
+"NFTDetailSheet.makeThisMyAvatar" = "Usar como mi avatar";
+
+"NewContactAuthView.pasteSignInLink" = "Pegar enlace de inicio de sesión";
+"NewContactAuthView.sendCode" = "Enviar código";
+"NewContactAuthView.simulatorCanTOpenUniversalLinksPasteIt" = "El simulador no puede abrir enlaces universales. Pégalo aquí:";
+"NewContactAuthView.text1" = "+1";
+"NewContactAuthView.text5551234567" = "5551234567";
+"NewContactAuthView.verify" = "Verificar";
+"NewContactAuthView.waitingForConfirmation" = "Esperando confirmación…";
+"NewContactAuthView.youExampleCom" = "tu@ejemplo.com";
+"NewContactAuthView.verifyYourEmail" = "Verifica tu correo";
+"NewContactAuthView.enterYourCode" = "Ingresa tu código";
+"NewContactAuthView.addEmail" = "Agregar correo";
+"NewContactAuthView.addPhone" = "Agregar teléfono";
+"NewContactAuthView.enterEmailToAdd" = "Ingresa el correo que deseas agregar.";
+"NewContactAuthView.enterPhoneToAdd" = "Ingresa el número de teléfono que deseas agregar.";
+"NewContactAuthView.tapLinkWeSentTo" = "Toca el enlace que enviamos a:";
+"NewContactAuthView.sentSixDigitCodeTo" = "Enviamos un código de 6 dígitos a:";
+
+"NewSeedView.avoidScreenshots" = "Evita capturas de pantalla";
+"NewSeedView.iWroteThemDownInASafePlace" = "Las escribí en un lugar seguro";
+"NewSeedView.screenshotsMaySyncToIcloudAndExposeYour" = "Las capturas pueden sincronizarse con iCloud y exponer tus palabras de recuperación. Escríbelas en papel y guárdalas en un lugar seguro.";
+"NewSeedView.words" = "Palabras";
+"NewSeedView.yourRecoveryPhrase" = "Tu frase de recuperación";
+"NewSeedView.wordDescription12" = "12 palabras te dan seguridad sólida y estándar para el uso diario.";
+"NewSeedView.wordDescription15" = "15 palabras agregan una capa extra de seguridad.";
+"NewSeedView.wordDescription24" = "24 palabras ofrecen la máxima protección, ideal si buscas mayor tranquilidad.";
+"NewSeedView.wordCountOption" = "%d palabras";
+"NewSeedView.writeTheseWordsInstruction" = "Escribe estas %d palabras en orden. Si las pierdes, tu ADA se perderá — nadie puede restablecerlas.";
+
+"OTPView.pasteSignInLink" = "Pegar enlace de inicio de sesión";
+"OTPView.simulatorCanTOpenUniversalLinksPasteIt" = "El simulador no puede abrir enlaces universales. Pégalo aquí:";
+"OTPView.tapTheSignInLinkWeSentTo" = "Toca el enlace de inicio de sesión que enviamos a:";
+"OTPView.verify" = "Verificar";
+"OTPView.waitingForConfirmation" = "Esperando confirmación…";
+"OTPView.weSentA6DigitCodeTo" = "Enviamos un código de 6 dígitos a:";
+"OTPView.verifyYourEmail" = "Verifica tu correo";
+"OTPView.enterYourCode" = "Ingresa tu código";
+
+"OfflineBanner.noInternetConnectionPleaseCheckYourNetworkAnd" = "Sin conexión a internet.\nRevisa tu red e intenta de nuevo.";
+
+"OnboardingFAQCardView.noFaqsAvailable" = "No hay preguntas frecuentes disponibles.";
+"OnboardingFAQCardView.orSwipeForMore" = "(o desliza para ver más)";
+"OnboardingFAQCardView.tapForClarity" = "Toca para aclarar";
+"OnboardingFAQCardView.tapForDetails" = "Toca para ver detalles";
+"OnboardingFAQCardView.tapForSummary" = "Toca para ver un resumen";
+
+"ProfileSheet.addEmail" = "Agregar correo";
+"ProfileSheet.addPhone" = "Agregar teléfono";
+"ProfileSheet.advanced" = "Avanzado";
+"ProfileSheet.appearance" = "Apariencia";
+"ProfileSheet.confirmIdentityBeforeDeleteReason" = "Confirmemos que eres tú antes de eliminar tu cuenta.";
+"ProfileSheet.currency" = "Moneda";
+"ProfileSheet.dangerZone" = "Zona de riesgo";
+"ProfileSheet.deleteAccountConfirm" = "¿Eliminar cuenta?";
+"ProfileSheet.deleteAccount" = "Eliminar cuenta";
+"ProfileSheet.displayName" = "Nombre para mostrar";
+"ProfileSheet.hoskyfyMyApp" = "HOSKYficar mi app";
+"ProfileSheet.logins" = "Inicios de sesión";
+"ProfileSheet.namePhoto" = "Nombre y foto";
+"ProfileSheet.showStakingRewardsDetails" = "Mostrar detalles de staking y recompensas";
+"ProfileSheet.thisRemovesYourNamePictureAndProfileInfo" = "Esto elimina tu nombre, foto y perfil de nuestra app y base de datos. No podrán encontrarte aquí hasta que te registres de nuevo, pero tu wallet y tu ADA siguen seguros en la blockchain. Siempre puedes recuperar tus fondos en esta u otra wallet usando tu frase de recuperación de 12/15/24 palabras.";
+
+"ReceiveView.cardanoMainnet" = "Cardano • Mainnet";
+"ReceiveView.copy" = "Copiar";
+"ReceiveView.keepYourRecoveryPhrase1224WordsWritten" = "Guarda tu frase de recuperación (12–24 palabras) escrita en un lugar seguro. Solo la usas para restaurar tu wallet en una app de wallets. Nadie —incluido el soporte de Vendano o los exchanges— te la pedirá por chat o correo.";
+"ReceiveView.newHereAddAdaInThreeEasySteps" = "¿Nuevo aquí? Agrega ADA en tres pasos fáciles";
+"ReceiveView.optionalStartWithASmallTestAmountIf" = "Opcional: empieza con una pequeña cantidad de prueba si quieres.";
+"ReceiveView.qrAccessibilityLabel" = "QR de tu dirección de Cardano";
+"ReceiveView.receiveAda" = "Recibir ADA";
+"ReceiveView.safetyTip" = "Consejo de seguridad";
+"ReceiveView.scanWithAnyCardanoWalletOrExchangeApp" = "Escanea con cualquier wallet de Cardano o app de exchange para recibir ADA en esta cuenta.";
+"ReceiveView.share" = "Compartir";
+"ReceiveView.stepByStepGuide" = "Guía paso a paso →";
+"ReceiveView.text1CreateAnAccountAtATrustedExchange" = "1. Crea una cuenta en un exchange confiable (por ejemplo: Coinbase o Kraken).";
+"ReceiveView.text2BuyAdaWithYourBankOrCard" = "2. Compra ADA con tu banco o tarjeta.";
+"ReceiveView.text3InTheExchangeChooseSendOrWithdraw" = "3. En el exchange, elige **Enviar** o **Retirar**, pega la dirección de arriba y confirma.";
+"ReceiveView.walletAddressCopiedToast" = "Dirección del wallet copiada";
+"ReceiveView.yourCardanoAddressForAda" = "Tu dirección de Cardano (para ADA)";
+
+"SendView.adaSent" = "🎉 ¡ADA enviada!";
+"SendView.addATipForTheDeveloper" = "Agregar propina al desarrollador";
+"SendView.all" = "Todo";
+"SendView.allow" = "Permitir";
+"SendView.amount" = "Monto";
+"SendView.enableNotifications" = "¿Activar notificaciones?";
+"SendView.error" = "Error";
+"SendView.inviteFriend" = "Invitar a un amigo";
+"SendView.mailServicesAreNotAvailableOnThisDevice" = "Los servicios de correo no están disponibles en este dispositivo.";
+"SendView.networkFee" = "Comisión de la red";
+"SendView.networkFeesCoverBasicBlockchainCostsAnyExtra" = "Las comisiones de la red cubren los costos básicos de la blockchain; cualquier propina extra nos ayuda a mantener la app y es muy apreciada.";
+"SendView.pasteACardanoAddressOrHandle" = "Pega una dirección de Cardano o $handle";
+"SendView.sendAda" = "Enviar ADA";
+"SendView.sendAnyway" = "Enviar de todos modos";
+"SendView.sendMethodAddress" = "Dirección";
+"SendView.sendMethodEmail" = "Correo";
+"SendView.sendMethodPhone" = "Teléfono";
+"SendView.sendingAda" = "Enviando ADA…";
+"SendView.smsServicesAreNotAvailableOnThisDevice" = "Los servicios de SMS no están disponibles en este dispositivo.";
+"SendView.summary" = "Resumen";
+"SendView.text" = "—";
+"SendView.text00" = "0.0 ₳";
+"SendView.text000" = "0.00";
+"SendView.text1" = "+1";
+"SendView.text5551234567" = "5551234567";
+"SendView.tip" = "Propina";
+"SendView.tipAmount" = "₳ Monto de propina";
+"SendView.to" = "Para";
+"SendView.total" = "Total";
+"SendView.unknownAddress" = "Dirección desconocida";
+"SendView.userSendingUnknownADAAmount" = "algo";
+"SendView.vendanoFeeWaivedTheCardanoNetworkDoesnT" = "Comisión de Vendano exenta: la red de Cardano no permite montos menores a 1 ADA.";
+"SendView.vendanoUsesNotificationsToLetYouKnowWhen" = "Vendano usa notificaciones para avisarte cuando tus amigos se unen o te envían ADA.";
+"SendView.weDonTRecognizeThisAddressInVendano" = "No reconocemos esta dirección en Vendano (lo cual está bien si conoces a esta persona). Una vez que envías ADA, no se puede deshacer, así que revisa todo cuidadosamente antes de continuar.";
+"SendView.youExampleCom" = "tu@ejemplo.com";
+"SendView.yourAdaHasBeenSuccessfullySentYouLl" = "Tu ADA se envió correctamente. La verás en tu historial de transacciones en unos minutos (cuando la blockchain se actualice).";
+"SendView.inviteMessage" = "%@ quiere enviarte %@ ADA en la blockchain de Cardano. Descarga la app de Vendano en https://vendano.net para comenzar.";
+"SendView.sendFailedTryAgain" = "Algo salió mal y no se envió tu ADA. Intenta de nuevo en un momento.";
+"SendView.inviteEmailSubject" = "¡Te invitaron a Vendano!";
+"SendView.notEnoughAdaForTransaction" = "No hay suficiente ADA en tu wallet para cubrir esta transacción.";
+"SendView.couldNotEstimateFeeWithMessage" = "No se pudo estimar la comisión: %@";
+"SendView.couldNotEstimateFeeTryAgain" = "No se pudo estimar la comisión. Intenta de nuevo.";
+"SendView.couldNotCalculateMaxSendable" = "No se pudo calcular el monto máximo que puedes enviar en este momento.";
+"SendView.enterValidAmount" = "Ingresa un monto válido (mayor que 0).";
+"SendView.confirmBeforeSendingReason" = "Confirmemos que eres tú antes de enviar ADA desde tu wallet.";
+"SendView.maxSendableDueToTokens" = "Como este wallet tiene tokens que necesitan ADA para mantenerse,\npor ahora puedes enviar hasta %@ ADA desde este wallet.\nIntenta con un monto menor o usa el botón “Todo”.";
+"SendView.cardanoRejectedMinAdaWithTokens" = "Cardano rechazó esta transacción porque el ADA que quedaría junto con tus tokens\ncaería por debajo del mínimo permitido por la red. En la práctica, eso significa que\nestás intentando enviar un poco más de ADA del que este wallet puede dejar sin perder\nla capacidad de mantener esos tokens. Intenta enviar menos o usa el botón “Todo”.";
+"SendView.recipientCardanoAddress" = "Dirección de Cardano";
+
+"SplashView.easyAdaTransfersByPhoneOrEmail" = "Transferencias de ADA fáciles\npor teléfono o correo.";
+"SplashView.getStarted" = "Comenzar";
+
+"WalletChoiceView.createANewWalletAndWeLlGive" = "Crea un nuevo wallet y te daremos una frase de recuperación segura.";
+"WalletChoiceView.createNewWallet" = "Crear nuevo wallet";
+"WalletChoiceView.importAnExistingWalletByEnteringYour12" = "Importa un wallet existente ingresando tu frase de recuperación de 12, 15 o 24 palabras.";
+"WalletChoiceView.importSeedPhrase" = "Importar frase semilla";
+"WalletChoiceView.letSBegin" = "¡Empecemos!";
+"WalletChoiceView.toSendOrReceiveAdaYouFirstNeed" = "Para enviar o recibir ADA, primero necesitas una dirección de wallet.";
+
+"WalletService.walletNotInitialized" = "El wallet no está inicializado";
+"WalletService.noAccountLoaded" = "No hay ninguna cuenta cargada";
+"WalletService.noPaymentAddressAvailable" = "No hay una dirección de pago disponible";
+"WalletService.amountMustBeGreaterThanZero" = "El monto debe ser mayor que 0";
+"WalletService.tipCannotBeNegative" = "La propina no puede ser negativa";
+"WalletService.insufficientFunds" = "Fondos insuficientes: tienes %.6f ADA y se necesitan %.6f ADA incluyendo comisiones.";

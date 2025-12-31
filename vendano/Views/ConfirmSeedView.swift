@@ -27,20 +27,16 @@ struct ConfirmSeedView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Confirm Keys")
+                    Text(L10n.ConfirmSeedView.confirmKeys)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "Accent"))
 
-                    Text("Tap your \(correctWords.count) recovery words in the correct order.")
+                    Text(L10n.ConfirmSeedView.tapRecoveryWordsInstruction(correctWords.count))
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextPrimary"))
                         .multilineTextAlignment(.center)
 
-                    Text("""
-                    These words are never sent to our servers - they stay only on your device. \
-                    We just need to confirm you’ve written them down correctly, because if you lose \
-                    them you won’t be able to recover your wallet.
-                    """)
+                    Text(L10n.ConfirmSeedView.theseWordsAreNeverSentToOurServers)
                     .vendanoFont(.caption, size: 13)
                     .foregroundColor(theme.color(named: "TextSecondary"))
                     .multilineTextAlignment(.center)
@@ -93,7 +89,7 @@ struct ConfirmSeedView: View {
                     Divider().padding(.vertical)
 
                     HStack {
-                        Button("Clear") {
+                        Button(L10n.ConfirmSeedView.clear) {
                             withAnimation {
                                 selectedIndices.removeAll()
                                 error = false
@@ -103,7 +99,7 @@ struct ConfirmSeedView: View {
 
                         Spacer()
 
-                        Button("Confirm") {
+                        Button(L10n.Common.confirm) {
                             let picked = selectedIndices.map { correctWords[$0] }
                             if picked == correctWords {
                                 isCreatingWallet = true
@@ -130,7 +126,7 @@ struct ConfirmSeedView: View {
                                             await MainActor.run {
                                                 isCreatingWallet = false
                                                 DebugLogger.log("❌ Wallet address missing after import")
-                                                errorMessage = "Wallet address not found after import."
+                                                errorMessage = L10n.ConfirmSeedView.walletAddressNotFound
                                                 showErrorAlert = true
                                             }
                                         }
@@ -142,19 +138,19 @@ struct ConfirmSeedView: View {
                                                 switch decodingError {
                                                 case .keyNotFound(let key, let context):
                                                     DebugLogger.log("❌ Wallet creation failed – missing key: \(key.stringValue), path: \(context.codingPath.map(\.stringValue))")
-                                                    errorMessage = "Wallet import failed: missing key \(key.stringValue)"
+                                                    errorMessage = L10n.ConfirmSeedView.walletImportFailedMissingKey(key.stringValue)
                                                 case .valueNotFound(let type, let context):
                                                     DebugLogger.log("❌ Wallet creation failed – missing value for type \(type), path: \(context.codingPath.map(\.stringValue))")
-                                                    errorMessage = "Wallet import failed: missing value for \(type)"
+                                                    errorMessage = L10n.ConfirmSeedView.walletImportFailedMissingValue(String(describing: type))
                                                 case .dataCorrupted(let context):
                                                     DebugLogger.log("❌ Wallet creation failed – data corrupted: \(context.debugDescription)")
-                                                    errorMessage = "Wallet import failed: corrupted data"
+                                                    errorMessage = L10n.ConfirmSeedView.walletImportFailedCorruptedData
                                                 case .typeMismatch(let type, let context):
                                                     DebugLogger.log("❌ Wallet creation failed – type mismatch \(type): \(context.debugDescription), path: \(context.codingPath.map(\.stringValue))")
-                                                    errorMessage = "Wallet import failed: data in wrong format"
+                                                    errorMessage = L10n.ConfirmSeedView.walletImportFailedWrongFormat
                                                 @unknown default:
                                                     DebugLogger.log("❌ Wallet creation failed – unknown DecodingError: \(decodingError)")
-                                                    errorMessage = "Wallet import failed due to an unknown decoding error."
+                                                    errorMessage = L10n.ConfirmSeedView.walletImportFailedUnknownDecodingError
                                                 }
                                             } else {
                                                 let nsError = error as NSError
@@ -181,14 +177,14 @@ struct ConfirmSeedView: View {
                     }
 
                     if error {
-                        Text("Incorrect order. Try again.")
+                        Text(L10n.ConfirmSeedView.incorrectOrderTryAgain)
                             .vendanoFont(.caption, size: 13)
                             .foregroundColor(theme.color(named: "Negative"))
                             .padding(.top, 8)
                     }
                 }
                 .padding(24)
-                .alert("Error", isPresented: $showErrorAlert, actions: {
+                .alert(L10n.ConfirmSeedView.error, isPresented: $showErrorAlert, actions: {
                     Button("OK", role: .cancel) {}
                 }, message: {
                     Text(errorMessage)

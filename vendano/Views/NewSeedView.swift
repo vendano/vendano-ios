@@ -34,20 +34,20 @@ struct NewSeedView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    Text("Your recovery phrase")
+                    Text(L10n.NewSeedView.yourRecoveryPhrase)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                         .padding(.top, 40)
 
-                    Text("Write these \(wordCount) words in order. If you lose them, your ADA is gone—nobody can reset them.")
+                    Text(L10n.NewSeedView.writeTheseWordsInstruction(wordCount))
                         .vendanoFont(.body, size: 16)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(theme.color(named: "TextPrimary"))
                         .padding(.horizontal, 24)
 
-                    Picker("Words", selection: $wordCount) {
+                    Picker(L10n.NewSeedView.words, selection: $wordCount) {
                         ForEach(options, id: \.self) { n in
-                            Text("\(n) words")
+                            Text(L10n.NewSeedView.wordCountOption(n))
                                 .tag(n)
                                 .vendanoFont(.body, size: 16)
                         }
@@ -86,11 +86,11 @@ struct NewSeedView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 8)
 
-                    Toggle("I wrote them down in a safe place", isOn: $acknowledged)
+                    Toggle(L10n.NewSeedView.iWroteThemDownInASafePlace, isOn: $acknowledged)
                         .tint(theme.color(named: "Positive"))
                         .padding(.horizontal, 24)
 
-                    Button("Next") {
+                    Button(L10n.Common.next) {
                         state.seedWords = words
                         state.onboardingStep = .confirmSeed
                     }
@@ -104,13 +104,10 @@ struct NewSeedView: View {
             .onReceive(NotificationCenter.default.publisher(
                 for: UIApplication.userDidTakeScreenshotNotification)
             ) { _ in showShotAlert = true }
-            .alert("Avoid screenshots", isPresented: $showShotAlert) {
+            .alert(L10n.NewSeedView.avoidScreenshots, isPresented: $showShotAlert) {
                 Button("Got it", role: .cancel) {}
             } message: {
-                Text("""
-                Screenshots may sync to iCloud and expose your recovery words. \
-                Write them on paper instead and store them in a safe place.
-                """)
+                Text(L10n.NewSeedView.screenshotsMaySyncToIcloudAndExposeYour)
                 .vendanoFont(.body, size: 16)
             }
             .onAppear { regenerate() }
@@ -129,11 +126,11 @@ struct NewSeedView: View {
     private var wordDescription: String {
         switch wordCount {
         case 12:
-            return "12 words give you strong, industry-standard security for everyday use."
+            return L10n.NewSeedView.wordDescription12
         case 15:
-            return "15 words add an extra layer of safety."
+            return L10n.NewSeedView.wordDescription15
         default:
-            return "24 words offer the highest protection—ideal if you want maximum peace of mind."
+            return L10n.NewSeedView.wordDescription24
         }
     }
 
@@ -141,7 +138,8 @@ struct NewSeedView: View {
         acknowledged = false
         do {
             let mnemonic = try Mnemonic(strength: strengthBits)
-            words = mnemonic.mnemonic()
+            let lang = state.seedLanguage
+            words = mnemonic.mnemonic(wordlist: lang.wordlist)
         } catch {
             DebugLogger.log("⚠️ Failed to generate mnemonic: \(error)")
             words = []

@@ -1,0 +1,245 @@
+"ActivityView.noTransactionHistoryFound" = "거래 내역이 없습니다.";
+"ActivityView.recentActivity" = "최근 활동";
+
+"AuthPhoneField.text5551234567" = "(555) 123-4567";
+
+"AuthView.email" = "이메일";
+"AuthView.enterYourEmailOrPhoneNumberAndWe" = "이메일 또는 전화번호를 입력하면 일회용 코드를 문자 또는 이메일로 보내드립니다. 비밀번호는 필요 없습니다.";
+"AuthView.ifYouReNewWeLlCreateAn" = "(처음이라면 계정이 자동으로 생성됩니다.)";
+"AuthView.loginRegister" = "로그인 / 가입";
+"AuthView.phone" = "전화번호";
+"AuthView.sendCode" = "코드 보내기";
+"AuthView.text1" = "+1";
+"AuthView.youExampleCom" = "you@example.com";
+"AuthView.errorSendingEmailLink" = "이메일 링크 전송 오류: %@";
+
+"CardanoRustError.dataError" = "데이터 오류: %@";
+"CardanoRustError.textEncodingError" = "텍스트 인코딩 오류: %@";
+"CardanoRustError.internalError" = "내부 오류: %@";
+"CardanoRustError.unexpectedDataLength" = "예상치 못한 데이터 길이입니다.";
+"CardanoRustError.internalNullPointerError" = "내부 null 포인터 오류입니다.";
+"CardanoRustError.unknownError" = "알 수 없는 오류입니다.";
+
+"Common.adaUnit" = "ADA";
+"Common.back" = "뒤로";
+"Common.cancel" = "취소";
+"Common.close" = "닫기";
+"Common.confirm" = "확인";
+"Common.continue" = "계속";
+"Common.delete" = "삭제";
+"Common.done" = "완료";
+"Common.edit" = "편집";
+"Common.token.hosky" = "HOSKY";
+"Common.next" = "다음";
+"Common.ok" = "확인";
+"Common.remove" = "제거";
+"Common.retry" = "다시 시도";
+"Common.save" = "저장";
+"Common.skip" = "넘어가기";
+"Common.unnamed" = "이름 없음";
+"Common.unknownError" = "알 수 없는 오류";
+
+"ConfirmSeedView.clear" = "지우기";
+"ConfirmSeedView.confirmKeys" = "복구 키 확인";
+"ConfirmSeedView.error" = "오류";
+"ConfirmSeedView.incorrectOrderTryAgain" = "순서가 올바르지 않습니다. 다시 시도하세요.";
+"ConfirmSeedView.tapRecoveryWordsInstruction" = "%d개의 복구 단어를 올바른 순서로 탭하세요.";
+"ConfirmSeedView.theseWordsAreNeverSentToOurServers" = "이 단어들은 서버로 전송되지 않으며 기기에만 저장됩니다. 단어를 정확히 기록했는지만 확인합니다. 분실 시 지갑을 복구할 수 없습니다.";
+"ConfirmSeedView.walletAddressNotFound" = "가져오기 후 지갑 주소를 찾을 수 없습니다.";
+"ConfirmSeedView.walletImportFailedMissingKey" = "지갑 가져오기 실패: 키 %@가 없습니다.";
+"ConfirmSeedView.walletImportFailedMissingValue" = "지갑 가져오기 실패: %@ 값이 없습니다.";
+"ConfirmSeedView.walletImportFailedCorruptedData" = "지갑 가져오기 실패: 데이터가 손상되었습니다.";
+"ConfirmSeedView.walletImportFailedWrongFormat" = "지갑 가져오기 실패: 데이터 형식이 올바르지 않습니다.";
+"ConfirmSeedView.walletImportFailedUnknownDecodingError" = "알 수 없는 디코딩 오류로 지갑 가져오기에 실패했습니다.";
+
+"CreateProfileView.addANameAndPictureSoSendersCan" = "이름과 사진을 추가하면 보내는 사람이 본인인지 확인할 수 있습니다.";
+"CreateProfileView.tellUsAboutYou" = "프로필 정보";
+"CreateProfileView.yourName" = "이름";
+
+"FAQLoader.missingJSONInBundle" = "번들에서 %@.json 파일을 찾을 수 없습니다.";
+
+"FAQSheet.segment.quick" = "요약";
+"FAQSheet.segment.explain" = "설명";
+"FAQSheet.segment.deepDive" = "자세히";
+
+"FAQView.titleOnboarding" = "시작하기 전에 몇 가지만 알려드릴게요...";
+"FAQView.titleCommonQuestions" = "자주 묻는 질문:";
+
+"FeedbackSheet.contactUs" = "문의하기";
+"FeedbackSheet.emptyPrompt.1" = "의견이나 아이디어가 있으신가요? Vendano를 더 좋게 만들 수 있도록 알려주세요.";
+"FeedbackSheet.emptyPrompt.2" = "질문, 칭찬, 버그 제보 모두 도움이 됩니다. 자유롭게 남겨주세요!";
+"FeedbackSheet.emptyPrompt.3" = "여러분의 의견이 이 앱을 만듭니다. 잘 되는 점이나 개선할 점을 알려주세요.";
+"FeedbackSheet.emptyPrompt.4" = "Vendano 사용이 궁금하신가요? 질문하거나 의견을 남겨주세요.";
+"FeedbackSheet.emptyPrompt.5" = "더 나은 경험을 함께 만들어주세요. 여러분의 피드백이 큰 도움이 됩니다.";
+
+"FiatCurrency.usd" = "미국 달러 (USD)";
+"FiatCurrency.eur" = "유로 (EUR)";
+"FiatCurrency.gbp" = "영국 파운드 (GBP)";
+"FiatCurrency.jpy" = "일본 엔 (JPY)";
+"FiatCurrency.mxn" = "멕시코 페소 (MXN)";
+"FiatCurrency.krw" = "대한민국 원 (KRW)";
+"FiatCurrency.php" = "필리핀 페소 (PHP)";
+"FiatCurrency.inr" = "인도 루피 (INR)";
+
+"FirebaseService.error.notSignedIn" = "로그인된 사용자가 없습니다.";
+"FirebaseService.error.onlyProvider" = "유일한 로그인 방법은 제거할 수 없습니다. 다른 방법을 먼저 추가하세요.";
+"FirebaseService.error.handleNotFound" = "프로필에서 핸들을 찾을 수 없습니다.";
+
+"HomeView.receive" = "받기";
+"HomeView.removeThisWalletFromThisDevice" = "이 기기에서 지갑을 제거할까요?";
+"HomeView.send" = "보내기";
+"HomeView.thisAppWillForgetYourWalletOnThis" = "이 앱은 이 기기에서 지갑 정보를 삭제합니다. 자산은 블록체인에 안전하게 남아 있으며, 12/15/24단어 복구 문구로 다시 복원할 수 있습니다.";
+"HomeView.totalOnChainInclStakingTokens" = "온체인 총액 (스테이킹 및 토큰 포함)";
+
+"ImportSeedView.import" = "가져오기";
+"ImportSeedView.invalidRecoveryPhrase" = "유효하지 않은 복구 문구";
+"ImportSeedView.pasteYour1215Or24WordRecovery" = "12·15·24단어 복구 문구를 붙여넣으세요.";
+"ImportSeedView.walletImport" = "지갑 가져오기";
+"ImportSeedView.invalidWordCount" = "단어 수가 올바르지 않습니다.";
+"ImportSeedView.recoveryPhraseNotValidAnyLanguage" = "지원되는 어떤 언어에서도 유효하지 않은 복구 문구입니다.";
+
+"NFTDetailSheet.makeThisMyAvatar" = "이 NFT를 아바타로 설정";
+
+"NewContactAuthView.pasteSignInLink" = "로그인 링크 붙여넣기";
+"NewContactAuthView.sendCode" = "코드 보내기";
+"NewContactAuthView.simulatorCanTOpenUniversalLinksPasteIt" = "시뮬레이터에서 유니버설 링크를 열 수 없습니다. 여기에 붙여넣으세요:";
+"NewContactAuthView.text1" = "+1";
+"NewContactAuthView.text5551234567" = "5551234567";
+"NewContactAuthView.verify" = "확인";
+"NewContactAuthView.waitingForConfirmation" = "확인 대기 중…";
+"NewContactAuthView.youExampleCom" = "you@example.com";
+"NewContactAuthView.verifyYourEmail" = "이메일 확인";
+"NewContactAuthView.enterYourCode" = "코드 입력";
+"NewContactAuthView.addEmail" = "이메일 추가";
+"NewContactAuthView.addPhone" = "전화번호 추가";
+"NewContactAuthView.enterEmailToAdd" = "추가할 이메일을 입력하세요.";
+"NewContactAuthView.enterPhoneToAdd" = "추가할 전화번호를 입력하세요.";
+"NewContactAuthView.tapLinkWeSentTo" = "보낸 링크를 탭하세요:";
+"NewContactAuthView.sentSixDigitCodeTo" = "6자리 코드를 보냈습니다:";
+
+"NewSeedView.avoidScreenshots" = "스크린샷을 피하세요";
+"NewSeedView.iWroteThemDownInASafePlace" = "안전한 곳에 적어두었습니다";
+"NewSeedView.screenshotsMaySyncToIcloudAndExposeYour" = "스크린샷은 iCloud에 동기화되어 복구 단어가 노출될 수 있습니다. 종이에 적어 안전한 곳에 보관하세요.";
+"NewSeedView.words" = "단어";
+"NewSeedView.yourRecoveryPhrase" = "복구 문구";
+"NewSeedView.wordDescription12" = "12단어는 일상 사용에 충분한 보안을 제공합니다.";
+"NewSeedView.wordDescription15" = "15단어는 추가적인 보안 계층을 제공합니다.";
+"NewSeedView.wordDescription24" = "24단어는 가장 높은 수준의 보안을 제공합니다.";
+"NewSeedView.wordCountOption" = "%d단어";
+"NewSeedView.writeTheseWordsInstruction" = "%d개의 단어를 순서대로 적어두세요. 분실 시 ADA를 복구할 수 없습니다.";
+
+"OTPView.pasteSignInLink" = "로그인 링크 붙여넣기";
+"OTPView.simulatorCanTOpenUniversalLinksPasteIt" = "시뮬레이터에서 유니버설 링크를 열 수 없습니다. 여기에 붙여넣으세요:";
+"OTPView.tapTheSignInLinkWeSentTo" = "보낸 로그인 링크를 탭하세요:";
+"OTPView.verify" = "확인";
+"OTPView.waitingForConfirmation" = "확인 대기 중…";
+"OTPView.weSentA6DigitCodeTo" = "6자리 코드를 보냈습니다:";
+"OTPView.verifyYourEmail" = "이메일 확인";
+"OTPView.enterYourCode" = "코드 입력";
+
+"OfflineBanner.noInternetConnectionPleaseCheckYourNetworkAnd" = "인터넷 연결이 없습니다.\n네트워크를 확인하고 다시 시도하세요.";
+
+"OnboardingFAQCardView.noFaqsAvailable" = "FAQ가 없습니다.";
+"OnboardingFAQCardView.orSwipeForMore" = "(또는 스와이프하여 더 보기)";
+"OnboardingFAQCardView.tapForClarity" = "요약 보기";
+"OnboardingFAQCardView.tapForDetails" = "자세히 보기";
+"OnboardingFAQCardView.tapForSummary" = "간단히 보기";
+
+"ProfileSheet.addEmail" = "이메일 추가";
+"ProfileSheet.addPhone" = "전화번호 추가";
+"ProfileSheet.advanced" = "고급 설정";
+"ProfileSheet.appearance" = "모양";
+"ProfileSheet.confirmIdentityBeforeDeleteReason" = "계정을 삭제하기 전에 본인 확인이 필요합니다.";
+"ProfileSheet.currency" = "통화";
+"ProfileSheet.dangerZone" = "위험 영역";
+"ProfileSheet.deleteAccountConfirm" = "계정을 삭제할까요?";
+"ProfileSheet.deleteAccount" = "계정 삭제";
+"ProfileSheet.displayName" = "표시 이름";
+"ProfileSheet.hoskyfyMyApp" = "앱을 HOSKY 스타일로";
+"ProfileSheet.logins" = "로그인";
+"ProfileSheet.namePhoto" = "이름 및 사진";
+"ProfileSheet.showStakingRewardsDetails" = "스테이킹 및 보상 세부 정보 표시";
+"ProfileSheet.thisRemovesYourNamePictureAndProfileInfo" = "이 작업은 앱과 데이터베이스에서 이름과 사진을 제거합니다. 지갑과 ADA는 블록체인에 안전하게 남아 있으며, 언제든지 복구 문구로 복원할 수 있습니다.";
+
+"ReceiveView.cardanoMainnet" = "카르다노 • 메인넷";
+"ReceiveView.copy" = "복사";
+"ReceiveView.keepYourRecoveryPhrase1224WordsWritten" = "복구 문구(12–24단어)는 반드시 적어서 안전한 곳에 보관하세요. 채팅이나 이메일로 이를 요구하는 사람은 없습니다.";
+"ReceiveView.newHereAddAdaInThreeEasySteps" = "처음이신가요? 3단계로 ADA 추가하기";
+"ReceiveView.optionalStartWithASmallTestAmountIf" = "선택 사항: 소액으로 테스트해도 좋습니다.";
+"ReceiveView.qrAccessibilityLabel" = "카르다노 주소 QR 코드";
+"ReceiveView.receiveAda" = "ADA 받기";
+"ReceiveView.safetyTip" = "보안 팁";
+"ReceiveView.scanWithAnyCardanoWalletOrExchangeApp" = "카르다노 지갑이나 거래소 앱으로 스캔하여 ADA를 받을 수 있습니다.";
+"ReceiveView.share" = "공유";
+"ReceiveView.stepByStepGuide" = "단계별 안내 →";
+"ReceiveView.text1CreateAnAccountAtATrustedExchange" = "1. 신뢰할 수 있는 거래소(예: Coinbase, Kraken)에 계정을 만드세요.";
+"ReceiveView.text2BuyAdaWithYourBankOrCard" = "2. 은행 또는 카드로 ADA를 구매하세요.";
+"ReceiveView.text3InTheExchangeChooseSendOrWithdraw" = "3. 거래소에서 **보내기** 또는 **출금**을 선택하고 위 주소를 붙여넣은 뒤 확인하세요.";
+"ReceiveView.walletAddressCopiedToast" = "지갑 주소가 복사되었습니다";
+"ReceiveView.yourCardanoAddressForAda" = "ADA용 카르다노 주소";
+
+"SendView.adaSent" = "🎉 ADA 전송 완료!";
+"SendView.addATipForTheDeveloper" = "개발자에게 팁 추가";
+"SendView.all" = "전체";
+"SendView.allow" = "허용";
+"SendView.amount" = "금액";
+"SendView.enableNotifications" = "알림을 활성화할까요?";
+"SendView.error" = "오류";
+"SendView.inviteFriend" = "친구 초대";
+"SendView.mailServicesAreNotAvailableOnThisDevice" = "이 기기에서 메일 서비스를 사용할 수 없습니다.";
+"SendView.networkFee" = "네트워크 수수료";
+"SendView.networkFeesCoverBasicBlockchainCostsAnyExtra" = "네트워크 수수료는 기본 블록체인 비용을 충당하며, 추가 팁은 앱 유지에 도움이 됩니다.";
+"SendView.pasteACardanoAddressOrHandle" = "카르다노 주소 또는 $핸들을 붙여넣으세요";
+"SendView.sendAda" = "ADA 보내기";
+"SendView.sendAnyway" = "그래도 보내기";
+"SendView.sendMethodAddress" = "주소";
+"SendView.sendMethodEmail" = "이메일";
+"SendView.sendMethodPhone" = "전화번호";
+"SendView.sendingAda" = "ADA 전송 중...";
+"SendView.smsServicesAreNotAvailableOnThisDevice" = "이 기기에서 SMS 서비스를 사용할 수 없습니다.";
+"SendView.summary" = "요약";
+"SendView.text" = "—";
+"SendView.text00" = "0.0 ₳";
+"SendView.text000" = "0.00";
+"SendView.text1" = "+1";
+"SendView.text5551234567" = "5551234567";
+"SendView.tip" = "팁";
+"SendView.tipAmount" = "₳ 팁 금액";
+"SendView.to" = "받는 사람";
+"SendView.total" = "합계";
+"SendView.unknownAddress" = "알 수 없는 주소";
+"SendView.userSendingUnknownADAAmount" = "일부";
+"SendView.vendanoFeeWaivedTheCardanoNetworkDoesnT" = "Vendano 수수료 면제 — 카르다노 네트워크는 1 ADA 미만의 금액을 허용하지 않습니다.";
+"SendView.vendanoUsesNotificationsToLetYouKnowWhen" = "Vendano는 친구가 가입하거나 ADA를 보낼 때 알림을 사용합니다.";
+"SendView.weDonTRecognizeThisAddressInVendano" = "Vendano에서 이 주소를 인식하지 못합니다. 괜찮지만, 전송 후에는 되돌릴 수 없으니 꼭 다시 확인하세요.";
+"SendView.youExampleCom" = "you@example.com";
+"SendView.yourAdaHasBeenSuccessfullySentYouLl" = "ADA 전송이 완료되었습니다. 블록체인이 업데이트되면 몇 분 후 거래 내역에서 확인할 수 있습니다.";
+"SendView.inviteMessage" = "%@님이 카르다노 블록체인에서 %@ ADA를 보내려고 합니다. 시작하려면 https://vendano.net 에서 Vendano 앱을 다운로드하세요!";
+"SendView.sendFailedTryAgain" = "문제가 발생하여 ADA를 보내지 못했습니다. 잠시 후 다시 시도하세요.";
+"SendView.inviteEmailSubject" = "Vendano에 초대되었습니다!";
+"SendView.notEnoughAdaForTransaction" = "이 거래를 완료하기에 ADA가 부족합니다.";
+"SendView.couldNotEstimateFeeWithMessage" = "수수료를 계산할 수 없습니다: %@";
+"SendView.couldNotEstimateFeeTryAgain" = "수수료를 계산할 수 없습니다. 다시 시도하세요.";
+"SendView.couldNotCalculateMaxSendable" = "현재 보낼 수 있는 최대 금액을 계산할 수 없습니다.";
+"SendView.enterValidAmount" = "유효한 금액을 입력하세요 (0보다 커야 합니다).";
+"SendView.confirmBeforeSendingReason" = "ADA를 보내기 전에 본인 확인이 필요합니다.";
+"SendView.maxSendableDueToTokens" = "이 지갑에는 ADA가 함께 유지되어야 하는 토큰이 있어,\n현재 최대 %@ ADA까지 보낼 수 있습니다.\n더 적은 금액을 입력하거나 “전체” 버튼을 사용하세요.";
+"SendView.cardanoRejectedMinAdaWithTokens" = "카르다노 네트워크는 토큰과 함께 남는 ADA가 최소 기준보다 낮을 경우\n거래를 거부합니다. 즉, 현재 지갑이 안전하게 유지할 수 있는 것보다\n조금 더 많은 ADA를 보내려는 상태입니다.\n금액을 줄이거나 “전체” 버튼을 사용하세요.";
+"SendView.recipientCardanoAddress" = "카르다노 주소";
+
+"SplashView.easyAdaTransfersByPhoneOrEmail" = "전화번호 또는 이메일로\n간편한 ADA 전송";
+"SplashView.getStarted" = "시작하기";
+
+"WalletChoiceView.createANewWalletAndWeLlGive" = "새 지갑을 생성하고 안전한 복구 문구를 제공합니다.";
+"WalletChoiceView.createNewWallet" = "새 지갑 만들기";
+"WalletChoiceView.importAnExistingWalletByEnteringYour12" = "12·15·24단어 복구 문구로 기존 지갑을 가져옵니다.";
+"WalletChoiceView.importSeedPhrase" = "시드 문구 가져오기";
+"WalletChoiceView.letSBegin" = "시작해볼까요!";
+"WalletChoiceView.toSendOrReceiveAdaYouFirstNeed" = "ADA를 보내거나 받으려면 먼저 지갑 주소가 필요합니다.";
+
+"WalletService.walletNotInitialized" = "지갑이 초기화되지 않았습니다.";
+"WalletService.noAccountLoaded" = "계정이 로드되지 않았습니다.";
+"WalletService.noPaymentAddressAvailable" = "결제 주소를 사용할 수 없습니다.";
+"WalletService.amountMustBeGreaterThanZero" = "금액은 0보다 커야 합니다.";
+"WalletService.tipCannotBeNegative" = "팁은 음수가 될 수 없습니다.";
+"WalletService.insufficientFunds" = "잔액 부족: 보유 %.6f ADA, 필요 %.6f ADA (수수료 포함).";

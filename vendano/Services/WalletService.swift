@@ -8,6 +8,7 @@
 import Cardano
 import CardanoBlockfrost
 import Foundation
+import Bip39
 
 @MainActor
 final class WalletService: ObservableObject {
@@ -121,7 +122,7 @@ final class WalletService: ObservableObject {
         return data
     }
 
-    func importWallet(words: [String]) async throws {
+    func importWallet(words: [String], language: MnemonicLanguage = .english) async throws {
         if let running = importTask {
             try await running.value
             return
@@ -129,7 +130,7 @@ final class WalletService: ObservableObject {
 
         let task = Task { [weak self] in
             guard let self else { return }
-            try await self.createWallet(from: words)
+            try await self.createWallet(from: words, language: language)
         }
 
         importTask = task
@@ -182,24 +183,23 @@ final class WalletService: ObservableObject {
     }
 
     // Create (or restore) from BIP-39 words, fetch or derive the first external address, and publish it.
-    func createWallet(from words: [String]) async throws {
-        print("🛠️ createWallet(): word count =", words.count)
-
+    func createWallet(from words: [String], language: MnemonicLanguage?) async throws {
         await bfCache.reset()
 
-        // Init keychain & ensure account #0 exists
+        // ✅ convert to English words for Keychain (Keychain assumes English)
+        let (englishWords, usedLang) = try MnemonicCanonicalizer.toEnglishWords(words, language: language)
+        print("🛠️ createWallet(): inputLang=\(language?.rawValue ?? "auto") used=\(usedLang.rawValue) count=\(words.count)")
+
         do {
-            let keychain = try Keychain(mnemonic: words)
+            let keychain = try Keychain(mnemonic: englishWords)
             try keychain.addAccount(index: 0)
             self.keychain = keychain
         } catch {
             print("❌ Keychain init failed:", error)
-            throw error // rethrow so your UI still shows an error
+            throw error
         }
 
-        guard let keychain = keychain else {
-            fatalError("💥 Keychain init failed!")
-        }
+        guard let keychain = keychain else { fatalError("💥 Keychain init failed!") }
 
         // Init Cardano + Blockfrost
         let cardano = try Cardano(
@@ -282,7 +282,7 @@ final class WalletService: ObservableObject {
             let pair = fiatCurrency.pricePair   // "ADA-USD", "ADA-EUR", etc.
             adaFiatRate = try await priceService.fetchPrice(for: pair)
         } catch {
-            print("Failed to fetch ADA price for \(fiatCurrency.rawValue):", error)
+            DebugLogger.log("Failed to fetch ADA price for \(fiatCurrency.rawValue): \(error.localizedDescription)")
         }
     }
 
@@ -296,7 +296,7 @@ final class WalletService: ObservableObject {
             throw NSError(
                 domain: "Vendano",
                 code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Wallet not initialized"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
             )
         }
 
@@ -318,7 +318,7 @@ final class WalletService: ObservableObject {
             throw NSError(
                 domain: "Vendano",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "No account loaded"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noAccountLoaded]
             )
         }
 
@@ -327,7 +327,7 @@ final class WalletService: ObservableObject {
             throw NSError(
                 domain: "Vendano",
                 code: 2,
-                userInfo: [NSLocalizedDescriptionKey: "No payment address available"]
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
             )
         }
 

@@ -38,14 +38,14 @@ struct OfflineBanner: View {
                     .vendanoFont(.title, size: 48, weight: .heavy)
                     .foregroundColor(theme.color(named: "TextReversed"))
 
-                Text("No internet connection.\nPlease check your network and try again.")
+                Text(L10n.OfflineBanner.noInternetConnectionPleaseCheckYourNetworkAnd)
                     .vendanoFont(.headline, size: 18, weight: .semibold)
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.color(named: "TextPrimary").opacity(0.85))
 
                 Spacer().frame(height: 48)
 
-//                Button("Retry") {
+//                Button(L10n.Common.retry) {
 //                    // Force a re-check by restarting the monitor:
 //                    // (could also attempt a manual reload)
 //                    let _ = NetworkMonitor()

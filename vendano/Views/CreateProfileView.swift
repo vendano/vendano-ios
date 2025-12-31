@@ -26,11 +26,11 @@ struct CreateProfileView: View {
                 Spacer()
 
                 VStack(spacing: 8) {
-                    Text("Tell us about you")
+                    Text(L10n.CreateProfileView.tellUsAboutYou)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
 
-                    Text("Add a name and picture so senders can be sure it’s you.")
+                    Text(L10n.CreateProfileView.addANameAndPictureSoSendersCan)
                         .vendanoFont(.body, size: 16)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
@@ -54,7 +54,7 @@ struct CreateProfileView: View {
                         matching: .images
                     )
 
-                    TextField("Your name", text: $name)
+                    TextField(L10n.CreateProfileView.yourName, text: $name)
                         .vendanoFont(.body, size: 18)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disableAutocorrection(true)
@@ -77,7 +77,7 @@ struct CreateProfileView: View {
                     }
                     state.onboardingStep = .walletChoice
                 } label: {
-                    Text("Continue")
+                    Text(L10n.Common.continue)
                         .vendanoFont(.body, size: 16)
                         .frame(maxWidth: .infinity)
                 }

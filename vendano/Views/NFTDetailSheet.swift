@@ -109,7 +109,7 @@ struct NFTDetailSheet: View {
                     }
                 } label: {
                     if isUploading { ProgressView() }
-                    else { Text("Make this my avatar").frame(maxWidth: .infinity) }
+                    else { Text(L10n.NFTDetailSheet.makeThisMyAvatar).frame(maxWidth: .infinity) }
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(isUploading)

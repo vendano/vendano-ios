@@ -14,17 +14,17 @@ extension CardanoRustError: @retroactive LocalizedError {
         case let .common(msg):
             return msg
         case let .deserialization(msg):
-            return "Data error: \(msg)"
+            return L10n.CardanoRustError.dataError(msg)
         case let .utf8(msg):
-            return "Text encoding error: \(msg)"
+            return L10n.CardanoRustError.textEncodingError(msg)
         case let .panic(reason):
-            return "Internal error: \(reason)"
+            return L10n.CardanoRustError.internalError(reason)
         case .dataLengthMismatch:
-            return "Unexpected data length."
+            return L10n.CardanoRustError.unexpectedDataLength
         case .nullPtr:
-            return "Internal null-pointer error."
+            return L10n.CardanoRustError.internalNullPointerError
         case .unknown:
-            return "Unknown error."
+            return L10n.CardanoRustError.unknownError
         }
     }
 }

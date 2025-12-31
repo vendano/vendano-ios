@@ -35,12 +35,12 @@ struct ActivityView: View {
                 Spacer()
             } else if state.recentTxs.isEmpty {
                 Spacer()
-                Text("No transaction history found.")
+                Text(L10n.ActivityView.noTransactionHistoryFound)
                     .vendanoFont(.headline, size: 18, weight: .semibold)
                     .foregroundColor(theme.color(named: "TextPrimary"))
                 Spacer()
             } else {
-                Text("Recent activity")
+                Text(L10n.ActivityView.recentActivity)
                     .vendanoFont(.headline, size: 18, weight: .semibold)
                     .foregroundColor(theme.color(named: "TextPrimary"))
 
@@ -48,7 +48,7 @@ struct ActivityView: View {
                     LazyVStack(spacing: 12, pinnedViews: .sectionHeaders) {
                         ForEach(groupedTxs, id: \.date) { group in
                             Section(header:
-                                Text(group.date, style: .date)
+                                Text(group.date, format: .dateTime.year().month().day())
                                     .vendanoFont(.caption, size: 13)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
                                     .padding(.horizontal)

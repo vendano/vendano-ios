@@ -12,7 +12,7 @@ struct ImportSeedView: View {
     @StateObject private var state = AppState.shared
     @State private var phraseText = ""
     @State private var showError = false
-    @State private var errorMessage = "Unknown error"
+    @State private var errorMessage = L10n.Common.unknownError
 
     var body: some View {
         ZStack {
@@ -23,11 +23,11 @@ struct ImportSeedView: View {
                 Spacer()
 
                 VStack(spacing: 24) {
-                    Text("Wallet Import")
+                    Text(L10n.ImportSeedView.walletImport)
                         .vendanoFont(.title, size: 24, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
 
-                    Text("Paste your 12-, 15-, or 24-word recovery phrase.")
+                    Text(L10n.ImportSeedView.pasteYour1215Or24WordRecovery)
                         .vendanoFont(.body, size: 16)
                         .foregroundColor(theme.color(named: "TextPrimary"))
                         .multilineTextAlignment(.center)
@@ -42,28 +42,33 @@ struct ImportSeedView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8)
                             .stroke(theme.color(named: "CellBackground"), lineWidth: 1))
 
-                    Button("Import") {
-                        let cleaned = phraseText
-                            .lowercased()
-                            .replacingOccurrences(of: "[^a-z\\s]", with: "", options: .regularExpression)
-                        let words = cleaned
-                            .split { $0.isWhitespace }
-                            .map(String.init)
-
-                        // simple validation
-                        guard [12, 15, 24].contains(words.count) else {
+                    Button(L10n.ImportSeedView.import) {
+                        let words = MnemonicText.tokenize(phraseText)
+                        
+                        guard [12, 15, 18, 21, 24].contains(words.count) else {
+                            errorMessage = L10n.ImportSeedView.invalidWordCount
                             showError = true
                             return
                         }
-
+                        
+                        guard let lang = MnemonicDetector.detectLanguage(words: words) else {
+                            errorMessage = L10n.ImportSeedView.recoveryPhraseNotValidAnyLanguage
+                            showError = true
+                            return
+                        }
+                        
                         state.seedWords = words
+                        state.seedLanguage = lang
+                        
+                        // Save both words + language
                         if let data = try? JSONEncoder().encode(words) {
                             KeychainWrapper.standard.set(data, forKey: "seedWords")
                         }
+                        KeychainWrapper.standard.set(lang.rawValue, forKey: "seedLanguage")
 
                         Task {
                             do {
-                                try await WalletService.shared.importWallet(words: words)
+                                try await WalletService.shared.importWallet(words: words, language: lang)
                                 if let addr = WalletService.shared.address {
                                     state.walletAddress = addr
                                     try await FirebaseService.shared.saveAddress(addr)
@@ -80,7 +85,7 @@ struct ImportSeedView: View {
                     .buttonStyle(PrimaryButtonStyle())
                     .disabled(phraseText.isEmpty)
 
-                    Button("Back") {
+                    Button(L10n.Common.back) {
                         state.onboardingStep = .walletChoice
                     }
                     .foregroundColor(theme.color(named: "Accent"))
@@ -89,7 +94,7 @@ struct ImportSeedView: View {
 
                 Spacer()
             }
-            .alert("Invalid recovery phrase", isPresented: $showError) {
+            .alert(L10n.ImportSeedView.invalidRecoveryPhrase, isPresented: $showError) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(errorMessage)

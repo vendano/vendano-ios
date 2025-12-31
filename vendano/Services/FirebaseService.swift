@@ -44,9 +44,12 @@ final class FirebaseService: ObservableObject {
         case handleNotFound
         var errorDescription: String? {
             switch self {
-            case .notSignedIn:  return "No signed-in user."
-            case .onlyProvider: return "Cannot remove the only sign-in method. Add another before removing."
-            case .handleNotFound: return "Handle not found in profile."
+            case .notSignedIn:
+                return L10n.FirebaseService.errorNotSignedIn
+            case .onlyProvider:
+                return L10n.FirebaseService.errorOnlyProvider
+            case .handleNotFound:
+                return L10n.FirebaseService.errorHandleNotFound
             }
         }
     }
@@ -80,18 +83,18 @@ final class FirebaseService: ObservableObject {
         }
     }
 
+    @MainActor
     private func fetchPrivateState(uid: String) async {
-        guard let db = db else { return } // demo: no-op
+        guard let db = db else { return }
         do {
             let snap = try await db.collection("users").document(uid).getDocument()
             guard let d = snap.data() else { return }
+
             let state = AppState.shared
-            DispatchQueue.main.async {
-                state.phone = d["phone"] as? [String] ?? []
-                state.email = d["email"] as? [String] ?? []
-                let faqs = d["viewedFAQ"] as? [String] ?? []
-                state.viewedFAQIDs = Set(faqs.compactMap(UUID.init))
-            }
+            state.phone = d["phone"] as? [String] ?? []
+            state.email = d["email"] as? [String] ?? []
+            let faqs = d["viewedFAQ"] as? [String] ?? []
+            state.viewedFAQIDs = Set(faqs)   // ✅ strings now
         } catch {
             DebugLogger.log("❌ fetchPrivateState: \(error)")
         }
@@ -379,15 +382,15 @@ final class FirebaseService: ObservableObject {
     // MARK: – FAQ tracking
     func markAllFAQsViewed() async {
         guard let uid = user?.uid, let db = db else { return }
-        let faqViewedIDs: Set<UUID> = AppState.shared.viewedFAQIDs
+        let ids = Array(AppState.shared.viewedFAQIDs)
         try? await db.collection("users").document(uid)
-            .setData(["viewedFAQ": FieldValue.arrayUnion(faqViewedIDs.map(\.uuidString))], merge: true)
+            .setData(["viewedFAQ": FieldValue.arrayUnion(ids)], merge: true)
     }
 
-    func markFAQViewed(_ id: UUID) async {
+    func markFAQViewed(_ id: String) async {
         guard let uid = user?.uid, let db = db else { return }
         try? await db.collection("users").document(uid)
-            .setData(["viewedFAQ": FieldValue.arrayUnion([id.uuidString])], merge: true)
+            .setData(["viewedFAQ": FieldValue.arrayUnion([id])], merge: true)
     }
 
     // MARK: – Handle lookup

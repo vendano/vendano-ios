@@ -21,7 +21,7 @@ struct RootView: View {
                 switch state.onboardingStep {
                 case .loading: SplashView(loading: true)
                 case .splash: SplashView(loading: false)
-                case .faq: OnboardingFAQCardView(faqs: FAQs.shared.onboarding, onSkip: nil)
+                case .faq: OnboardingFAQCardView(faqs: state.FAQs?.sections.first?.items, onSkip: nil)
                 case .auth: AuthView()
                 case .otp: OTPView()
                 case .profile: CreateProfileView()

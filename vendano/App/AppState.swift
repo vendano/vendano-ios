@@ -17,6 +17,7 @@ final class AppState: ObservableObject {
     @Published var onboardingStep: OnboardingStep = .splash
 
     @Published var seedWords: [String] = []
+    @Published var seedLanguage: MnemonicLanguage = .app
 
     @Published var avatar: Image?
     @Published var avatarUrl: String?
@@ -35,7 +36,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    @Published var viewedFAQIDs: Set<UUID> = []
+    @Published var viewedFAQIDs: Set<String> = []
     @Published var checkingTxs: Bool = false
     @Published var recentTxs: [TxRowViewModel] = []
     
@@ -48,6 +49,12 @@ final class AppState: ObservableObject {
         didSet {
             UserDefaults.standard.set(isExpertMode, forKey: "VendanoExpertMode")
         }
+    }
+    
+    @Published var FAQs: FAQDocument?
+    
+    var allFAQs: [FAQItem] {
+        FAQs?.sections.flatMap(\.items) ?? []
     }
     
     @Published var environment: AppEnvironment = .mainnet
@@ -69,6 +76,12 @@ final class AppState: ObservableObject {
         }
         
         return .mainnet
+    }
+    
+    @MainActor
+    func loadFAQ() {
+        do { FAQs = try FAQLoader.load() }
+        catch { print("FAQ load error:", error) }
     }
     
     @MainActor

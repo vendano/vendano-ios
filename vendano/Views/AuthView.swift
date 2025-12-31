@@ -38,20 +38,20 @@ struct AuthView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                Text("Login / Register")
+                Text(L10n.AuthView.loginRegister)
                     .vendanoFont(.title, size: 24, weight: .semibold)
                     .foregroundColor(theme.color(named: "TextReversed"))
 
-                Text("Enter your email or phone number and we’ll text / email a one-time code—no passwords needed.")
+                Text(L10n.AuthView.enterYourEmailOrPhoneNumberAndWe)
                     .vendanoFont(.headline, size: 18)
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.color(named: "TextPrimary"))
 
                 Picker("", selection: $useEmail) {
-                    Text("Email")
+                    Text(L10n.AuthView.email)
                         .tag(true)
                         .vendanoFont(.body, size: 16)
-                    Text("Phone")
+                    Text(L10n.AuthView.phone)
                         .tag(false)
                         .vendanoFont(.body, size: 16)
                 }
@@ -71,7 +71,7 @@ struct AuthView: View {
                     TextField(
                         "",
                         text: $email,
-                        prompt: Text("you\u{200B}@example.com")
+                        prompt: Text(L10n.AuthView.youExampleCom)
                             .foregroundColor(theme.color(named: "Accent"))
                     )
                     .vendanoFont(.body, size: 18)
@@ -89,7 +89,7 @@ struct AuthView: View {
 
                 } else {
                     HStack(spacing: 12) {
-                        TextField("+1", text: $dialCode)
+                        TextField(L10n.AuthView.text1, text: $dialCode)
                             .vendanoFont(.body, size: 18)
                             .keyboardType(.phonePad)
                             .padding()
@@ -119,7 +119,7 @@ struct AuthView: View {
                             .tint(theme.color(named: "TextReversed"))
                             .frame(maxWidth: .infinity)
                     } else {
-                        Text("Send code")
+                        Text(L10n.AuthView.sendCode)
                             .vendanoFont(.body, size: 16)
                             .frame(maxWidth: .infinity)
                     }
@@ -128,7 +128,7 @@ struct AuthView: View {
                 .disabled(isLoading || (useEmail ? !emailIsValid : !phoneIsValid))
                 .opacity(isLoading ? 0.7 : 1)
 
-                Text("(If you’re new, we’ll create an account automatically.)")
+                Text(L10n.AuthView.ifYouReNewWeLlCreateAn)
                     .vendanoFont(.caption, size: 13)
                     .multilineTextAlignment(.center)
                     .foregroundColor(theme.color(named: "TextSecondary"))
@@ -153,7 +153,7 @@ struct AuthView: View {
             FirebaseService.shared.sendEmailLink(to: email) { err in
                 isLoading = false
                 if let err = err {
-                    errorMessage = "Error sending email link: \(err.localizedDescription)"
+                    errorMessage = L10n.AuthView.errorSendingEmailLink(err.localizedDescription)
                 } else {
                     state.onboardingStep = .otp
                 }

@@ -14,7 +14,11 @@ struct FAQSheet: View {
 
     // 0 = Answer, 1 = Clarify, 2 = Details
     @State private var level: Int = 0
-    private let segments = ["Quick", "Explain", "Deep Dive"]
+    private let segments = [
+        L10n.FAQSheet.segmentQuick,
+        L10n.FAQSheet.segmentExplain,
+        L10n.FAQSheet.segmentDeepDive
+    ]
 
     var body: some View {
         ZStack {
@@ -77,7 +81,7 @@ struct FAQSheet: View {
                     .padding()
                 }
 
-                Button("Close") {
+                Button(L10n.Common.close) {
                     onDismiss()
                 }
                 .buttonStyle(PrimaryButtonStyle())

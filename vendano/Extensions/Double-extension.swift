@@ -11,6 +11,6 @@ extension Double {
     func truncating(toPlaces places: Int) -> String {
         let multiplier = pow(10.0, Double(places))
         let truncated = Double(Int(self * multiplier)) / multiplier
-        return String(format: "%.\(places)f", truncated)
+        return truncated.formatted(.number.precision(.fractionLength(places)))
     }
 }

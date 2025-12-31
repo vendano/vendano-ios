@@ -37,4 +37,10 @@ extension String {
         }
         return String(bytes: bytes, encoding: .utf8)
     }
+    
+    func replacingTokens(_ tokens: [String: String]) -> String {
+        tokens.reduce(self) { result, pair in
+            result.replacingOccurrences(of: "{{\(pair.key)}}", with: pair.value)
+        }
+    }
 }

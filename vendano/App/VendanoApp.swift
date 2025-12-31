@@ -104,6 +104,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         
         let env = AppState.shared.environment
+        AppState.shared.loadFAQ()
         
         switch env {
         case .appstorereview:

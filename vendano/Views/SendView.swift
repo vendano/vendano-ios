@@ -12,11 +12,21 @@ import PhoneNumberKit
 import SwiftUI
 
 enum SendMethod: String, CaseIterable, Identifiable {
-    case email = "Email"
-    case phone = "Phone"
-    case address = "Address"
+    case email
+    case phone
+    case address
+
     var id: String { rawValue }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .email: return L10n.SendView.sendMethodEmail
+        case .phone: return L10n.SendView.sendMethodPhone
+        case .address: return L10n.SendView.sendMethodAddress
+        }
+    }
 }
+
 
 struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
@@ -130,13 +140,13 @@ struct SendView: View {
 
                 // form
                 Form {
-                    Section(header: Text("To")
+                    Section(header: Text(L10n.SendView.to)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         Picker("", selection: $sendMethod) {
                             ForEach(SendMethod.allCases) { method in
-                                Text(method.rawValue)
+                                Text(method.label)
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                                     .tag(method)
@@ -159,7 +169,7 @@ struct SendView: View {
 
                         switch sendMethod {
                         case .email:
-                            TextField("you\u{200B}@example.com", text: $email)
+                            TextField(L10n.SendView.youExampleCom, text: $email)
                                 .vendanoFont(.body, size: 18)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
@@ -177,7 +187,7 @@ struct SendView: View {
                                 }
                         case .phone:
                             HStack(spacing: 12) {
-                                TextField("+1", text: $dialCode)
+                                TextField(L10n.SendView.text1, text: $dialCode)
                                     .vendanoFont(.body, size: 18)
                                     .keyboardType(.phonePad)
                                     .padding(12)
@@ -189,7 +199,7 @@ struct SendView: View {
                                             lookupRecipient()
                                         }
                                     }
-                                TextField("5551234567", text: $localNumber)
+                                TextField(L10n.SendView.text5551234567, text: $localNumber)
                                     .vendanoFont(.body, size: 18)
                                     .keyboardType(.phonePad)
                                     .padding(12)
@@ -203,7 +213,7 @@ struct SendView: View {
                                     }
                             }
                         case .address:
-                            TextField("Paste a Cardano address or $handle", text: $addressText)
+                            TextField(L10n.SendView.pasteACardanoAddressOrHandle, text: $addressText)
                                 .vendanoFont(.body, size: 18)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -248,12 +258,12 @@ struct SendView: View {
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
 
-                    Section(header: Text("Amount")
+                    Section(header: Text(L10n.SendView.amount)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
                         HStack {
-                            TextField("0.0 ₳", text: $adaText)
+                            TextField(L10n.SendView.text00, text: $adaText)
                                 .vendanoFont(.body, size: 18)
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.trailing)
@@ -266,12 +276,12 @@ struct SendView: View {
                             if let ada = adaValue,
                                let fiatRate = wallet.adaFiatRate
                             {
-                                Text("₳ ≈ \(wallet.fiatCurrency.symbol)\(ada * fiatRate, specifier: "%.2f")")
+                                Text("₳ ≈ \(wallet.fiatCurrency.symbol)\((ada * fiatRate).formatted(.number.precision(.fractionLength(2))))")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
                             }
 
-                            Button("All") {
+                            Button(L10n.SendView.all) {
                                 // Single source of truth: Home + Send both trust adaBalance
                                 let available = wallet.adaBalance
 
@@ -286,7 +296,7 @@ struct SendView: View {
                                     maxAmount = 0
                                 }
 
-                                adaText = String(format: "%.6f", maxAmount)
+                                adaText = (maxAmount).formatted(.number.precision(.fractionLength(6)))
 
                                 // Recalculate fee for the new amount
                                 recalcFee()
@@ -301,7 +311,7 @@ struct SendView: View {
                         }
 
                         if let ada = adaValue, ada > 0 {
-                            Toggle("Add a tip for the developer", isOn: $includeTip)
+                            Toggle(L10n.SendView.addATipForTheDeveloper, isOn: $includeTip)
                                 .tint(theme.color(named: "Accent"))
                                 .foregroundColor(theme.color(named: "TextPrimary"))
                                 .padding()
@@ -313,7 +323,7 @@ struct SendView: View {
 
                             if includeTip {
                                 HStack {
-                                    TextField("0.00", text: $tipText)
+                                    TextField(L10n.SendView.text000, text: $tipText)
                                         .vendanoFont(.body, size: 18)
                                         .keyboardType(.decimalPad)
                                         .multilineTextAlignment(.trailing)
@@ -326,13 +336,13 @@ struct SendView: View {
 
                                     Spacer()
 
-                                    Text("₳ Tip amount")
+                                    Text(L10n.SendView.tipAmount)
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                                 .padding(.vertical, 4)
 
-                                Text("Network fees cover basic blockchain costs; any extra tip helps us keep this app running and is greatly appreciated!")
+                                Text(L10n.SendView.networkFeesCoverBasicBlockchainCostsAnyExtra)
                                     .vendanoFont(.caption, size: 14)
                                     .foregroundColor(theme.color(named: "TextSecondary"))
                                     .padding()
@@ -342,31 +352,31 @@ struct SendView: View {
                     .listRowBackground(theme.color(named: "CellBackground"))
 
                     if let ada = adaValue, ada > 0 {
-                        Section(header: Text("Summary")
+                        Section(header: Text(L10n.SendView.summary)
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                         ) {
                             HStack {
-                                Text("Amount")
+                                Text(L10n.SendView.amount)
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
 
                                 Spacer()
 
-                                Text("\(ada, specifier: "%.2f") ₳")
+                                Text("\((ada).formatted(.number.precision(.fractionLength(2)))) ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                             }
 
                             if tipValue > 0 {
                                 HStack {
-                                    Text("Tip")
+                                    Text(L10n.SendView.tip)
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
 
                                     Spacer()
 
-                                    Text("\(tipValue, specifier: "%.2f") ₳")
+                                    Text("\((tipValue).formatted(.number.precision(.fractionLength(2)))) ₳")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
@@ -374,7 +384,7 @@ struct SendView: View {
 
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text("Network fee")
+                                    Text(L10n.SendView.networkFee)
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
 
@@ -388,15 +398,15 @@ struct SendView: View {
                                                 )
                                             )
                                     } else if netFee > 0 {
-                                        Text("\(netFee, specifier: "%.2f") ₳")
+                                        Text("\((netFee).formatted(.number.precision(.fractionLength(2)))) ₳")
                                             .vendanoFont(.body, size: 16)
                                             .foregroundColor(theme.color(named: "TextPrimary"))
                                     } else if feeError != nil {
-                                        Text("—")
+                                        Text(L10n.SendView.text)
                                             .vendanoFont(.body, size: 16)
                                             .foregroundColor(theme.color(named: "TextSecondary"))
                                     } else {
-                                        Text("—")
+                                        Text(L10n.SendView.text)
                                             .vendanoFont(.body, size: 16)
                                             .foregroundColor(theme.color(named: "TextSecondary"))
                                     }
@@ -419,13 +429,13 @@ struct SendView: View {
                                     
                                     Spacer()
                                     
-                                    Text("\(appFee, specifier: "%.2f") ₳")
+                                    Text("\((appFee).formatted(.number.precision(.fractionLength(2)))) ₳")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
                                 
                                 if appFee == 0 {
-                                    Text("Vendano fee waived - the Cardano network doesn't allow amounts smaller than 1 ADA.")
+                                    Text(L10n.SendView.vendanoFeeWaivedTheCardanoNetworkDoesnT)
                                         .vendanoFont(.caption, size: 13)
                                         .foregroundColor(theme.color(named: "TextSecondary"))
                                         .padding(.top, 4)
@@ -433,13 +443,13 @@ struct SendView: View {
                             }
 
                             HStack {
-                                Text("Total")
+                                Text(L10n.SendView.total)
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
 
                                 Spacer()
 
-                                Text("\(ada + tipValue + netFee + appFee, specifier: "%.2f") ₳")
+                                Text("\((ada + tipValue + netFee + appFee).formatted(.number.precision(.fractionLength(2)))) ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                             }
@@ -452,7 +462,7 @@ struct SendView: View {
                             Button {
                                 authenticateAndSend()
                             } label: {
-                                Label("Send ADA", systemImage: "paperplane.fill")
+                                Label(L10n.SendView.sendAda, systemImage: "paperplane.fill")
                                     .vendanoFont(.body, size: 16)
                                     .frame(maxWidth: .infinity)
                             }
@@ -460,7 +470,7 @@ struct SendView: View {
                             .buttonStyle(PrimaryButtonStyle())
                             .listRowBackground(Color.clear)
                         } else {
-                            Button("Invite Friend") {
+                            Button(L10n.SendView.inviteFriend) {
                                 let handle: String
                                 switch sendMethod {
                                 case .email: handle = email.lowercased()
@@ -468,10 +478,11 @@ struct SendView: View {
                                 default: handle = ""
                                 }
                                 var adaMsg = adaText
-                                if adaMsg == "" { adaMsg = "some" }
-                                let msg = """
-                                \(state.displayName) wants to send you \(adaMsg) ADA on the Cardano blockchain. Please download the Vendano app at https://vendano.net to get started!
-                                """
+                                if adaMsg == "" { adaMsg = L10n.SendView.userSendingUnknownADAAmount }
+                                let msg = L10n.SendView.inviteMessage(
+                                    senderName: state.displayName,
+                                    adaAmount: adaMsg
+                                )
 
                                 shareInvite = ShareMessage(text: msg)
 
@@ -513,44 +524,44 @@ struct SendView: View {
 
             if isSending {
                 Color.black.opacity(0.4).ignoresSafeArea()
-                ProgressView("Sending ADA...")
+                ProgressView(L10n.SendView.sendingAda)
                     .padding(24)
                     .background(RoundedRectangle(cornerRadius: 8).fill(theme.color(named: "FieldBackground")))
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .alert("Unknown Address", isPresented: $showWarning) {
-            Button("Cancel", role: .cancel) {}
-            Button("Send Anyway") {
+        .alert(L10n.SendView.unknownAddress, isPresented: $showWarning) {
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.SendView.sendAnyway) {
                 authenticateAndSend()
             }
         } message: {
-            Text("We don’t recognize this address in Vendano (which is fine, if you know this person). Once ADA is sent, it can’t be undone - so please double-check everything before you continue.")
+            Text(L10n.SendView.weDonTRecognizeThisAddressInVendano)
                 .vendanoFont(.body, size: 16)
                 .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // success alert
-        .alert("🎉 ADA Sent!", isPresented: $sendSuccess) {
+        .alert(L10n.SendView.adaSent, isPresented: $sendSuccess) {
             Button("OK", action: onClose)
         } message: {
-            Text("Your ADA has been successfully sent. You’ll see it in your transaction history in a few minutes (once the blockchain updates).")
+            Text(L10n.SendView.yourAdaHasBeenSuccessfullySentYouLl)
                 .vendanoFont(.body, size: 16)
                 .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // generic error alert
-        .alert("Error", isPresented: Binding(
+        .alert(L10n.SendView.error, isPresented: Binding(
             get: { sendError != nil },
             set: { if !$0 { sendError = nil } }
         )) {
-            Button("OK") { sendError = nil }
+            Button(L10n.Common.ok) { sendError = nil }
         } message: {
-            Text(sendError ?? "Something went wrong and your ADA wasn’t sent. Please try again in a moment.")
+            Text(sendError ?? L10n.SendView.sendFailedTryAgain)
                 .vendanoFont(.body, size: 16)
                 .foregroundColor(theme.color(named: "TextPrimary"))
         }
         // invite‐notfound alert
         .alert(inviteTitle, isPresented: $showInviteAlert) {
-            Button("OK") {}
+            Button(L10n.Common.ok) {}
         } message: {
             Text(inviteMessage)
                 .vendanoFont(.body, size: 16)
@@ -567,11 +578,11 @@ struct SendView: View {
                     if MFMailComposeViewController.canSendMail() {
                         MailComposeView(
                             recipients: [email],
-                            subject: "You’ve been invited to Vendano!",
+                            subject: L10n.SendView.inviteEmailSubject,
                             body: invitation.text
                         )
                     } else {
-                        Text("Mail services are not available on this device.")
+                        Text(L10n.SendView.mailServicesAreNotAvailableOnThisDevice)
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                     }
@@ -584,7 +595,7 @@ struct SendView: View {
                             body: invitation.text
                         )
                     } else {
-                        Text("SMS services are not available on this device.")
+                        Text(L10n.SendView.smsServicesAreNotAvailableOnThisDevice)
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
                     }
@@ -597,11 +608,11 @@ struct SendView: View {
             .onAppear {
                 checkNotificationPermission()
             }
-            .alert("Enable Notifications?", isPresented: $showNotificationPrompt) {
-                Button("Allow") { requestPushPermission() }
+            .alert(L10n.SendView.enableNotifications, isPresented: $showNotificationPrompt) {
+                Button(L10n.SendView.allow) { requestPushPermission() }
                 Button("Not Now", role: .cancel) {}
             } message: {
-                Text("Vendano uses notifications to let you know when friends join or send you ADA.")
+                Text(L10n.SendView.vendanoUsesNotificationsToLetYouKnowWhen)
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(theme.color(named: "TextPrimary"))
             }
@@ -686,16 +697,16 @@ struct SendView: View {
                     case let .common(message):
                         DebugLogger.log("💥 [fee-ui] CardanoRustError.common: \(message)")
                         if message.contains("UTxO Balance Insufficient") {
-                            feeError = "There is not enough ADA in your wallet to cover this transaction."
+                            feeError = L10n.SendView.notEnoughAdaForTransaction
                         } else {
                             // 👇 this is the string you’re currently seeing
-                            feeError = "Couldn’t estimate the fee: \(message)"
+                            feeError = L10n.SendView.couldNotEstimateFeeWithMessage(message)
                         }
                     default:
-                        feeError = "Couldn’t estimate the fee. Please try again."
+                        feeError = L10n.SendView.couldNotEstimateFeeTryAgain
                     }
                 } else {
-                    feeError = "Couldn’t estimate the fee. Please try again."
+                    feeError = L10n.SendView.couldNotEstimateFeeTryAgain
                 }
 
                 netFee = 0
@@ -713,7 +724,7 @@ struct SendView: View {
         if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
             ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Let's confirm it’s you before you send ADA from your wallet."
+                localizedReason: L10n.SendView.confirmBeforeSendingReason
             ) { success, _ in
                 if success {
                     Task { await sendTransaction() }
@@ -730,7 +741,7 @@ struct SendView: View {
         defer { isSending = false }
 
         guard let amount = Double(adaText), amount > 0 else {
-            sendError = "Enter a valid amount (more than 0)."
+            sendError = L10n.SendView.enterValidAmount
             return
         }
         let tip = Double(tipText) ?? 0
@@ -744,13 +755,8 @@ struct SendView: View {
                 .maxSendableAda(to: dest, tipAda: tip)
 
             if amount > maxAda {
-                let formatted = String(format: "%.6f", maxAda)
-                sendError =
-                """
-                Because this wallet is holding tokens that need ADA to stay with them,
-                you can currently send up to \(formatted) ADA from this wallet.
-                Try entering a smaller amount or use the “All” button.
-                """
+                let formatted = (maxAda).formatted(.number.precision(.fractionLength(6)))
+                sendError = L10n.SendView.maxSendableDueToTokens(formatted)
                 return
             }
 
@@ -778,13 +784,7 @@ struct SendView: View {
             // 🧠 Translate the FeeTooSmallUTxO noise into human language
             let lower = friendly.lowercased()
             if lower.contains("feettoosmallutxo") {
-                friendly =
-                """
-                Cardano rejected this transaction because the ADA left behind with your tokens
-                would fall below the minimum the network allows. In practice, that means you’re
-                trying to send a bit more ADA than this wallet can safely spare while still
-                holding all of those tokens. Try sending a smaller amount or use the “All” button.
-                """
+                friendly = L10n.SendView.cardanoRejectedMinAdaWithTokens
             }
 
             debugPrint("❌ Raw Blockfrost error:", error as Error)
@@ -835,7 +835,7 @@ struct SendView: View {
                         recipient = Recipient(name: name, avatarURL: avatarURL, address: chainAddr)
                     } else {
                         // show bare address but still allow sending
-                        recipient = Recipient(name: "Cardano Address", avatarURL: nil, address: input)
+                        recipient = Recipient(name: L10n.SendView.recipientCardanoAddress, avatarURL: nil, address: input)
                     }
                     recalcFee()
                     return
@@ -876,11 +876,11 @@ struct SendView: View {
             let maxAda = try await WalletService.shared
                 .maxSendableAda(to: dest, tipAda: tipValue)
 
-            adaText = String(format: "%.6f", maxAda)
+            adaText = (maxAda).formatted(.number.precision(.fractionLength(6)))
             recalcFee()
         } catch {
             DebugLogger.log("⚠️ Failed to compute max sendable ADA: \(error)")
-            feeError = "Couldn't calculate the maximum amount you can send right now."
+            feeError = L10n.SendView.couldNotCalculateMaxSendable
         }
     }
 
