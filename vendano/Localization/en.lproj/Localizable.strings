@@ -218,3 +218,24 @@
 "WalletService.amountMustBeGreaterThanZero" = "Amount must be > 0";
 "WalletService.tipCannotBeNegative" = "Tip cannot be negative";
 "WalletService.insufficientFunds" = "Insufficient funds: have %.6f ADA, need %.6f ADA including fees.";
+
+"HomeEmptyFunding.title" = "Get your first ADA";
+"HomeEmptyFunding.subtitle" = "Choose the easiest option below.";
+"HomeEmptyFunding.tip" = "Tip: Start small. A quick test transfer can help you feel confident before sending more.";
+
+"HomeEmptyFunding.badgeEasiest" = "Easiest";
+"HomeEmptyFunding.badgeRecommended" = "Recommended";
+
+"HomeEmptyFunding.cardAskFriendTitle" = "Ask a friend to send ADA";
+"HomeEmptyFunding.cardAskFriendSubtitle" = "Share your QR or address and get a small test amount first.";
+"HomeEmptyFunding.cardAskFriendCta" = "Request ADA";
+
+"HomeEmptyFunding.cardTransferTitle" = "Transfer from another wallet";
+"HomeEmptyFunding.cardTransferSubtitle" = "Copy your wallet address, then paste it into your exchange or wallet’s Send screen.";
+"HomeEmptyFunding.cardTransferCta" = "Copy wallet address";
+"HomeEmptyFunding.addressCopiedCta" = "Address copied!";
+
+"HomeEmptyFunding.cardBuyTitle" = "Buy ADA";
+"HomeEmptyFunding.cardBuySubtitle" = "See options and steps (availability depends on your region).";
+"HomeEmptyFunding.cardBuyCta" = "How to buy ADA";
+

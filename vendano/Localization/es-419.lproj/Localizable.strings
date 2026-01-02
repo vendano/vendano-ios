@@ -218,3 +218,23 @@
 "WalletService.amountMustBeGreaterThanZero" = "El monto debe ser > 0";
 "WalletService.tipCannotBeNegative" = "La propina no puede ser negativa";
 "WalletService.insufficientFunds" = "Fondos insuficientes: tienes %.6f ADA, necesitas %.6f ADA incluyendo comisiones.";
+
+"HomeEmptyFunding.title" = "Obtén tu primer ADA";
+"HomeEmptyFunding.subtitle" = "Elige la opción más fácil a continuación.";
+"HomeEmptyFunding.tip" = "Tip: Empieza con poco. Una transferencia de prueba rápida puede darte confianza antes de enviar más.";
+
+"HomeEmptyFunding.badgeEasiest" = "Más fácil";
+"HomeEmptyFunding.badgeRecommended" = "Recomendado";
+
+"HomeEmptyFunding.cardAskFriendTitle" = "Pídele a un amigo que te envíe ADA";
+"HomeEmptyFunding.cardAskFriendSubtitle" = "Comparte tu QR o dirección y recibe primero una pequeña cantidad de prueba.";
+"HomeEmptyFunding.cardAskFriendCta" = "Solicitar ADA";
+
+"HomeEmptyFunding.cardTransferTitle" = "Transfiere desde otra billetera";
+"HomeEmptyFunding.cardTransferSubtitle" = "Copia la dirección de tu billetera y pégala en la pantalla de Enviar de tu exchange o billetera.";
+"HomeEmptyFunding.cardTransferCta" = "Copiar dirección";
+"HomeEmptyFunding.addressCopiedCta" = "¡Dirección copiada!";
+
+"HomeEmptyFunding.cardBuyTitle" = "Comprar ADA";
+"HomeEmptyFunding.cardBuySubtitle" = "Ver opciones y pasos (la disponibilidad depende de tu región).";
+"HomeEmptyFunding.cardBuyCta" = "Cómo comprar ADA";

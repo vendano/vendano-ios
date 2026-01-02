@@ -217,3 +217,23 @@
 "WalletService.amountMustBeGreaterThanZero" = "金額は 0 より大きい必要があります";
 "WalletService.tipCannotBeNegative" = "チップはマイナスにできません";
 "WalletService.insufficientFunds" = "残高不足: %.6f ADA ありますが、手数料込みで %.6f ADA 必要です。";
+
+"HomeEmptyFunding.title" = "最初のADAを入れてみましょう";
+"HomeEmptyFunding.subtitle" = "下から一番かんたんな方法を選んでください。";
+"HomeEmptyFunding.tip" = "ヒント：まずは少額で試すのがおすすめです。テスト送金で動作を確認してから、必要に応じて増やすと安心です。";
+
+"HomeEmptyFunding.badgeEasiest" = "いちばん簡単";
+"HomeEmptyFunding.badgeRecommended" = "おすすめ";
+
+"HomeEmptyFunding.cardAskFriendTitle" = "友だちにADAを送ってもらう";
+"HomeEmptyFunding.cardAskFriendSubtitle" = "QRまたはアドレスを共有して、まずは少額を受け取って試してみましょう。";
+"HomeEmptyFunding.cardAskFriendCta" = "ADAをリクエスト";
+
+"HomeEmptyFunding.cardTransferTitle" = "別のウォレットから送る";
+"HomeEmptyFunding.cardTransferSubtitle" = "ウォレットアドレスをコピーして、取引所やウォレットの「送金」画面に貼り付けてください。";
+"HomeEmptyFunding.cardTransferCta" = "ウォレットアドレスをコピー";
+"HomeEmptyFunding.addressCopiedCta" = "アドレスをコピーしました！";
+
+"HomeEmptyFunding.cardBuyTitle" = "ADAを購入する";
+"HomeEmptyFunding.cardBuySubtitle" = "購入手順と選択肢を見る（利用可否は地域によって異なります）。";
+"HomeEmptyFunding.cardBuyCta" = "ADAの購入方法";

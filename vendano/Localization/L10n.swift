@@ -2,7 +2,7 @@ import SwiftUI
 
 enum L10n {
     enum Common {
-        static var adaUnit: String { String(localized: "Common.unit.ada") }
+        static var adaUnit: String { String(localized: "Common.adaUnit") }
         static let back: LocalizedStringKey = "Common.back"
         static let cancel: LocalizedStringKey = "Common.cancel"
         static let close: LocalizedStringKey = "Common.close"
@@ -394,6 +394,29 @@ enum L10n {
         static func insufficientFunds(_ haveAda: Double, _ needAda: Double) -> String {
             String(format: String(localized: "WalletService.insufficientFunds"), haveAda, needAda)
         }
+    }
+    
+    enum HomeEmptyFunding {
+        static let title = NSLocalizedString("HomeEmptyFunding.title", comment: "")
+        static let subtitle = NSLocalizedString("HomeEmptyFunding.subtitle", comment: "")
+        static let tip = NSLocalizedString("HomeEmptyFunding.tip", comment: "")
+
+        static let badgeEasiest = NSLocalizedString("HomeEmptyFunding.badgeEasiest", comment: "")
+        static let badgeRecommended = NSLocalizedString("HomeEmptyFunding.badgeRecommended", comment: "")
+
+        static let cardAskFriendTitle = NSLocalizedString("HomeEmptyFunding.cardAskFriendTitle", comment: "")
+        static let cardAskFriendSubtitle = NSLocalizedString("HomeEmptyFunding.cardAskFriendSubtitle", comment: "")
+        static let cardAskFriendCta = NSLocalizedString("HomeEmptyFunding.cardAskFriendCta", comment: "")
+
+        static let cardTransferTitle = NSLocalizedString("HomeEmptyFunding.cardTransferTitle", comment: "")
+        static let cardTransferSubtitle = NSLocalizedString("HomeEmptyFunding.cardTransferSubtitle", comment: "")
+        static let cardTransferCta = NSLocalizedString("HomeEmptyFunding.cardTransferCta", comment: "")
+
+        static let cardBuyTitle = NSLocalizedString("HomeEmptyFunding.cardBuyTitle", comment: "")
+        static let cardBuySubtitle = NSLocalizedString("HomeEmptyFunding.cardBuySubtitle", comment: "")
+        static let cardBuyCta = NSLocalizedString("HomeEmptyFunding.cardBuyCta", comment: "")
+
+        static let addressCopiedCta = NSLocalizedString("HomeEmptyFunding.addressCopiedCta", comment: "")
     }
 
 }

@@ -122,7 +122,7 @@ final class WalletService: ObservableObject {
         return data
     }
 
-    func importWallet(words: [String], language: MnemonicLanguage = .english) async throws {
+    func importWallet(words: [String], language: MnemonicLanguage? = nil) async throws {
         if let running = importTask {
             try await running.value
             return

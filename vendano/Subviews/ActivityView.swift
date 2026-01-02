@@ -9,7 +9,11 @@ import SwiftUI
 
 struct ActivityView: View {
     @EnvironmentObject var theme: VendanoTheme
+    @Environment(\.openURL) private var openURL
     @StateObject private var state = AppState.shared
+    
+    @State private var selectedAddAdaPath: AddAdaPath? = nil
+    @State private var isShowingReceive = false
 
     // helper: group by start‐of‐day
     private var groupedTxs: [(date: Date, txs: [TxRowViewModel])] {
@@ -35,9 +39,22 @@ struct ActivityView: View {
                 Spacer()
             } else if state.recentTxs.isEmpty {
                 Spacer()
-                Text(L10n.ActivityView.noTransactionHistoryFound)
-                    .vendanoFont(.headline, size: 18, weight: .semibold)
-                    .foregroundColor(theme.color(named: "TextPrimary"))
+//                Text(L10n.ActivityView.noTransactionHistoryFound)
+//                    .vendanoFont(.headline, size: 18, weight: .semibold)
+//                    .foregroundColor(theme.color(named: "TextPrimary"))
+                
+                HowToFundView(
+                    walletAddress: state.walletAddress,
+                    onOpenReceive: {
+                        isShowingReceive = true
+                    },
+                    onOpenBuyAda: {
+                        guard let url = URL(string: "https://vendano.net/getting-ada.html") else { return }
+                        openURL(url)
+                    }
+                )
+                .environmentObject(theme)
+                
                 Spacer()
             } else {
                 Text(L10n.ActivityView.recentActivity)
@@ -77,6 +94,10 @@ struct ActivityView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $isShowingReceive) {
+            ReceiveView(onClose: { isShowingReceive = false })
+                .environmentObject(theme)
         }
     }
 }

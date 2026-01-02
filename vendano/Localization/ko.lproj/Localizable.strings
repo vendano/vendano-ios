@@ -243,3 +243,23 @@
 "WalletService.amountMustBeGreaterThanZero" = "금액은 0보다 커야 합니다.";
 "WalletService.tipCannotBeNegative" = "팁은 음수가 될 수 없습니다.";
 "WalletService.insufficientFunds" = "잔액 부족: 보유 %.6f ADA, 필요 %.6f ADA (수수료 포함).";
+
+"HomeEmptyFunding.title" = "첫 ADA를 받아보세요";
+"HomeEmptyFunding.subtitle" = "아래에서 가장 쉬운 방법을 선택하세요.";
+"HomeEmptyFunding.tip" = "팁: 소액으로 먼저 테스트해 보세요. 짧은 테스트 전송으로 정상 동작을 확인한 뒤 더 큰 금액을 보내면 안심할 수 있어요.";
+
+"HomeEmptyFunding.badgeEasiest" = "가장 쉬움";
+"HomeEmptyFunding.badgeRecommended" = "추천";
+
+"HomeEmptyFunding.cardAskFriendTitle" = "친구에게 ADA 보내달라고 요청하기";
+"HomeEmptyFunding.cardAskFriendSubtitle" = "QR 또는 주소를 공유하고, 먼저 소액을 받아 테스트해 보세요.";
+"HomeEmptyFunding.cardAskFriendCta" = "ADA 요청하기";
+
+"HomeEmptyFunding.cardTransferTitle" = "다른 지갑에서 옮기기";
+"HomeEmptyFunding.cardTransferSubtitle" = "지갑 주소를 복사한 다음, 거래소나 지갑의 ‘보내기’ 화면에 붙여넣으세요.";
+"HomeEmptyFunding.cardTransferCta" = "지갑 주소 복사";
+"HomeEmptyFunding.addressCopiedCta" = "주소가 복사됐어요!";
+
+"HomeEmptyFunding.cardBuyTitle" = "ADA 구매하기";
+"HomeEmptyFunding.cardBuySubtitle" = "구매 방법과 옵션 보기(지역에 따라 이용 가능 여부가 달라요).";
+"HomeEmptyFunding.cardBuyCta" = "ADA 구매 방법";
