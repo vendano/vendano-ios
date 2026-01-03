@@ -434,6 +434,14 @@ enum L10n {
         static func insufficientFunds(_ haveAda: Double, _ needAda: Double) -> String {
             String(format: String(localized: "WalletService.insufficientFunds"), haveAda, needAda)
         }
+
+        static var walletKeychainNotInitialized: String {
+            String(localized: "WalletService.walletKeychainNotInitialized")
+        }
+
+        static var noWalletFound: String {
+            String(localized: "WalletService.noWalletFound")
+        }
     }
 
     enum HomeEmptyFunding {

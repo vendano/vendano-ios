@@ -71,6 +71,18 @@ final class WalletService: ObservableObject {
         return URLSession(configuration: config)
     }()
 
+    enum WalletServiceError: LocalizedError {
+        case keychainNotInitialized
+        case noAccountAfterFetch
+
+        var errorDescription: String? {
+            switch self {
+            case .keychainNotInitialized: return L10n.WalletService.walletKeychainNotInitialized
+            case .noAccountAfterFetch: return L10n.WalletService.noWalletFound
+            }
+        }
+    }
+
     init(priceService: PriceService = CoinbaseService()) {
         self.priceService = priceService
     }
@@ -106,7 +118,9 @@ final class WalletService: ObservableObject {
 
         // 3) Fire the request
         let (data, resp) = try await session.data(for: req)
-        let http = resp as! HTTPURLResponse
+        guard let http = resp as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
 
         // 4) If 304, return the stale data
         if http.statusCode == 304,
@@ -147,7 +161,7 @@ final class WalletService: ObservableObject {
             let stake_address: String? // may be null for enterprise addresses
         }
 
-        let url = URL(string: "\(apiBase)/addresses/\(payment)")!
+        guard let url = URL(string: "\(apiBase)/addresses/\(payment)") else { throw URLError(.badURL) }
         let data = try await getJSON(url)
         let info = try JSONDecoder().decode(AddrInfo.self, from: data)
 
@@ -158,15 +172,16 @@ final class WalletService: ObservableObject {
     func stakeBalances(stake: String) async throws -> (ada: Double, hosky: Double) {
         // ---------- ADA ----------
         struct AccountInfo: Decodable { let controlled_amount: String }
-        let accURL = URL(string: "\(apiBase)/accounts/\(stake)")!
+
+        guard let accURL = URL(string: "\(apiBase)/accounts/\(stake)") else { throw URLError(.badURL) }
         let accData = try await getJSON(accURL)
         let account = try JSONDecoder().decode(AccountInfo.self, from: accData)
         let ada = Double(UInt64(account.controlled_amount) ?? 0) / 1_000_000
 
         // ---------- native assets ----------
         struct AssetRow: Decodable { let unit: String; let quantity: String }
-        let assetURL = URL(string:
-            "\(apiBase)/accounts/\(stake)/addresses/assets?count=100")!
+
+        guard let assetURL = URL(string: "\(apiBase)/accounts/\(stake)/addresses/assets?count=100") else { throw URLError(.badURL) }
         let assetData = try await getJSON(assetURL)
         let assets = try JSONDecoder().decode([AssetRow].self, from: assetData)
 
@@ -200,7 +215,7 @@ final class WalletService: ObservableObject {
             throw error
         }
 
-        guard let keychain = keychain else { fatalError("💥 Keychain init failed!") }
+        guard let keychain = keychain else { throw WalletServiceError.keychainNotInitialized }
 
         // Init Cardano + Blockfrost
         let cardano = try Cardano(
@@ -226,14 +241,12 @@ final class WalletService: ObservableObject {
         for acct in accounts {
             print("   • account index: \(acct.index)")
         }
-        guard let account = accounts.first else {
-            fatalError("No account found after fetch()!")
-        }
+        guard let account = accounts.first else { throw WalletServiceError.noAccountAfterFetch }
 
         let cached = try cardano.addresses.get(cached: account)
         print("⛏️ cached external addresses count: \(cached.count)")
 
-        // …and if none, derive a brand-new one
+        // ...and if none, derive a brand-new one
         let addrObj: Address
         if let first = cached.first {
             addrObj = first
@@ -378,7 +391,7 @@ final class WalletService: ObservableObject {
 
     // Fetch recent transactions for a given address via Blockfrost.
     func fetchTransactions(for addr: String) async throws -> [RawTx] {
-        let listURL = URL(string: "\(apiBase)/addresses/\(addr)/transactions?order=desc")!
+        guard let listURL = URL(string: "\(apiBase)/addresses/\(addr)/transactions?order=desc") else { throw URLError(.badURL) }
         let listData = try await getJSON(listURL)
 
         struct AddressTx: Decodable { let tx_hash: String }
@@ -388,8 +401,8 @@ final class WalletService: ObservableObject {
         var result: [RawTx] = []
 
         for hash in recentHashes {
-            let utxoURL = URL(string: "\(apiBase)/txs/\(hash)/utxos")!
-            let metaURL = URL(string: "\(apiBase)/txs/\(hash)")!
+            guard let utxoURL = URL(string: "\(apiBase)/txs/\(hash)/utxos") else { throw URLError(.badURL) }
+            guard let metaURL = URL(string: "\(apiBase)/txs/\(hash)") else { throw URLError(.badURL) }
 
             async let utxoData = getJSON(utxoURL)
             async let metaData = getJSON(metaURL)
@@ -464,7 +477,8 @@ final class WalletService: ObservableObject {
         let unit = adaHandlePolicy + name.hexEncoded
 
         struct Holder: Decodable { let address: String; let quantity: String }
-        let url = URL(string: "\(apiBase)/assets/\(unit)/addresses?count=100&order=desc")!
+        guard let url = URL(string: "\(apiBase)/assets/\(unit)/addresses?count=100&order=desc") else { throw URLError(.badURL) }
+
         let data = try await getJSON(url)
         let holders = try JSONDecoder().decode([Holder].self, from: data)
 

@@ -194,7 +194,12 @@ open class KeychainWrapper {
             return nil
         }
 
-        return try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(keychainData) as? NSCoding
+        do {
+            return try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(keychainData) as? NSCoding
+        } catch {
+            _ = removeObject(forKey: key, withAccessibility: accessibility)
+            return nil
+        }
     }
 
     /// Returns a Data object for a specified key.

@@ -851,9 +851,12 @@ struct SendView: View {
     private func isValidAdaHandle(_ raw: String) -> Bool {
         let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         let noDollar = s.hasPrefix("$") ? String(s.dropFirst()) : s
-        // allowed: a-z 0-9 . _ -
-        let regex = try! NSRegularExpression(pattern: "^[a-z0-9._-]{1,15}$")
-        return regex.firstMatch(in: noDollar.lowercased(), range: NSRange(location: 0, length: noDollar.count)) != nil
+        let lower = noDollar.lowercased()
+
+        guard (1 ... 15).contains(lower.count) else { return false }
+
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789._-")
+        return lower.unicodeScalars.allSatisfy { allowed.contains($0) }
     }
 
     private func lookupRecipient() {

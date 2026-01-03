@@ -381,14 +381,12 @@ final class AppState: ObservableObject {
 
     func saveImage(img: UIImage) {
         guard let data = img.jpegData(compressionQuality: 0.8) else { return }
-        let encoded = try! PropertyListEncoder().encode(data)
-        UserDefaults.standard.set(encoded, forKey: "avatar")
+        UserDefaults.standard.set(data, forKey: "avatar")
     }
 
     func loadImage() {
         guard let data = UserDefaults.standard.data(forKey: "avatar") else { return }
-        let decoded = try! PropertyListDecoder().decode(Data.self, from: data)
-        if let img = UIImage(data: decoded) {
+        if let img = UIImage(data: data) {
             avatar = Image(uiImage: img)
         }
     }

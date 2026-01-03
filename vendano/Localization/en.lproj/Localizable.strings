@@ -312,3 +312,6 @@
 "StoreView.payNow" = "Pay now";
 "StoreView.paying" = "Paying…";
 "StoreView.cancel" = "Cancel";
+
+"WalletService.walletKeychainNotInitialized" = "Secure storage was not initialized.";
+"WalletService.noWalletFound" = "No wallet account was found after loading addresses.";

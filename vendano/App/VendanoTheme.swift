@@ -39,7 +39,7 @@ class VendanoTheme: ObservableObject {
         }
     }
 
-    // your existing dictionaries…
+    // your existing dictionaries...
     private var lightColors: [String: Color] = [
         "Accent": Color("Accent"),
         "BackgroundEnd": Color("BackgroundEnd"),
