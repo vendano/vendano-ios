@@ -8,6 +8,8 @@
 import LocalAuthentication
 import PhotosUI
 import SwiftUI
+import UserNotifications
+import UIKit
 
 struct ProfileSheet: View {
     @EnvironmentObject var theme: VendanoTheme
@@ -34,6 +36,9 @@ struct ProfileSheet: View {
 
     @State private var useHoskyTheme = false
     @State private var suppressAppearanceReset = false
+    
+    @State private var notificationStatus: UNAuthorizationStatus?
+    @State private var showNotificationsDeniedAlert = false
 
     @FocusState private var focus: Bool
 
@@ -181,10 +186,62 @@ struct ProfileSheet: View {
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextReversed"))
                     ) {
+                        Button {
+                            Task {
+                                let status = await NotificationPermissionManager.shared.getStatus()
+                                notificationStatus = status
+
+                                switch status {
+                                case .notDetermined:
+                                    let granted = await NotificationPermissionManager.shared.request()
+                                    notificationStatus = await NotificationPermissionManager.shared.getStatus()
+                                    if !granted {
+                                        // user tapped "Don't Allow" on the system prompt
+                                        showNotificationsDeniedAlert = true
+                                    }
+
+                                case .denied:
+                                    showNotificationsDeniedAlert = true
+
+                                case .authorized, .provisional, .ephemeral:
+                                    // already enabled; optionally do nothing or show a confirmation toast
+                                    break
+
+                                @unknown default:
+                                    break
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "bell")
+                                Text(L10n.ProfileSheet.notificationsTitle)
+
+                                Spacer()
+
+                                Text(notificationLabel(notificationStatus))
+                                    .foregroundStyle(.secondary)
+
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        .alert(L10n.ProfileSheet.enableNotifications, isPresented: $showNotificationsDeniedAlert) {
+                            Button(L10n.ProfileSheet.openSettings) {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            Button(L10n.Common.cancel, role: .cancel) {}
+                        } message: {
+                            Text(L10n.ProfileSheet.notificationsOff)
+                        }
+
+                        /*
                         Toggle(L10n.ProfileSheet.showStakingRewardsDetails, isOn: $state.isExpertMode)
                             .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
                             .vendanoFont(.body, size: 16)
                             .foregroundColor(theme.color(named: "TextPrimary"))
+                         */
                         
                         Picker(L10n.ProfileSheet.currency, selection: $wallet.fiatCurrency) {
                             ForEach(FiatCurrency.allCases) { currency in
@@ -283,6 +340,23 @@ struct ProfileSheet: View {
                 }
             }
             .preferredColorScheme(resolvedScheme())
+        }
+        .task {
+            notificationStatus = await NotificationPermissionManager.shared.getStatus()
+        }
+    }
+    
+    private func notificationLabel(_ status: UNAuthorizationStatus?) -> String {
+        guard let status else { return L10n.Common.ellipsis }
+        switch status {
+        case .authorized, .provisional, .ephemeral:
+            return L10n.Common.on
+        case .denied:
+            return L10n.Common.off
+        case .notDetermined:
+            return L10n.Common.setUp
+        @unknown default:
+            return L10n.Common.ellipsis
         }
     }
 

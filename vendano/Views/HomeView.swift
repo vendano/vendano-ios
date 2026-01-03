@@ -9,6 +9,9 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var theme: VendanoTheme
+    @AppStorage("notifications_primer_dismissed") private var notificationPrimerDismissed = false
+    @State private var showNotificationPrimer = false
+
     @State private var showSend = false
     @State private var showReceive = false
     @State private var showProfile = false
@@ -84,6 +87,23 @@ struct HomeView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         showProfile = true
+                    }
+                    
+                    if showNotificationPrimer {
+                        NotificationPrimerCard(
+                            onEnable: {
+                                Task {
+                                    _ = await NotificationPermissionManager.shared.request()
+                                    notificationPrimerDismissed = true
+                                    showNotificationPrimer = false
+                                }
+                            },
+                            onNotNow: {
+                                notificationPrimerDismissed = true
+                                showNotificationPrimer = false
+                            }
+                        )
+                        .transition(.opacity)
                     }
 
                     // Main balance card
@@ -194,6 +214,15 @@ struct HomeView: View {
         }
         .task {
             await nftVM.loadNFTs()
+        }
+        .task {
+            guard !notificationPrimerDismissed else { return }
+            guard !showSend && !showReceive else { return }
+
+            let status = await NotificationPermissionManager.shared.getStatus()
+            if status == .notDetermined {
+                showNotificationPrimer = true
+            }
         }
         .onChange(of: state.walletAddress) { _, _ in
             Task { await nftVM.loadNFTs() }

@@ -5,14 +5,17 @@ enum L10n {
         static var adaUnit: String { String(localized: "Common.adaUnit") }
         static let back: LocalizedStringKey = "Common.back"
         static let cancel: LocalizedStringKey = "Common.cancel"
+        static var cancelString: String { String(localized: "Common.cancel") }
         static let close: LocalizedStringKey = "Common.close"
         static let confirm: LocalizedStringKey = "Common.confirm"
         static let `continue`: LocalizedStringKey = "Common.continue"
         static let delete: LocalizedStringKey = "Common.delete"
         static let done: LocalizedStringKey = "Common.done"
         static let edit: LocalizedStringKey = "Common.edit"
+        static let enable: LocalizedStringKey = "Common.enable"
         static var hoskyToken: String { String(localized: "Common.token.hosky") }
         static let next: LocalizedStringKey = "Common.next"
+        static var notNow: String { String(localized: "Common.notNow") }
         static let ok: LocalizedStringKey = "Common.ok"
         static let remove: LocalizedStringKey = "Common.remove"
         static let retry: LocalizedStringKey = "Common.retry"
@@ -20,6 +23,11 @@ enum L10n {
         static let skip: LocalizedStringKey = "Common.skip"
         static var unnamed: String { String(localized: "Common.unnamed") }
         static var unknownError: String { String(localized: "Common.unknownError") }
+        
+        static var on: String { String(localized: "Common.on") }
+        static var off: String { String(localized: "Common.off") }
+        static var setUp: String { String(localized: "Common.setUp") }
+        static var ellipsis: String { String(localized: "Common.ellipsis") }
     }
 
     enum ActivityView {
@@ -254,6 +262,10 @@ enum L10n {
         static let namePhoto: LocalizedStringKey = "ProfileSheet.namePhoto"
         static let showStakingRewardsDetails: LocalizedStringKey = "ProfileSheet.showStakingRewardsDetails"
         static let thisRemovesYourNamePictureAndProfileInfo: LocalizedStringKey = "ProfileSheet.thisRemovesYourNamePictureAndProfileInfo"
+        static var enableNotifications: String { String(localized: "ProfileSheet.enableNotifications") }
+        static var notificationsOff: String { String(localized: "ProfileSheet.notificationsOff") }
+        static let openSettings: LocalizedStringKey = "ProfileSheet.openSettings"
+        static var notificationsTitle: String { String(localized: "ProfileSheet.notificationsTitle") }
     }
 
     enum ReceiveView {
@@ -333,27 +345,38 @@ enum L10n {
         static func couldNotEstimateFeeWithMessage(_ message: String) -> String {
             String(format: String(localized: "SendView.couldNotEstimateFeeWithMessage"), message)
         }
-        static var couldNotEstimateFeeTryAgain: String {
-            String(localized: "SendView.couldNotEstimateFeeTryAgain")
+        static var couldNotEstimateFeeTryAgain: String { String(localized: "SendView.couldNotEstimateFeeTryAgain")
         }
-        static var couldNotCalculateMaxSendable: String {
-            String(localized: "SendView.couldNotCalculateMaxSendable")
+        static var couldNotCalculateMaxSendable: String { String(localized: "SendView.couldNotCalculateMaxSendable")
         }
-        static var enterValidAmount: String {
-            String(localized: "SendView.enterValidAmount")
+        static var enterValidAmount: String { String(localized: "SendView.enterValidAmount")
         }
-        static var confirmBeforeSendingReason: String {
-            String(localized: "SendView.confirmBeforeSendingReason")
+        static var confirmBeforeSendingReason: String { String(localized: "SendView.confirmBeforeSendingReason")
         }
-        static func maxSendableDueToTokens(_ formattedAda: String) -> String {
-            String(format: String(localized: "SendView.maxSendableDueToTokens"), formattedAda)
+        static func maxSendableDueToTokens(_ formattedAda: String) -> String { String(format: String(localized: "SendView.maxSendableDueToTokens"), formattedAda)
         }
-        static var cardanoRejectedMinAdaWithTokens: String {
-            String(localized: "SendView.cardanoRejectedMinAdaWithTokens")
+        static var cardanoRejectedMinAdaWithTokens: String { String(localized: "SendView.cardanoRejectedMinAdaWithTokens")
         }
-        static var recipientCardanoAddress: String {
-            String(localized: "SendView.recipientCardanoAddress")
+        static var recipientCardanoAddress: String { String(localized: "SendView.recipientCardanoAddress")
         }
+        
+        static func vendanoFeeFormat(_ message: String) -> String {
+            String(format: String(localized: "SendView.vendanoFeeFormat"), message)
+        }
+        static var authPrimerTitle: String { String(localized: "SendView.authPrimerTitle") }
+        static func authPrimerMessage(_ message: String) -> String {
+            String(format: String(localized: "SendView.authPrimerMessage"), message)
+        }
+        static var authPasscode: String { String(localized: "SendView.authPasscode") }
+        static var authFaceId: String { String(localized: "SendView.authFaceId") }
+        static var authTouchId: String { String(localized: "SendView.authTouchId") }
+        static var authBiometrics: String { String(localized: "SendView.authBiometrics") }
+        static var authFailed: String { String(localized: "SendView.authFailed") }
+        
+        static func authLockedFormat(_ message: String) -> String {
+            String(format: String(localized: "SendView.authLockedFormat"), message)
+        }
+        
     }
 
     enum SplashView {
@@ -419,4 +442,9 @@ enum L10n {
         static let addressCopiedCta = NSLocalizedString("HomeEmptyFunding.addressCopiedCta", comment: "")
     }
 
+    enum NotificationPrimerCard {
+        static let title = NSLocalizedString("NotificationPrimerCard.title", comment: "")
+        static let details = NSLocalizedString("NotificationPrimerCard.details", comment: "")
+    }
+    
 }

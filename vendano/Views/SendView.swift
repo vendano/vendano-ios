@@ -30,6 +30,9 @@ enum SendMethod: String, CaseIterable, Identifiable {
 
 struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
+    
+    @AppStorage("didShowSendAuthPrimer") private var didShowSendAuthPrimer = false
+    @State private var showSendAuthPrimer = false
 
     @StateObject private var state = AppState.shared
     @StateObject private var wallet = WalletService.shared
@@ -423,7 +426,8 @@ struct SendView: View {
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text("Vendano fee (\(Config.vendanoAppFeePercentFormatted))")
+                                    Text(String(format: String(localized: "SendView.vendanoFeeFormat"),
+                                                Config.vendanoAppFeePercentFormatted))
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                     
@@ -460,7 +464,11 @@ struct SendView: View {
                     Section {
                         if recipient != nil || sendMethod == .address {
                             Button {
-                                authenticateAndSend()
+                                if shouldShowSendAuthPrimer() {
+                                    showSendAuthPrimer = true
+                                } else {
+                                    authenticateAndSend()
+                                }
                             } label: {
                                 Label(L10n.SendView.sendAda, systemImage: "paperplane.fill")
                                     .vendanoFont(.body, size: 16)
@@ -542,7 +550,7 @@ struct SendView: View {
         }
         // success alert
         .alert(L10n.SendView.adaSent, isPresented: $sendSuccess) {
-            Button("OK", action: onClose)
+            Button(L10n.Common.ok, action: onClose)
         } message: {
             Text(L10n.SendView.yourAdaHasBeenSuccessfullySentYouLl)
                 .vendanoFont(.body, size: 16)
@@ -566,6 +574,16 @@ struct SendView: View {
             Text(inviteMessage)
                 .vendanoFont(.body, size: 16)
                 .foregroundColor(theme.color(named: "TextPrimary"))
+        }
+        // Face ID alert
+        .alert(L10n.SendView.authPrimerTitle, isPresented: $showSendAuthPrimer) {
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.continue) {
+                didShowSendAuthPrimer = true
+                authenticateAndSend()
+            }
+        } message: {
+            Text(L10n.SendView.authPrimerMessage(authMethodName()))
         }
         .sheet(item: $shareInvite) { invitation in
             ZStack {
@@ -605,17 +623,34 @@ struct SendView: View {
                     ShareActivityView(activityItems: [invitation.text])
                 }
             }
-            .onAppear {
-                checkNotificationPermission()
-            }
             .alert(L10n.SendView.enableNotifications, isPresented: $showNotificationPrompt) {
                 Button(L10n.SendView.allow) { requestPushPermission() }
-                Button("Not Now", role: .cancel) {}
+                Button(L10n.Common.notNow, role: .cancel) {}
             } message: {
                 Text(L10n.SendView.vendanoUsesNotificationsToLetYouKnowWhen)
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(theme.color(named: "TextPrimary"))
             }
+        }
+    }
+    
+    private func shouldShowSendAuthPrimer() -> Bool {
+        guard !didShowSendAuthPrimer else { return false }
+        let ctx = LAContext()
+        var err: NSError?
+        return ctx.canEvaluatePolicy(.deviceOwnerAuthentication, error: &err)
+    }
+
+    private func authMethodName() -> String {
+        let ctx = LAContext()
+        var err: NSError?
+        guard ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &err) else {
+            return L10n.SendView.authPasscode
+        }
+        switch ctx.biometryType {
+        case .faceID:  return L10n.SendView.authFaceId
+        case .touchID: return L10n.SendView.authTouchId
+        default:       return L10n.SendView.authBiometrics
         }
     }
 
@@ -634,16 +669,6 @@ struct SendView: View {
         // if it starts “.”, prefix with “0”
         if filtered.first == "." { filtered = "0" + filtered }
         return filtered
-    }
-
-    func checkNotificationPermission() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            if settings.authorizationStatus == .notDetermined {
-                DispatchQueue.main.async {
-                    showNotificationPrompt = true
-                }
-            }
-        }
     }
 
     func requestPushPermission() {
@@ -720,18 +745,36 @@ struct SendView: View {
 
     private func authenticateAndSend() {
         let ctx = LAContext()
+        ctx.localizedCancelTitle = L10n.Common.cancelString
+
         var authErr: NSError?
-        if ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authErr) {
-            ctx.evaluatePolicy(
-                .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: L10n.SendView.confirmBeforeSendingReason
-            ) { success, _ in
-                if success {
-                    Task { await sendTransaction() }
+        let policy: LAPolicy = .deviceOwnerAuthentication   // ✅ allows passcode fallback
+
+        guard ctx.canEvaluatePolicy(policy, error: &authErr) else {
+            Task { await sendTransaction() }
+            return
+        }
+
+        ctx.evaluatePolicy(policy, localizedReason: L10n.SendView.confirmBeforeSendingReason) { success, error in
+            if success {
+                Task { await sendTransaction() }
+            } else {
+                Task { @MainActor in
+                    if let laError = error as? LAError {
+                        switch laError.code {
+                        case .userCancel, .systemCancel, .appCancel:
+                            // user backed out — no need to scare them with “error”
+                            return
+                        case .biometryLockout:
+                            sendError = L10n.SendView.authLockedFormat(authMethodName().capitalized)
+                        default:
+                            sendError = L10n.SendView.authFailed
+                        }
+                    } else {
+                        sendError = L10n.SendView.authFailed
+                    }
                 }
             }
-        } else {
-            Task { await sendTransaction() }
         }
     }
 
@@ -783,7 +826,7 @@ struct SendView: View {
 
             // 🧠 Translate the FeeTooSmallUTxO noise into human language
             let lower = friendly.lowercased()
-            if lower.contains("feettoosmallutxo") {
+            if lower.contains("feetoosmallutxo") || (lower.contains("fee") && lower.contains("small")) {
                 friendly = L10n.SendView.cardanoRejectedMinAdaWithTokens
             }
 

@@ -237,3 +237,26 @@
 "HomeEmptyFunding.cardBuyTitle" = "ADAを購入する";
 "HomeEmptyFunding.cardBuySubtitle" = "購入手順と選択肢を見る（利用可否は地域によって異なります）。";
 "HomeEmptyFunding.cardBuyCta" = "ADAの購入方法";
+
+"Common.notNow" = "今はしない";
+"SendView.vendanoFeeFormat" = "Vendano手数料（%@）";
+"SendView.authPrimerTitle" = "セキュリティ確認";
+"SendView.authPrimerMessage" = "セキュリティのため、Vendanoは送金の確認に%@（またはパスコード）を求めます。";
+"SendView.authPasscode" = "パスコード";
+"SendView.authFaceId" = "Face ID";
+"SendView.authTouchId" = "Touch ID";
+"SendView.authBiometrics" = "生体認証";
+"SendView.authFailed" = "認証に失敗しました。もう一度お試しください。";
+"SendView.authLockedFormat" = "%@がロックされています。もう一度お試しいただくか、パスコードを使用してください。";
+
+"Common.on" = "オン";
+"Common.off" = "オフ";
+"Common.setUp" = "設定";
+"Common.ellipsis" = "...";
+"Common.enable" = "有効にする";
+"ProfileSheet.notificationsOff" = "現在、通知はオフになっています。有効にするには「設定」→「通知」→「Vendano」を開き、通知を許可してください。";
+"ProfileSheet.enableNotifications" = "設定で通知を有効にする";
+"ProfileSheet.openSettings" = "設定を開く";
+"ProfileSheet.notificationsTitle" = "通知";
+"NotificationPrimerCard.title" = "通知をオンにしますか？";
+"NotificationPrimerCard.details" = "ADAを受け取ったときに通知します（今後さらに追加予定）。";

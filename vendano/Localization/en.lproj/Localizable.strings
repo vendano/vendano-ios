@@ -239,3 +239,25 @@
 "HomeEmptyFunding.cardBuySubtitle" = "See options and steps (availability depends on your region).";
 "HomeEmptyFunding.cardBuyCta" = "How to buy ADA";
 
+"Common.notNow" = "Not now";
+"SendView.vendanoFeeFormat" = "Vendano fee (%@)";
+"SendView.authPrimerTitle" = "Security check";
+"SendView.authPrimerMessage" = "For your security, Vendano will ask for %@ (or your passcode) to confirm sends.";
+"SendView.authPasscode" = "your passcode";
+"SendView.authFaceId" = "Face ID";
+"SendView.authTouchId" = "Touch ID";
+"SendView.authBiometrics" = "biometrics";
+"SendView.authFailed" = "Authentication failed. Please try again.";
+"SendView.authLockedFormat" = "%@ is locked. Try again or use your passcode.";
+
+"Common.on" = "On";
+"Common.off" = "Off";
+"Common.setUp" = "Set up";
+"Common.ellipsis" = "...";
+"Common.enable" = "enable";
+"ProfileSheet.notificationsOff" = "Notifications are currently off. To enable them, open Settings → Notifications → Vendano and allow alerts.";
+"ProfileSheet.enableNotifications" = "Enable notifications in Settings";
+"ProfileSheet.openSettings" = "Open Settings";
+"ProfileSheet.notificationsTitle" = "Notifications";
+"NotificationPrimerCard.title" = "Turn on notifications?";
+"NotificationPrimerCard.details" = "Get alerts when you receive ADA (and more soon).";

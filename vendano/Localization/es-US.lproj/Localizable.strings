@@ -264,3 +264,25 @@
 "HomeEmptyFunding.cardBuySubtitle" = "Ver opciones y pasos (la disponibilidad depende de tu región).";
 "HomeEmptyFunding.cardBuyCta" = "Cómo comprar ADA";
 
+"Common.notNow" = "Ahora no";
+"SendView.vendanoFeeFormat" = "Comisión de Vendano (%@)";
+"SendView.authPrimerTitle" = "Verificación de seguridad";
+"SendView.authPrimerMessage" = "Por tu seguridad, Vendano te pedirá %@ (o tu código) para confirmar envíos.";
+"SendView.authPasscode" = "tu código";
+"SendView.authFaceId" = "Face ID";
+"SendView.authTouchId" = "Touch ID";
+"SendView.authBiometrics" = "biometría";
+"SendView.authFailed" = "La autenticación falló. Intenta de nuevo.";
+"SendView.authLockedFormat" = "%@ está bloqueado. Intenta de nuevo o usa tu código.";
+
+"Common.on" = "Activadas";
+"Common.off" = "Desactivadas";
+"Common.setUp" = "Configurar";
+"Common.ellipsis" = "...";
+"Common.enable" = "Activar";
+"ProfileSheet.notificationsOff" = "Las notificaciones están desactivadas. Para activarlas, abre Configuración → Notificaciones → Vendano y permite las alertas.";
+"ProfileSheet.enableNotifications" = "Activa las notificaciones en Configuración";
+"ProfileSheet.openSettings" = "Abrir Configuración";
+"ProfileSheet.notificationsTitle" = "Notificaciones";
+"NotificationPrimerCard.title" = "¿Activar notificaciones?";
+"NotificationPrimerCard.details" = "Recibe alertas cuando te envíen ADA (y más funciones pronto).";

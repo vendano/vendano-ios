@@ -263,3 +263,26 @@
 "HomeEmptyFunding.cardBuyTitle" = "ADA 구매하기";
 "HomeEmptyFunding.cardBuySubtitle" = "구매 방법과 옵션 보기(지역에 따라 이용 가능 여부가 달라요).";
 "HomeEmptyFunding.cardBuyCta" = "ADA 구매 방법";
+
+"Common.notNow" = "나중에";
+"SendView.vendanoFeeFormat" = "Vendano 수수료(%@)";
+"SendView.authPrimerTitle" = "보안 확인";
+"SendView.authPrimerMessage" = "보안을 위해 Vendano에서 송금 확인을 위해 %@ (또는 암호)를 요청합니다.";
+"SendView.authPasscode" = "암호";
+"SendView.authFaceId" = "Face ID";
+"SendView.authTouchId" = "Touch ID";
+"SendView.authBiometrics" = "생체 인증";
+"SendView.authFailed" = "인증에 실패했습니다. 다시 시도해 주세요.";
+"SendView.authLockedFormat" = "%@이(가) 잠겨 있습니다. 다시 시도하거나 암호를 사용해 주세요.";
+
+"Common.on" = "켬";
+"Common.off" = "끔";
+"Common.setUp" = "설정";
+"Common.ellipsis" = "...";
+"Common.enable" = "활성화";
+"ProfileSheet.notificationsOff" = "현재 알림이 꺼져 있습니다. 알림을 켜려면 설정 → 알림 → Vendano로 이동한 다음 알림 허용을 켜세요.";
+"ProfileSheet.enableNotifications" = "설정에서 알림 켜기";
+"ProfileSheet.openSettings" = "설정 열기";
+"ProfileSheet.notificationsTitle" = "알림";
+"NotificationPrimerCard.title" = "알림을 켤까요?";
+"NotificationPrimerCard.details" = "ADA를 받으면 알림을 보내드려요(곧 더 많은 기능도 추가됩니다).";
