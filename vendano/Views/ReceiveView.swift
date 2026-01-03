@@ -12,6 +12,7 @@ import SwiftUI
 struct ReceiveView: View {
     @EnvironmentObject var theme: VendanoTheme
     @Environment(\.openURL) private var openURL
+    @AppStorage("receive.mode") private var receiveModeStored: String = ReceiveMode.personal.rawValue
 
     @StateObject private var state = AppState.shared
     @StateObject private var wallet = WalletService.shared
@@ -21,6 +22,14 @@ struct ReceiveView: View {
     @State private var qrImage: UIImage? = nil
     
     @State private var isShowingShareSheet = false
+
+    enum ReceiveMode: String, CaseIterable, Identifiable {
+        case personal
+        case store
+        var id: String { rawValue }
+    }
+
+    @State private var receiveMode: ReceiveMode = .personal
 
     private let context = CIContext()
     private let filter = CIFilter.qrCodeGenerator()
@@ -39,7 +48,16 @@ struct ReceiveView: View {
                     }
                 }
 
+                Picker("", selection: $receiveMode) {
+                    Text(L10n.StoreView.personalTab).tag(ReceiveMode.personal)
+                    Text(L10n.StoreView.storeTab).tag(ReceiveMode.store)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+
                 ScrollView {
+                    if receiveMode == .personal {
+
                     VStack(spacing: 8) {
                         
                         HStack(spacing: 8) {
@@ -169,10 +187,28 @@ struct ReceiveView: View {
                         Spacer()
                     }
                     .padding()
-                }
+                
+                    } else {
+                        ReceiveStoreView()
+                            .padding(.horizontal)
+                    }
+}
                 .padding()
             }
             .padding()
+        }
+        .onAppear {
+            // initialize state from storage
+            let stored = ReceiveMode(rawValue: receiveModeStored) ?? .personal
+            if stored == .store,
+               state.storeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                receiveMode = .personal
+            } else {
+                receiveMode = stored
+            }
+        }
+        .onChange(of: receiveMode) { _, newValue in
+            receiveModeStored = newValue.rawValue
         }
         .overlay(alignment: .top) {
             if state.displayToast {

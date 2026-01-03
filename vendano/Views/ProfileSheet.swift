@@ -179,6 +179,59 @@ struct ProfileSheet: View {
                         }
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
+
+                    Section(
+                        header:
+                        Text(L10n.StoreView.storeSettings)
+                            .vendanoFont(.headline, size: 18, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed"))
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(L10n.StoreView.storeName)
+                                .vendanoFont(.caption, size: 13, weight: .semibold)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
+                            TextField(L10n.StoreView.storeNamePlaceholder, text: $state.storeName)
+                                .textInputAutocapitalization(.words)
+                                .submitLabel(.done)
+                                .vendanoFont(.body, size: 16)
+                                .foregroundColor(theme.color(named: "TextPrimary"))
+                                .padding(12)
+                                .background(theme.color(named: "FieldBackground"))
+                                .cornerRadius(10)
+                        }
+                        .padding(.vertical, 6)
+
+                        Picker(L10n.StoreView.defaultPricingCurrency, selection: $state.storeDefaultPricingCurrency) {
+                            Text(L10n.StoreView.defaultPricingLocalCurrency).tag(PricingCurrency.fiat)
+                            Text(L10n.StoreView.defaultPricingAda).tag(PricingCurrency.ada)
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(L10n.StoreView.exchangeRateBuffer)
+                                Spacer()
+                                Text(L10n.StoreView.percentValue(Int((state.storeExchangeRateBufferPercent * 100).rounded())))
+                                    .foregroundColor(theme.color(named: "TextSecondary"))
+                            }
+                            .vendanoFont(.body, size: 16)
+
+                            Slider(value: $state.storeExchangeRateBufferPercent, in: 0...0.25, step: 0.01)
+                                .tint(theme.color(named: "Accent"))
+
+                            Text(L10n.StoreView.exchangeRateBufferHelp)
+                                .vendanoFont(.caption, size: 13)
+                                .foregroundColor(theme.color(named: "TextSecondary"))
+                        }
+                        .padding(.vertical, 6)
+
+                        Toggle(L10n.StoreView.enableTips, isOn: $state.storeTipsEnabled)
+                            .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
+                            .vendanoFont(.body, size: 16)
+                            .foregroundColor(theme.color(named: "TextPrimary"))
+                    }
+                    .listRowBackground(theme.color(named: "CellBackground"))
+
+                    
                     
                     Section(
                         header:
@@ -257,7 +310,7 @@ struct ProfileSheet: View {
                             await wallet.loadPrice()
                         }
                     }
-
+                    
                     Section(
                         header:
                         Text(L10n.ProfileSheet.dangerZone)

@@ -22,6 +22,37 @@ final class AppState: ObservableObject {
     @Published var avatar: Image?
     @Published var avatarUrl: String?
     @Published var displayName: String = ""
+
+    // MARK: - Store settings (for accepting payments)
+    @Published var storeName: String = UserDefaults.standard.string(forKey: "VendanoStoreName") ?? "" {
+        didSet { UserDefaults.standard.set(storeName, forKey: "VendanoStoreName") }
+    }
+
+    @Published var storeDefaultPricingCurrency: PricingCurrency = {
+        if let raw = UserDefaults.standard.string(forKey: "VendanoStoreDefaultPricingCurrency"),
+           let val = PricingCurrency(rawValue: raw) {
+            return val
+        }
+        return .fiat
+    }() {
+        didSet { UserDefaults.standard.set(storeDefaultPricingCurrency.rawValue, forKey: "VendanoStoreDefaultPricingCurrency") }
+    }
+
+    @Published var storeExchangeRateBufferPercent: Double = {
+        if UserDefaults.standard.object(forKey: "VendanoStoreBufferPercent") == nil { return 0.05 }
+        return UserDefaults.standard.double(forKey: "VendanoStoreBufferPercent")
+    }() {
+        didSet { UserDefaults.standard.set(storeExchangeRateBufferPercent, forKey: "VendanoStoreBufferPercent") }
+    }
+
+    @Published var storeTipsEnabled: Bool = {
+        if UserDefaults.standard.object(forKey: "VendanoStoreTipsEnabled") == nil { return true }
+        return UserDefaults.standard.bool(forKey: "VendanoStoreTipsEnabled")
+    }() {
+        didSet { UserDefaults.standard.set(storeTipsEnabled, forKey: "VendanoStoreTipsEnabled") }
+    }
+
+
     @Published var otpEmail: String?
     @Published var otpPhone: String?
     @Published var phone: [String] = []

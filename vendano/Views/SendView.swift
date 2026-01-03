@@ -34,6 +34,8 @@ struct SendView: View {
     @AppStorage("didShowSendAuthPrimer") private var didShowSendAuthPrimer = false
     @State private var showSendAuthPrimer = false
 
+    @State private var showTapToPay = false
+
     @StateObject private var state = AppState.shared
     @StateObject private var wallet = WalletService.shared
     @StateObject private var kb = KeyboardGuardian()
@@ -143,6 +145,18 @@ struct SendView: View {
 
                 // form
                 Form {
+
+                    Section {
+                        Button {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            showTapToPay = true
+                        } label: {
+                            Label(L10n.StoreView.tapToPay, systemImage: "wave.3.right")
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
+                    }
+                    .listRowBackground(theme.color(named: "CellBackground"))
+
                     Section(header: Text(L10n.SendView.to)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
                         .foregroundColor(theme.color(named: "TextReversed"))
@@ -584,6 +598,10 @@ struct SendView: View {
             }
         } message: {
             Text(L10n.SendView.authPrimerMessage(authMethodName()))
+        }
+        .sheet(isPresented: $showTapToPay) {
+            TapToPayPayerView()
+                .environmentObject(theme)
         }
         .sheet(item: $shareInvite) { invitation in
             ZStack {

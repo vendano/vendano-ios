@@ -447,4 +447,98 @@ enum L10n {
         static let details = NSLocalizedString("NotificationPrimerCard.details", comment: "")
     }
     
+
+
+    enum StoreView {
+        static let personalTab = NSLocalizedString("StoreView.personalTab", comment: "")
+        static let storeTab = NSLocalizedString("StoreView.storeTab", comment: "")
+
+        static let storeSettings = NSLocalizedString("StoreView.storeSettings", comment: "")
+        static let storeName = NSLocalizedString("StoreView.storeName", comment: "")
+        static let storeNamePlaceholder = NSLocalizedString("StoreView.storeNamePlaceholder", comment: "")
+        static let storeNameNotSet = NSLocalizedString("StoreView.storeNameNotSet", comment: "")
+        static let storeNameSetupHint = NSLocalizedString("StoreView.storeNameSetupHint", comment: "")
+        static let defaultStoreNameFallback = NSLocalizedString("StoreView.defaultStoreNameFallback", comment: "")
+
+        static let defaultPricingCurrency = NSLocalizedString("StoreView.defaultPricingCurrency", comment: "")
+        static let defaultPricingLocalCurrency = NSLocalizedString("StoreView.defaultPricingLocalCurrency", comment: "")
+        static let defaultPricingAda = NSLocalizedString("StoreView.defaultPricingAda", comment: "")
+
+        static let exchangeRateBuffer = NSLocalizedString("StoreView.exchangeRateBuffer", comment: "")
+        static let exchangeRateBufferHelp = NSLocalizedString("StoreView.exchangeRateBufferHelp", comment: "")
+        static let enableTips = NSLocalizedString("StoreView.enableTips", comment: "")
+
+        static func percentValue(_ value: Int) -> String {
+            String(format: NSLocalizedString("StoreView.percentValue", comment: ""), value)
+        }
+
+        static let acceptPaymentsSubtitle = NSLocalizedString("StoreView.acceptPaymentsSubtitle", comment: "")
+        static let amountPlaceholder = NSLocalizedString("StoreView.amountPlaceholder", comment: "")
+        static let convertsToAda = NSLocalizedString("StoreView.convertsToAda", comment: "")
+
+        static func rateAndBuffer(_ currencyCode: String, _ rate: Double, _ bufferPercent: Int, _ bufferedFiat: Double) -> String {
+            String(format: NSLocalizedString("StoreView.rateAndBuffer", comment: ""), currencyCode, rate, bufferPercent, bufferedFiat)
+        }
+
+        static func fetchingRate(_ currencyCode: String) -> String {
+            String(format: NSLocalizedString("StoreView.fetchingRate", comment: ""), currencyCode)
+        }
+
+        static let refreshRate = NSLocalizedString("StoreView.refreshRate", comment: "")
+
+        static func approxFiat(_ currencyCode: String, _ fiat: Double) -> String {
+            String(format: NSLocalizedString("StoreView.approxFiat", comment: ""), currencyCode, fiat)
+        }
+
+        static let fiatApproxUnavailable = NSLocalizedString("StoreView.fiatApproxUnavailable", comment: "")
+
+        static let tapToCollect = NSLocalizedString("StoreView.tapToCollect", comment: "")
+        static let readyToCollectTitle = NSLocalizedString("StoreView.readyToCollectTitle", comment: "")
+        static let readyToCollectSubtitle = NSLocalizedString("StoreView.readyToCollectSubtitle", comment: "")
+        static let waitingForCustomer = NSLocalizedString("StoreView.waitingForCustomer", comment: "")
+
+        static func connectedTo(_ names: String) -> String {
+            String(format: NSLocalizedString("StoreView.connectedTo", comment: ""), names)
+        }
+
+        static func paymentComplete(_ txHash: String) -> String {
+            String(format: NSLocalizedString("StoreView.paymentComplete", comment: ""), txHash)
+        }
+
+        static let paymentAccepted = NSLocalizedString("StoreView.paymentAccepted", comment: "")
+        static let paymentDeclined = NSLocalizedString("StoreView.paymentDeclined", comment: "")
+
+        static func paymentFailed(_ message: String) -> String {
+            String(format: NSLocalizedString("StoreView.paymentFailed", comment: ""), message)
+        }
+
+        static let paymentExpired = NSLocalizedString("StoreView.paymentExpired", comment: "")
+        static let paymentCancelled = NSLocalizedString("StoreView.paymentCancelled", comment: "")
+
+        static let tapToPay = NSLocalizedString("StoreView.tapToPay", comment: "")
+        static let tapToPayTitle = NSLocalizedString("StoreView.tapToPayTitle", comment: "")
+        static let tapToPaySubtitle = NSLocalizedString("StoreView.tapToPaySubtitle", comment: "")
+        static let searchingForMerchant = NSLocalizedString("StoreView.searchingForMerchant", comment: "")
+
+        static func payStoreTitle(_ storeName: String) -> String {
+            String(format: NSLocalizedString("StoreView.payStoreTitle", comment: ""), storeName)
+        }
+
+        static let addTip = NSLocalizedString("StoreView.addTip", comment: "")
+        static let networkFee = NSLocalizedString("StoreView.networkFee", comment: "")
+        static let calculating = NSLocalizedString("StoreView.calculating", comment: "")
+
+        static func vendanoFeePaidByStore(_ percentText: String) -> String {
+            String(format: NSLocalizedString("StoreView.vendanoFeePaidByStore", comment: ""), percentText)
+        }
+
+        static let storeReceives = NSLocalizedString("StoreView.storeReceives", comment: "")
+        static let youPayTotal = NSLocalizedString("StoreView.youPayTotal", comment: "")
+
+        static let payNow = NSLocalizedString("StoreView.payNow", comment: "")
+        static let paying = NSLocalizedString("StoreView.paying", comment: "")
+        static let cancel = NSLocalizedString("StoreView.cancel", comment: "")
+    }
+
+
 }

@@ -403,3 +403,227 @@ extension WalletService {
         }
     }
 }
+
+
+// MARK: - Store payments (store pays Vendano fee)
+
+@MainActor
+extension WalletService {
+
+    /// Store payment where the payer pays `baseAda + tipAda`, and the Vendano fee is taken from the merchant's side
+    /// (merchant receives `base - fee + tip`). Network fee is still paid by the payer (normal Cardano behavior).
+    func sendStorePayment(
+        to merchantAddress: String,
+        baseAda: Double,
+        tipAda: Double
+    ) async throws -> String {
+
+        guard baseAda > 0 else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 24,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.amountMustBeGreaterThanZero]
+            )
+        }
+        guard tipAda >= 0 else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 25,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.tipCannotBeNegative]
+            )
+        }
+
+        guard let cardano = cardano else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 20,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
+            )
+        }
+
+        guard let acct = cardano.addresses.fetchedAccounts().first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 21,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
+            )
+        }
+
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 23,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
+            )
+        }
+
+        let utxos: [CardanoCore.TransactionUnspentOutput]
+        if !currentUtxos.isEmpty {
+            utxos = currentUtxos
+        } else {
+            let fetched = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+            currentUtxos = fetched
+            utxos = fetched
+        }
+
+        debugLogUtxos(utxos, context: "sendStorePayment")
+
+        let totalLovelace = utxos.reduce(UInt64(0)) { $0 + $1.output.amount.coin }
+
+        let toAddr = try CardanoCore.Address(bech32: merchantAddress)
+
+        let baseCoin = VendanoWalletMath.adaToLovelace(baseAda)
+
+        // Keep prior behavior: tips under 1 ADA are waived (optional; you can remove this later)
+        let tipCoin: UInt64 = tipAda < 1 ? 0 : VendanoWalletMath.adaToLovelace(tipAda)
+
+        // Fee is calculated from the *base* amount only (tip excluded)
+        let feeCoin = VendanoWalletMath.vendanoFeeLovelace(
+            forSendLovelace: baseCoin,
+            percent: Config.vendanoAppFeePercent
+        )
+
+        // Merchant receives base - fee + tip (fee is store-paid)
+        let merchantCoin: UInt64 = (feeCoin > baseCoin ? 0 : (baseCoin - feeCoin)) + tipCoin
+
+        let (txBody, required) = try buildCandidateTransactionStore(
+            cardano: cardano,
+            utxos: utxos,
+            changeAddr: changeAddr,
+            toAddr: toAddr,
+            merchantCoin: merchantCoin,
+            feeCoin: feeCoin
+        )
+
+        guard totalLovelace >= required else {
+            let haveAda = Double(totalLovelace) / 1_000_000
+            let needAda = Double(required) / 1_000_000
+            let msg = L10n.WalletService.insufficientFunds(haveAda, needAda)
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 22,
+                userInfo: [NSLocalizedDescriptionKey: msg]
+            )
+        }
+
+        // 🔐 Minimal signer set: only addresses that actually hold UTxOs
+        let signerBaseAddrs: [CardanoCore.Address] = {
+            var seen = Set<String>()
+            var result: [CardanoCore.Address] = []
+
+            for u in utxos {
+                let bech = (try? u.output.address.bech32()) ?? ""
+                guard !bech.isEmpty else { continue }
+                if seen.insert(bech).inserted {
+                    if let addr = try? CardanoCore.Address(bech32: bech) {
+                        result.append(addr)
+                    }
+                }
+            }
+
+            return result
+        }()
+
+        let signers = try cardano.addresses
+            .extended(addresses: signerBaseAddrs)
+            .map(\.address)
+
+        DebugLogger.log("🏪 [storepay] signing with \(signers.count) addresses (utxo-backed)")
+
+        let txHash = try await withCheckedThrowingContinuation { cont in
+            cardano.tx.signAndSubmit(
+                tx: txBody,
+                with: signers,
+                auxiliaryData: nil
+            ) { res in
+                cont.resume(with: res)
+            }
+        }
+
+        AnalyticsManager.logEvent(
+            "store_payment_sent",
+            parameters: ["base_lovelace": baseCoin, "tip_lovelace": tipCoin, "fee_lovelace": feeCoin]
+        )
+
+        return txHash.hex
+    }
+
+    /// Builds a tx where merchant output is already net-of-fee, and a second output pays Vendano fee address (if feeCoin > 0).
+    private func buildCandidateTransactionStore(
+        cardano: Cardano,
+        utxos: [CardanoCore.TransactionUnspentOutput],
+        changeAddr: CardanoCore.Address,
+        toAddr: CardanoCore.Address,
+        merchantCoin: UInt64,
+        feeCoin: UInt64
+    ) throws -> (txBody: CardanoCore.TransactionBody, required: UInt64) {
+
+        let info = cardano.info
+
+        DebugLogger.log(
+            "🏪 [storebuild] start utxos=\(utxos.count) merchant=\(Double(merchantCoin)/1_000_000) fee=\(Double(feeCoin)/1_000_000)"
+        )
+
+        // Keep the padded fee constant behavior from the standard send builder
+        let paddedLinearFee = LinearFee(
+            constant: info.linearFee.constant + 50_000,
+            coefficient: info.linearFee.coefficient
+        )
+
+        var builder = try TransactionBuilder(
+            feeAlgo: paddedLinearFee,
+            poolDeposit: BigNum(info.poolDeposit),
+            keyDeposit: BigNum(info.keyDeposit),
+            maxValueSize: info.maxValueSize,
+            maxTxSize: info.maxTxSize,
+            coinsPerUtxoWord: info.coinsPerUtxoWord,
+            preferPureChange: false
+        )
+
+        try builder.addInputsFrom(inputs: utxos, strategy: .largestFirst)
+
+        // Merchant (net) output
+        try builder.addOutput(
+            output: TransactionOutput(
+                address: toAddr,
+                amount: Value(coin: merchantCoin)
+            )
+        )
+
+        // Vendano fee output (only if >= 1 ADA)
+        if feeCoin >= VendanoWalletMath.minFeeOutputLovelace {
+            let feeAddr = try CardanoCore.Address(bech32: Config.vendanoFeeAddress)
+            try builder.addOutput(
+                output: TransactionOutput(
+                    address: feeAddr,
+                    amount: Value(coin: feeCoin)
+                )
+            )
+            DebugLogger.log("🏪 [storebuild] added fee output = \(Double(feeCoin)/1_000_000) ADA")
+        } else if feeCoin > 0 {
+            DebugLogger.log("🏪 [storebuild] fee < min output, waived")
+        }
+
+        // Balance inputs vs outputs and create change
+        do {
+            _ = try builder.addChangeIfNeeded(address: changeAddr)
+        } catch {
+            DebugLogger.log("🏪 [storebuild] change failed: \(error.localizedDescription)")
+            throw error
+        }
+
+        let txBody = try builder.build()
+
+        // required is total output coin + tx fee (what you must have in inputs)
+        let required = txBody.outputs.reduce(UInt64(0)) { $0 + $1.amount.coin } + txBody.fee
+
+        DebugLogger.log(
+            "🏪 [storebuild] done outputs=\(txBody.outputs.count) fee=\(Double(txBody.fee)/1_000_000) required=\(Double(required)/1_000_000)"
+        )
+
+        return (txBody: txBody, required: required)
+    }
+}
