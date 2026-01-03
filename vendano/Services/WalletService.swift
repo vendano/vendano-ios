@@ -5,10 +5,10 @@
 //  Created by Jeffrey Berthiaume on 6/3/25.
 //
 
+import Bip39
 import Cardano
 import CardanoBlockfrost
 import Foundation
-import Bip39
 
 @MainActor
 final class WalletService: ObservableObject {
@@ -23,7 +23,7 @@ final class WalletService: ObservableObject {
     @Published private(set) var totalAdaBalance: Double?
     /// Optional: HOSKY balance if available in this wallet
     @Published private(set) var hoskyBalance: Double = 0
-    
+
     /// “Real” sendable ADA for a *single* tx, after tokens/min-UTxO/etc.
     @Published private(set) var spendableAda: Double? = nil
 
@@ -31,10 +31,11 @@ final class WalletService: ObservableObject {
     var currentUtxos: [TransactionUnspentOutput] = []
 
     @Published var adaFiatRate: Double?
-    
+
     @Published var fiatCurrency: FiatCurrency = {
         if let code = UserDefaults.standard.string(forKey: "VendanoFiatCurrency"),
-           let currency = FiatCurrency(rawValue: code) {
+           let currency = FiatCurrency(rawValue: code)
+        {
             return currency
         }
         return .usd
@@ -246,7 +247,7 @@ final class WalletService: ObservableObject {
         self.keychain = keychain
         self.cardano = cardano
         address = bech32
-        
+
         await refreshBalancesFromChain()
 
         AnalyticsManager.logEvent("create_wallet")
@@ -279,7 +280,7 @@ final class WalletService: ObservableObject {
 
     func loadPrice() async {
         do {
-            let pair = fiatCurrency.pricePair   // "ADA-USD", "ADA-EUR", etc.
+            let pair = fiatCurrency.pricePair // "ADA-USD", "ADA-EUR", etc.
             adaFiatRate = try await priceService.fetchPrice(for: pair)
         } catch {
             DebugLogger.log("Failed to fetch ADA price for \(fiatCurrency.rawValue): \(error.localizedDescription)")
@@ -442,7 +443,7 @@ final class WalletService: ObservableObject {
         // already descending, but just to be safe:
         return result.sorted { $0.blockHeight > $1.blockHeight }
     }
-    
+
     // MARK: – ADA Handle
 
     private let adaHandlePolicy = "f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a"
@@ -478,11 +479,12 @@ final class WalletService: ObservableObject {
         handleCache[name] = (address: holder.address, expires: Date().addingTimeInterval(3600))
         return holder.address
     }
-    
+
     @MainActor
     func refreshBalancesFromChain() async {
         guard let cardano = cardano,
-              let bech32 = address else {
+              let bech32 = address
+        else {
             // No wallet loaded – reset balances
             adaBalance = 0
             totalAdaBalance = nil
@@ -513,7 +515,7 @@ final class WalletService: ObservableObject {
             }
 
             let allAddrs: [Address] = cached.isEmpty ? [addrObj] : cached
-            self.allAddresses = try allAddrs.map { try $0.bech32() }
+            allAddresses = try allAddrs.map { try $0.bech32() }
 
             // 3) Spendable ADA: sum lovelace from all UTxOs on all account addresses
             let utxos = try await collectAllUTXOs(
@@ -522,7 +524,7 @@ final class WalletService: ObservableObject {
 
             // Cache UTxOs so Home + Send share the same view of the world
             currentUtxos = utxos
-            
+
             debugLogUtxos(utxos, context: "refreshBalancesFromChain")
 
             // Raw “on UTxOs” ADA (for debug / comparison only)
@@ -539,7 +541,7 @@ final class WalletService: ObservableObject {
                     utxos: utxos,
                     changeAddress: addrObj,
                     destAddress: addrObj, // any valid address is fine here
-                    vendanoFeeForAmount: self.vendanoFeeLovelace(for:),
+                    vendanoFeeForAmount: vendanoFeeLovelace(for:),
                     tipLovelace: 0
                 )
 
@@ -566,20 +568,20 @@ final class WalletService: ObservableObject {
             }
 
             await recomputeSendableAda()
-            
+
         } catch {
             DebugLogger.log("⚠️ refreshBalancesFromChain failed: \(error)")
             // Don’t blow away balances on transient errors; better to keep last known values.
         }
     }
-    
+
     func effectiveAppFee(for amount: Double) -> Double {
         VendanoWalletMath.vendanoFeeAda(
             forSendAda: amount,
             percent: Config.vendanoAppFeePercent
         )
     }
-    
+
     @MainActor
     func recomputeSendableAda() async {
         guard let bech32 = address else {
@@ -602,5 +604,4 @@ final class WalletService: ObservableObject {
             }
         }
     }
-
 }

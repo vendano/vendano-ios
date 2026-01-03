@@ -8,8 +8,8 @@
 import LocalAuthentication
 import PhotosUI
 import SwiftUI
-import UserNotifications
 import UIKit
+import UserNotifications
 
 struct ProfileSheet: View {
     @EnvironmentObject var theme: VendanoTheme
@@ -36,7 +36,7 @@ struct ProfileSheet: View {
 
     @State private var useHoskyTheme = false
     @State private var suppressAppearanceReset = false
-    
+
     @State private var notificationStatus: UNAuthorizationStatus?
     @State private var showNotificationsDeniedAlert = false
 
@@ -215,7 +215,7 @@ struct ProfileSheet: View {
                             }
                             .vendanoFont(.body, size: 16)
 
-                            Slider(value: $state.storeExchangeRateBufferPercent, in: 0...0.25, step: 0.01)
+                            Slider(value: $state.storeExchangeRateBufferPercent, in: 0 ... 0.25, step: 0.01)
                                 .tint(theme.color(named: "Accent"))
 
                             Text(L10n.StoreView.exchangeRateBufferHelp)
@@ -231,8 +231,6 @@ struct ProfileSheet: View {
                     }
                     .listRowBackground(theme.color(named: "CellBackground"))
 
-                    
-                    
                     Section(
                         header:
                         Text(L10n.ProfileSheet.advanced)
@@ -290,12 +288,12 @@ struct ProfileSheet: View {
                         }
 
                         /*
-                        Toggle(L10n.ProfileSheet.showStakingRewardsDetails, isOn: $state.isExpertMode)
-                            .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
-                            .vendanoFont(.body, size: 16)
-                            .foregroundColor(theme.color(named: "TextPrimary"))
-                         */
-                        
+                         Toggle(L10n.ProfileSheet.showStakingRewardsDetails, isOn: $state.isExpertMode)
+                             .toggleStyle(SwitchToggleStyle(tint: theme.color(named: "Accent")))
+                             .vendanoFont(.body, size: 16)
+                             .foregroundColor(theme.color(named: "TextPrimary"))
+                          */
+
                         Picker(L10n.ProfileSheet.currency, selection: $wallet.fiatCurrency) {
                             ForEach(FiatCurrency.allCases) { currency in
                                 Text(currency.displayName)
@@ -310,7 +308,7 @@ struct ProfileSheet: View {
                             await wallet.loadPrice()
                         }
                     }
-                    
+
                     Section(
                         header:
                         Text(L10n.ProfileSheet.dangerZone)
@@ -344,10 +342,10 @@ struct ProfileSheet: View {
                 .alert(L10n.ProfileSheet.deleteAccountConfirm,
                        isPresented: $showDel,
                        actions: {
-                        Button(L10n.Common.cancel, role: .cancel) {}
-                        Button(L10n.Common.delete, role: .destructive) {
-                            authenticateAndDelete()
-                        }
+                           Button(L10n.Common.cancel, role: .cancel) {}
+                           Button(L10n.Common.delete, role: .destructive) {
+                               authenticateAndDelete()
+                           }
                        }, message: {
                            Text(L10n.ProfileSheet.thisRemovesYourNamePictureAndProfileInfo)
                                .vendanoFont(.body, size: 16)
@@ -398,7 +396,7 @@ struct ProfileSheet: View {
             notificationStatus = await NotificationPermissionManager.shared.getStatus()
         }
     }
-    
+
     private func notificationLabel(_ status: UNAuthorizationStatus?) -> String {
         guard let status else { return L10n.Common.ellipsis }
         switch status {

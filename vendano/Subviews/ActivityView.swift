@@ -11,7 +11,7 @@ struct ActivityView: View {
     @EnvironmentObject var theme: VendanoTheme
     @Environment(\.openURL) private var openURL
     @StateObject private var state = AppState.shared
-    
+
     @State private var selectedAddAdaPath: AddAdaPath? = nil
     @State private var isShowingReceive = false
 
@@ -42,7 +42,7 @@ struct ActivityView: View {
 //                Text(L10n.ActivityView.noTransactionHistoryFound)
 //                    .vendanoFont(.headline, size: 18, weight: .semibold)
 //                    .foregroundColor(theme.color(named: "TextPrimary"))
-                
+
                 HowToFundView(
                     walletAddress: state.walletAddress,
                     onOpenReceive: {
@@ -54,7 +54,7 @@ struct ActivityView: View {
                     }
                 )
                 .environmentObject(theme)
-                
+
                 Spacer()
             } else {
                 Text(L10n.ActivityView.recentActivity)
@@ -77,7 +77,7 @@ struct ActivityView: View {
                                             Divider()
                                                 .padding(.vertical, 8)
                                         }
-                                        
+
                                         TransactionRow(tx: tx)
                                             .contentShape(Rectangle())
                                             .onTapGesture {

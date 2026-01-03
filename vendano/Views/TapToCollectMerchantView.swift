@@ -27,19 +27,19 @@ struct TapToCollectMerchantView: View {
                         Text(L10n.StoreView.readyToCollectTitle)
                             .vendanoFont(.headline, size: 24, weight: .bold)
                             .foregroundColor(theme.color(named: "TextReversed"))
-                        
+
                         Text(L10n.StoreView.readyToCollectSubtitle)
                             .vendanoFont(.body, size: 14)
                             .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                             .multilineTextAlignment(.center)
                     }
                     .padding(.top, 4)
-                    
+
                     VStack(spacing: 10) {
-                        Text("\(request.baseAda.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                        Text("\(request.baseAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                             .vendanoFont(.title, size: 42, weight: .bold)
                             .foregroundColor(theme.color(named: "TextReversed"))
-                        
+
                         if let rate = wallet.adaFiatRate, rate > 0 {
                             let fiat = request.baseAda * rate
                             Text(L10n.StoreView.approxFiat(wallet.fiatCurrency.rawValue, fiat))
@@ -52,7 +52,7 @@ struct TapToCollectMerchantView: View {
                     .background(theme.color(named: "CellBackground").opacity(0.22))
                     .cornerRadius(16)
                     .padding(.horizontal)
-                    
+
                     VStack(alignment: .leading, spacing: 10) {
                         if proximity.connectedPeerNames.isEmpty {
                             Text(L10n.StoreView.waitingForCustomer)
@@ -63,12 +63,12 @@ struct TapToCollectMerchantView: View {
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextReversed"))
                         }
-                        
+
                         if let resp = proximity.lastResponse, resp.requestId == request.id {
                             MerchantResponseBanner(response: resp)
                                 .environmentObject(theme)
                         }
-                        
+
                         if let err = proximity.lastErrorMessage {
                             Text(err)
                                 .vendanoFont(.caption, size: 13)
@@ -76,7 +76,7 @@ struct TapToCollectMerchantView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     Spacer()
                 }
             }

@@ -80,8 +80,8 @@ struct OnboardingFAQCardView: View {
                             .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2), value: currentIndex)
                             .animation(nil, value: dragOffset)
                         }
-                        .clipped()                        // avoid showing blank gutters
-                        .contentShape(Rectangle())        // full-rect hit area
+                        .clipped() // avoid showing blank gutters
+                        .contentShape(Rectangle()) // full-rect hit area
                         .highPriorityGesture(drag, including: .all) // swipe works anywhere, even over buttons
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -100,13 +100,13 @@ struct OnboardingFAQCardView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .onAppear {
                     level = 0
-                    locallyViewed.removeAll()   // start fresh; do not gray initial card
+                    locallyViewed.removeAll() // start fresh; do not gray initial card
                     clampIndexToBounds()
                 }
                 .onChange(of: faqs.count) { _, _ in
                     clampIndexToBounds()
                 }
-                .onChange(of: currentIndex) { oldIndex, newIndex in
+                .onChange(of: currentIndex) { oldIndex, _ in
                     guard faqs.indices.contains(oldIndex) else { return }
                     let item = faqs[oldIndex]
                     locallyViewed.insert(item.id)

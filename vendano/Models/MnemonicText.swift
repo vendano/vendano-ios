@@ -28,5 +28,4 @@ enum MnemonicText {
             $0.trimmingCharacters(in: CharacterSet.punctuationCharacters.union(.symbols))
         }.filter { !$0.isEmpty }
     }
-    
 }

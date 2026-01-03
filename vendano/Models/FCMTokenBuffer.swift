@@ -23,5 +23,4 @@ final class FCMTokenBuffer {
         }
         pendingToken = nil
     }
-
 }

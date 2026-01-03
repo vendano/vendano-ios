@@ -5,15 +5,15 @@
 //  Created by Jeffrey Berthiaume on 6/9/25.
 //
 
-import Foundation
 import Cardano
+import Foundation
 
 enum Config {
     static var vendanoAppFeePercent: Double { 0.01 }
     static var vendanoAppFeePercentFormatted: String { "1%" }
-    
+
     private static var env: AppEnvironment { AppState.shared.environment }
-    
+
     static var cardanoInfo: NetworkApiInfo {
         switch env {
         case .mainnet, .appstorereview:
@@ -22,7 +22,7 @@ enum Config {
             return .testnet
         }
     }
-    
+
     static var blockfrostAPIURL: String {
         switch env {
         case .mainnet, .appstorereview:
@@ -63,13 +63,12 @@ enum Config {
         }
         return fallback
     }
-    
+
     static var environmentName: String {
         switch env {
-            case .mainnet:        return "mainnet"
-            case .testnet:        return "testnet"
-            case .appstorereview: return "app-store-review"
+        case .mainnet: return "mainnet"
+        case .testnet: return "testnet"
+        case .appstorereview: return "app-store-review"
         }
     }
-    
 }

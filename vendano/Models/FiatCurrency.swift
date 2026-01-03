@@ -5,16 +5,15 @@
 //  Created by Jeffrey Berthiaume on 12/1/25.
 //
 
-
 enum FiatCurrency: String, CaseIterable, Identifiable {
-    case usd = "USD"   // United States
-    case eur = "EUR"   // Euro
-    case gbp = "GBP"   // Great Britain
-    case jpy = "JPY"   // Japan
-    case mxn = "MXN"   // Mexico
-    case krw = "KRW"   // South Korea
-    case php = "PHP"   // Philippines
-    case inr = "INR"   // India
+    case usd = "USD" // United States
+    case eur = "EUR" // Euro
+    case gbp = "GBP" // Great Britain
+    case jpy = "JPY" // Japan
+    case mxn = "MXN" // Mexico
+    case krw = "KRW" // South Korea
+    case php = "PHP" // Philippines
+    case inr = "INR" // India
 
     var id: String { rawValue }
 

@@ -33,10 +33,10 @@ struct AuthPhoneField: View {
                 let region = regionCode(from: dialCode)
 
                 if let num = try? kit.parse(new, withRegion: region, ignoreType: true) {
-                    //Extract nationalNumber directly (no 0 prefix)
+                    // Extract nationalNumber directly (no 0 prefix)
                     localNumber = String(num.nationalNumber)
 
-                    //pretty format for user, but without leading 0
+                    // pretty format for user, but without leading 0
                     rawInput = fmtr.formatPartial(localNumber)
                 } else {
                     localNumber = new.filter(\.isNumber)

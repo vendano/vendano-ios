@@ -4,14 +4,13 @@
 //
 //  Created by Jeffrey Berthiaume on 12/2/25.
 //
-import Foundation
 import Cardano
 import CCardano
+import Foundation
 
 /// Stateless helper that uses the same TransactionBuilder flow
 /// to answer: "what is the max lovelace we can send?"
-struct SpendableCalculator {
-
+enum SpendableCalculator {
     /// - Parameters:
     ///   - cardano: your Cardano instance
     ///   - utxos: UTxOs to draw from
@@ -27,7 +26,6 @@ struct SpendableCalculator {
         vendanoFeeForAmount: (UInt64) -> UInt64,
         tipLovelace: UInt64
     ) throws -> UInt64 {
-
         let totalLovelace = utxos.reduce(UInt64(0)) { $0 &+ $1.output.amount.coin }
         let info = cardano.info
 

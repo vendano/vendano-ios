@@ -27,10 +27,9 @@ enum SendMethod: String, CaseIterable, Identifiable {
     }
 }
 
-
 struct SendView: View {
     @EnvironmentObject var theme: VendanoTheme
-    
+
     @AppStorage("didShowSendAuthPrimer") private var didShowSendAuthPrimer = false
     @State private var showSendAuthPrimer = false
 
@@ -62,7 +61,7 @@ struct SendView: View {
     @State private var inviteTitle = ""
     @State private var inviteMessage = ""
     @State private var shareInvite: ShareMessage?
-    
+
     @State private var didApplyDraft: Bool = false
 
     private var recipientOK: Bool {
@@ -118,7 +117,7 @@ struct SendView: View {
     }
 
     private var tipValue: Double { Double(tipText) ?? 0 }
-    
+
     private var amountOK: Bool {
         let base = (adaValue ?? 0) + netFee + appFee + tipValue
         let maxSpendable = wallet.spendableAda ?? wallet.adaBalance
@@ -145,7 +144,6 @@ struct SendView: View {
 
                 // form
                 Form {
-
                     Section {
                         Button {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -245,7 +243,6 @@ struct SendView: View {
                                         recalcFee()
                                     }
                                 }
-
                         }
 
                         if let rec = recipient {
@@ -304,7 +301,7 @@ struct SendView: View {
 
                                 // Leave headroom for network fee + Vendano fee.
                                 // For small wallets this is conservative; for bigger ones it’s still tiny.
-                                let headroom = 1.0  // 1 ADA safety margin
+                                let headroom = 1.0 // 1 ADA safety margin
 
                                 var maxAmount = max(available - headroom - tipValue, 0)
 
@@ -313,7 +310,7 @@ struct SendView: View {
                                     maxAmount = 0
                                 }
 
-                                adaText = (maxAmount).formatted(.number.precision(.fractionLength(6)))
+                                adaText = maxAmount.formatted(.number.precision(.fractionLength(6)))
 
                                 // Recalculate fee for the new amount
                                 recalcFee()
@@ -323,8 +320,6 @@ struct SendView: View {
                             .background(theme.color(named: "Accent"))
                             .foregroundColor(theme.color(named: "TextReversed"))
                             .clipShape(Capsule())
-
-
                         }
 
                         if let ada = adaValue, ada > 0 {
@@ -380,7 +375,7 @@ struct SendView: View {
 
                                 Spacer()
 
-                                Text("\((ada).formatted(.number.precision(.fractionLength(2)))) ₳")
+                                Text("\(ada.formatted(.number.precision(.fractionLength(2)))) ₳")
                                     .vendanoFont(.body, size: 16)
                                     .foregroundColor(theme.color(named: "TextPrimary"))
                             }
@@ -393,7 +388,7 @@ struct SendView: View {
 
                                     Spacer()
 
-                                    Text("\((tipValue).formatted(.number.precision(.fractionLength(2)))) ₳")
+                                    Text("\(tipValue.formatted(.number.precision(.fractionLength(2)))) ₳")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
@@ -415,7 +410,7 @@ struct SendView: View {
                                                 )
                                             )
                                     } else if netFee > 0 {
-                                        Text("\((netFee).formatted(.number.precision(.fractionLength(2)))) ₳")
+                                        Text("\(netFee.formatted(.number.precision(.fractionLength(2)))) ₳")
                                             .vendanoFont(.body, size: 16)
                                             .foregroundColor(theme.color(named: "TextPrimary"))
                                     } else if feeError != nil {
@@ -437,21 +432,20 @@ struct SendView: View {
                                 }
                             }
 
-                            
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Text(String(format: String(localized: "SendView.vendanoFeeFormat"),
                                                 Config.vendanoAppFeePercentFormatted))
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
-                                    
+
                                     Spacer()
-                                    
-                                    Text("\((appFee).formatted(.number.precision(.fractionLength(2)))) ₳")
+
+                                    Text("\(appFee.formatted(.number.precision(.fractionLength(2)))) ₳")
                                         .vendanoFont(.body, size: 16)
                                         .foregroundColor(theme.color(named: "TextPrimary"))
                                 }
-                                
+
                                 if appFee == 0 {
                                     Text(L10n.SendView.vendanoFeeWaivedTheCardanoNetworkDoesnT)
                                         .vendanoFont(.caption, size: 13)
@@ -651,7 +645,7 @@ struct SendView: View {
             }
         }
     }
-    
+
     private func shouldShowSendAuthPrimer() -> Bool {
         guard !didShowSendAuthPrimer else { return false }
         let ctx = LAContext()
@@ -666,9 +660,9 @@ struct SendView: View {
             return L10n.SendView.authPasscode
         }
         switch ctx.biometryType {
-        case .faceID:  return L10n.SendView.authFaceId
+        case .faceID: return L10n.SendView.authFaceId
         case .touchID: return L10n.SendView.authTouchId
-        default:       return L10n.SendView.authBiometrics
+        default: return L10n.SendView.authBiometrics
         }
     }
 
@@ -766,7 +760,7 @@ struct SendView: View {
         ctx.localizedCancelTitle = L10n.Common.cancelString
 
         var authErr: NSError?
-        let policy: LAPolicy = .deviceOwnerAuthentication   // ✅ allows passcode fallback
+        let policy: LAPolicy = .deviceOwnerAuthentication // ✅ allows passcode fallback
 
         guard ctx.canEvaluatePolicy(policy, error: &authErr) else {
             Task { await sendTransaction() }
@@ -816,7 +810,7 @@ struct SendView: View {
                 .maxSendableAda(to: dest, tipAda: tip)
 
             if amount > maxAda {
-                let formatted = (maxAda).formatted(.number.precision(.fractionLength(6)))
+                let formatted = maxAda.formatted(.number.precision(.fractionLength(6)))
                 sendError = L10n.SendView.maxSendableDueToTokens(formatted)
                 return
             }
@@ -853,7 +847,7 @@ struct SendView: View {
             sendError = friendly
         }
     }
-    
+
     private func isValidAdaHandle(_ raw: String) -> Bool {
         let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         let noDollar = s.hasPrefix("$") ? String(s.dropFirst()) : s
@@ -884,7 +878,7 @@ struct SendView: View {
                     return
                 }
                 handle = "\(dialCode)\(digits)"
-                
+
             case .address:
                 let input = addressText.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -913,7 +907,6 @@ struct SendView: View {
                     recipient = nil // unknown / not found
                 }
                 return
-
             }
 
             if let (name, avatarURL, chainAddr) = await FirebaseService.shared.fetchRecipient(for: handle) {
@@ -925,7 +918,7 @@ struct SendView: View {
             }
         }
     }
-    
+
     @MainActor
     private func fillMaxAmount() async {
         let dest = (recipient?.address ?? addressText)
@@ -937,12 +930,11 @@ struct SendView: View {
             let maxAda = try await WalletService.shared
                 .maxSendableAda(to: dest, tipAda: tipValue)
 
-            adaText = (maxAda).formatted(.number.precision(.fractionLength(6)))
+            adaText = maxAda.formatted(.number.precision(.fractionLength(6)))
             recalcFee()
         } catch {
             DebugLogger.log("⚠️ Failed to compute max sendable ADA: \(error)")
             feeError = L10n.SendView.couldNotCalculateMaxSendable
         }
     }
-
 }

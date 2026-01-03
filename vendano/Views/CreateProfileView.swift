@@ -104,7 +104,7 @@ struct CreateProfileView: View {
     }
 }
 
- #Preview {
+#Preview {
     CreateProfileView()
-         .environmentObject(VendanoTheme.shared)
- }
+        .environmentObject(VendanoTheme.shared)
+}

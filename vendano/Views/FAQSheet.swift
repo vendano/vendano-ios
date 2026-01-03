@@ -17,7 +17,7 @@ struct FAQSheet: View {
     private let segments = [
         L10n.FAQSheet.segmentQuick,
         L10n.FAQSheet.segmentExplain,
-        L10n.FAQSheet.segmentDeepDive
+        L10n.FAQSheet.segmentDeepDive,
     ]
 
     var body: some View {

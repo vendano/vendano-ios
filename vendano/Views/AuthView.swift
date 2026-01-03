@@ -142,9 +142,9 @@ struct AuthView: View {
     private func sendCode() {
         isLoading = true
         errorMessage = nil
-        
+
         let phone = "\(dialCode) \(localNumber)".trimmingCharacters(in: .whitespaces)
-        
+
         let env = state.resolveEnvironment(for: useEmail ? email : phone)
         state.setEnvironment(env)
 

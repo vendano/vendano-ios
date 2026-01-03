@@ -55,7 +55,7 @@ extension WalletService {
                 userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
             )
         }
-        
+
         let utxos: [CardanoCore.TransactionUnspentOutput]
         if !currentUtxos.isEmpty {
             utxos = currentUtxos
@@ -65,15 +65,15 @@ extension WalletService {
             )
             currentUtxos = utxos
         }
-        
+
         debugLogUtxos(utxos, context: "sendMultiTransaction")
-        
+
         let totalLovelace = utxos.reduce(UInt64(0)) { $0 + $1.output.amount.coin }
 
         let toAddr = try CardanoCore.Address(bech32: dest)
 
         let sendCoin = VendanoWalletMath.adaToLovelace(amount)
-        
+
         let tipCoin: UInt64
         if tip < 1 {
             tipCoin = 0
@@ -104,10 +104,10 @@ extension WalletService {
         }
 
         DebugLogger.log(
-            "⭐ sendMultiTransaction total=\(Double(totalLovelace)/1_000_000) " +
-            "send=\(amount) fee=\(Double(feeCoin)/1_000_000) " +
-            "vendanoFee=\(Double(vendanoFeeCoin)/1_000_000) tip=\(tip) " +
-            "required=\(Double(required)/1_000_000)"
+            "⭐ sendMultiTransaction total=\(Double(totalLovelace) / 1_000_000) " +
+                "send=\(amount) fee=\(Double(feeCoin) / 1_000_000) " +
+                "vendanoFee=\(Double(vendanoFeeCoin) / 1_000_000) tip=\(tip) " +
+                "required=\(Double(required) / 1_000_000)"
         )
 
         DebugLogger.log("💸 txBody.fee = \(txBody.fee) lovelace (\(Double(txBody.fee) / 1_000_000) ADA)")
@@ -157,13 +157,12 @@ extension WalletService {
     }
 }
 
-
 extension WalletService {
     /// Compute Vendano fee in lovelace (same as you already had)
     func vendanoFeeLovelace(for sendCoin: UInt64) -> UInt64 {
         let raw = Double(sendCoin) * Config.vendanoAppFeePercent
         let fee = UInt64(raw)
-        
+
         let minUtxoLovelace: UInt64 = 1_000_000 // ≈ 1 ADA
         if fee < minUtxoLovelace {
             return 0
@@ -251,13 +250,11 @@ extension WalletService {
 
         let bestAda = Double(best) / 1_000_000
         DebugLogger.log(
-            "⭐ maxSendableAda total=\(Double(totalLovelace)/1_000_000) " +
-            "tip=\(tipAda) best=\(bestAda)"
+            "⭐ maxSendableAda total=\(Double(totalLovelace) / 1_000_000) " +
+                "tip=\(tipAda) best=\(bestAda)"
         )
         return bestAda
     }
-
-    
 }
 
 // MARK: - Shared Tx Builder Helper
@@ -282,17 +279,17 @@ extension WalletService {
 
         DebugLogger.log(
             "💸 [build] start utxos=\(utxos.count) " +
-            "send=\(Double(sendCoin) / 1_000_000) " +
-            "tip=\(Double(tipCoin) / 1_000_000) " +
-            "linearFee=(const:\(info.linearFee.constant), coeff:\(info.linearFee.coefficient)) " +
-            "coinsPerUtxoWord=\(info.coinsPerUtxoWord)"
+                "send=\(Double(sendCoin) / 1_000_000) " +
+                "tip=\(Double(tipCoin) / 1_000_000) " +
+                "linearFee=(const:\(info.linearFee.constant), coeff:\(info.linearFee.coefficient)) " +
+                "coinsPerUtxoWord=\(info.coinsPerUtxoWord)"
         )
 
         // 🚧 Pad the fee constant so our fee is always *higher* than the node’s minimum.
         // The mismatch you’re seeing is ~13k–22k lovelace, so +50k is a safe cushion.
         let paddedLinearFee = LinearFee(
-            constant: info.linearFee.constant + 50_000,   // +0.05 ADA
-            coefficient: info.linearFee.coefficient       // keep slope identical
+            constant: info.linearFee.constant + 50000, // +0.05 ADA
+            coefficient: info.linearFee.coefficient // keep slope identical
         )
 
         var builder = try TransactionBuilder(
@@ -356,7 +353,8 @@ extension WalletService {
         } catch {
             DebugLogger.log("💥 [build] addChangeIfNeeded threw: \(error)")
             if let rustError = error as? CardanoRustError,
-               case let .common(message) = rustError {
+               case let .common(message) = rustError
+            {
                 DebugLogger.log("💥 [build] addChangeIfNeeded Rust message: \(message)")
             }
             throw error
@@ -378,13 +376,12 @@ extension WalletService {
 
         DebugLogger.log(
             "💸 [build] required total ADA = \(Double(required) / 1_000_000) " +
-            "(send=\(Double(sendCoin) / 1_000_000), fee=\(Double(feeCoin) / 1_000_000), " +
-            "vendanoFee=\(Double(vendanoFeeCoin) / 1_000_000), tip=\(Double(tipCoin) / 1_000_000))"
+                "(send=\(Double(sendCoin) / 1_000_000), fee=\(Double(feeCoin) / 1_000_000), " +
+                "vendanoFee=\(Double(vendanoFeeCoin) / 1_000_000), tip=\(Double(tipCoin) / 1_000_000))"
         )
 
         return (txBody, required, feeCoin, vendanoFeeCoin)
     }
-
 }
 
 extension WalletService {
@@ -399,17 +396,15 @@ extension WalletService {
             let hasMultiAsset = (utxo.output.amount.multiasset != nil)
 
             print("   [\(idx)] \(coin) lovelace (\(ada) ADA) " +
-                  "tokens=\(hasMultiAsset ? "yes" : "no")")
+                "tokens=\(hasMultiAsset ? "yes" : "no")")
         }
     }
 }
-
 
 // MARK: - Store payments (store pays Vendano fee)
 
 @MainActor
 extension WalletService {
-
     /// Store payment where the payer pays `baseAda + tipAda`, and the Vendano fee is taken from the merchant's side
     /// (merchant receives `base - fee + tip`). Network fee is still paid by the payer (normal Cardano behavior).
     func sendStorePayment(
@@ -417,7 +412,6 @@ extension WalletService {
         baseAda: Double,
         tipAda: Double
     ) async throws -> String {
-
         guard baseAda > 0 else {
             throw NSError(
                 domain: "Vendano.Send",
@@ -560,16 +554,15 @@ extension WalletService {
         merchantCoin: UInt64,
         feeCoin: UInt64
     ) throws -> (txBody: CardanoCore.TransactionBody, required: UInt64) {
-
         let info = cardano.info
 
         DebugLogger.log(
-            "🏪 [storebuild] start utxos=\(utxos.count) merchant=\(Double(merchantCoin)/1_000_000) fee=\(Double(feeCoin)/1_000_000)"
+            "🏪 [storebuild] start utxos=\(utxos.count) merchant=\(Double(merchantCoin) / 1_000_000) fee=\(Double(feeCoin) / 1_000_000)"
         )
 
         // Keep the padded fee constant behavior from the standard send builder
         let paddedLinearFee = LinearFee(
-            constant: info.linearFee.constant + 50_000,
+            constant: info.linearFee.constant + 50000,
             coefficient: info.linearFee.coefficient
         )
 
@@ -602,7 +595,7 @@ extension WalletService {
                     amount: Value(coin: feeCoin)
                 )
             )
-            DebugLogger.log("🏪 [storebuild] added fee output = \(Double(feeCoin)/1_000_000) ADA")
+            DebugLogger.log("🏪 [storebuild] added fee output = \(Double(feeCoin) / 1_000_000) ADA")
         } else if feeCoin > 0 {
             DebugLogger.log("🏪 [storebuild] fee < min output, waived")
         }
@@ -621,7 +614,7 @@ extension WalletService {
         let required = txBody.outputs.reduce(UInt64(0)) { $0 + $1.amount.coin } + txBody.fee
 
         DebugLogger.log(
-            "🏪 [storebuild] done outputs=\(txBody.outputs.count) fee=\(Double(txBody.fee)/1_000_000) required=\(Double(required)/1_000_000)"
+            "🏪 [storebuild] done outputs=\(txBody.outputs.count) fee=\(Double(txBody.fee) / 1_000_000) required=\(Double(required) / 1_000_000)"
         )
 
         return (txBody: txBody, required: required)

@@ -28,8 +28,8 @@ struct HomeView: View {
     // how far the main card moves while an overlay is on-screen
     private var verticalOffset: CGFloat {
         switch (showSend, showReceive) {
-        case (true, _): return 200   // slide wallet up when Send appears
-        case (_, true): return -200  // slide wallet down when Receive appears
+        case (true, _): return 200 // slide wallet up when Send appears
+        case (_, true): return -200 // slide wallet down when Receive appears
         default: return 0
         }
     }
@@ -88,7 +88,7 @@ struct HomeView: View {
                     .onTapGesture {
                         showProfile = true
                     }
-                    
+
                     if showNotificationPrimer {
                         NotificationPrimerCard(
                             onEnable: {
@@ -113,7 +113,7 @@ struct HomeView: View {
 
                         Text(
                             total.formatted(.number.precision(.fractionLength(1)))
-                            + " " + L10n.Common.adaUnit
+                                + " " + L10n.Common.adaUnit
                         )
                         .vendanoFont(.title, size: 48, weight: .heavy)
                         .foregroundColor(theme.color(named: "TextPrimary"))
@@ -134,9 +134,9 @@ struct HomeView: View {
                         VStack(spacing: 2) {
                             Text(
                                 L10n.Common.hoskyToken + " " +
-                                wallet.hoskyBalance.formatted(
-                                    .number.precision(.fractionLength(0))
-                                )
+                                    wallet.hoskyBalance.formatted(
+                                        .number.precision(.fractionLength(0))
+                                    )
                             )
                             .vendanoFont(.headline, size: 18, weight: .semibold)
                             .foregroundColor(theme.color(named: "TextPrimary"))

@@ -24,6 +24,7 @@ final class FirebaseService: ObservableObject {
     @Published private(set) var user: User?
 
     // MARK: - Env helpers
+
     private var isDemo: Bool { AppState.shared.environment == .appstorereview }
 
     private var db: Firestore? {
@@ -55,6 +56,7 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Auth listener
+
     private func listenAuth() {
         _ = Auth.auth().addStateDidChangeListener { [weak self] _, usr in
             guard let self else { return }
@@ -76,7 +78,7 @@ final class FirebaseService: ObservableObject {
             let state = AppState.shared
             DispatchQueue.main.async {
                 state.displayName = d["displayName"] as? String ?? ""
-                state.avatarUrl   = d["avatarURL"]   as? String
+                state.avatarUrl = d["avatarURL"] as? String
             }
         } catch {
             DebugLogger.log("❌ fetchPublicState: \(error)")
@@ -94,13 +96,14 @@ final class FirebaseService: ObservableObject {
             state.phone = d["phone"] as? [String] ?? []
             state.email = d["email"] as? [String] ?? []
             let faqs = d["viewedFAQ"] as? [String] ?? []
-            state.viewedFAQIDs = Set(faqs)   // ✅ strings now
+            state.viewedFAQIDs = Set(faqs) // ✅ strings now
         } catch {
             DebugLogger.log("❌ fetchPrivateState: \(error)")
         }
     }
 
     // MARK: – Phone OTP
+
     func sendPhoneOTP(e164: String, completion: @escaping () -> Void) {
         UserDefaults.standard.set(e164, forKey: "PhoneForSignIn")
         PhoneAuthProvider.provider().verifyPhoneNumber(e164, uiDelegate: nil) { id, err in
@@ -112,15 +115,16 @@ final class FirebaseService: ObservableObject {
                 DebugLogger.log("❌ [PHONE OTP] verificationID is nil!")
                 return
             }
-            UserDefaults.standard.set(id,    forKey: "phoneVID")
-            UserDefaults.standard.set(e164,  forKey: "phoneNumber")
+            UserDefaults.standard.set(id, forKey: "phoneVID")
+            UserDefaults.standard.set(e164, forKey: "phoneNumber")
             completion()
         }
     }
 
     func confirmPhoneOTP(code: String, completion: @escaping (String?) -> Void) {
         guard let id = UserDefaults.standard.string(forKey: "phoneVID"),
-              let phone = UserDefaults.standard.string(forKey: "phoneNumber") else {
+              let phone = UserDefaults.standard.string(forKey: "phoneNumber")
+        else {
             DebugLogger.log("❌ [CONFIRM OTP] Missing phoneVID in UserDefaults!")
             return
         }
@@ -159,7 +163,7 @@ final class FirebaseService: ObservableObject {
             return
         }
 
-        let userRef   = db.collection("users").document(uid)
+        let userRef = db.collection("users").document(uid)
         let publicRef = db.collection("public").document(uid)
 
         let normalized = normalizePhone(phone)
@@ -169,7 +173,7 @@ final class FirebaseService: ObservableObject {
         async let pSnap = publicRef.getDocument()
         let (userDoc, publicDoc) = try await (uSnap, pSnap)
 
-        let userHasCreated   = userDoc.exists   && userDoc.data()?["createdDate"]   != nil
+        let userHasCreated = userDoc.exists && userDoc.data()?["createdDate"] != nil
         let publicHasCreated = publicDoc.exists && publicDoc.data()?["createdDate"] != nil
 
         let userBase: [String: Any] = [
@@ -199,6 +203,7 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Email link (OTP-ish) auth
+
     func sendEmailLink(to email: String, completion: @escaping (Error?) -> Void) {
         let settings = ActionCodeSettings()
         settings.handleCodeInApp = true
@@ -234,16 +239,16 @@ final class FirebaseService: ObservableObject {
             return
         }
 
-        let norm  = email.lowercased()
-        let hash  = handleHash(norm)
-        let userRef   = db.collection("users").document(uid)
+        let norm = email.lowercased()
+        let hash = handleHash(norm)
+        let userRef = db.collection("users").document(uid)
         let publicRef = db.collection("public").document(uid)
 
         async let uSnap = userRef.getDocument()
         async let pSnap = publicRef.getDocument()
         let (u, p) = try await (uSnap, pSnap)
 
-        let userHasCreated   = u.exists && u.data()?["createdDate"] != nil
+        let userHasCreated = u.exists && u.data()?["createdDate"] != nil
         let publicHasCreated = p.exists && p.data()?["createdDate"] != nil
 
         let userBase: [String: Any] = [
@@ -276,6 +281,7 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Profile update
+
     func saveAddress(_ addr: String) async throws {
         guard let uid = user?.uid else { return }
         guard let db = db else { return } // demo: no-op
@@ -296,7 +302,7 @@ final class FirebaseService: ObservableObject {
         // In demo: write locally and return file URL; no Storage/Firestore writes.
         if isDemo {
             let side = min(image.size.width, image.size.height)
-            let rect = CGRect(x: (image.size.width - side)/2, y: (image.size.height - side)/2, width: side, height: side)
+            let rect = CGRect(x: (image.size.width - side) / 2, y: (image.size.height - side) / 2, width: side, height: side)
             guard let cg = image.cgImage?.cropping(to: rect) else { throw URLError(.cannotDecodeContentData) }
             let square = UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
             guard let data = square.jpegData(compressionQuality: 0.8) else { throw FirebaseServiceError.pngEncodingFailed }
@@ -310,7 +316,7 @@ final class FirebaseService: ObservableObject {
         guard let storage = storageRef, let db = db else { throw FirebaseServiceError.unknown }
 
         let side = min(image.size.width, image.size.height)
-        let rect = CGRect(x: (image.size.width - side)/2, y: (image.size.height - side)/2, width: side, height: side)
+        let rect = CGRect(x: (image.size.width - side) / 2, y: (image.size.height - side) / 2, width: side, height: side)
         guard let cg = image.cgImage?.cropping(to: rect) else { throw URLError(.cannotDecodeContentData) }
         let square = UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
         let thumb = square.resize(to: 200)
@@ -380,6 +386,7 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – FAQ tracking
+
     func markAllFAQsViewed() async {
         guard let uid = user?.uid, let db = db else { return }
         let ids = Array(AppState.shared.viewedFAQIDs)
@@ -394,13 +401,14 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – Handle lookup
+
     func fetchRecipient(for handle: String) async -> (name: String, avatarURL: String?, address: String)? {
         guard let db = db else { return nil } // demo: no lookup
         let hash = handleHash(handle)
         let col = db.collection("public")
         let emailQ = col.whereField("emailHashes", arrayContains: hash)
         let phoneQ = col.whereField("phoneHashes", arrayContains: hash)
-        let addrQ  = col.whereField("walletAddress", isEqualTo: handle)
+        let addrQ = col.whereField("walletAddress", isEqualTo: handle)
 
         for query in [emailQ, phoneQ, addrQ] {
             do {
@@ -432,7 +440,7 @@ final class FirebaseService: ObservableObject {
         }
 
         guard let uid = user.uid as String? else { throw RemoveHandleError.notSignedIn }
-        let userRef   = db?.collection("users").document(uid)
+        let userRef = db?.collection("users").document(uid)
         let publicRef = db?.collection("public").document(uid)
         let hash = handleHash(emailToRemove)
 
@@ -469,7 +477,7 @@ final class FirebaseService: ObservableObject {
         }
 
         guard let uid = user.uid as String? else { throw RemoveHandleError.notSignedIn }
-        let userRef   = db?.collection("users").document(uid)
+        let userRef = db?.collection("users").document(uid)
         let publicRef = db?.collection("public").document(uid)
         let hash = handleHash(phoneToRemove)
 
@@ -505,9 +513,11 @@ final class FirebaseService: ObservableObject {
 
         do {
             let snap = try await feedbackCol.getDocuments()
-            for doc in snap.documents { batch.deleteDocument(doc.reference) }
+            for doc in snap.documents {
+                batch.deleteDocument(doc.reference)
+            }
 
-            let userRef   = db.collection("users").document(uid)
+            let userRef = db.collection("users").document(uid)
             let publicRef = db.collection("public").document(uid)
             batch.deleteDocument(userRef)
             batch.deleteDocument(publicRef)
@@ -531,6 +541,7 @@ final class FirebaseService: ObservableObject {
     }
 
     // MARK: – helpers
+
     private func handleHash(_ h: String) -> String {
         let digest = SHA256.hash(data: Data(h.lowercased().utf8))
         return Data(digest).base64EncodedString()
@@ -553,11 +564,12 @@ final class FirebaseService: ObservableObject {
 
         if !emails.isEmpty,
            user.providerData.contains(where: { $0.providerID == EmailAuthProviderID }),
-           user.isEmailVerified == false {
+           user.isEmailVerified == false
+        {
             return .auth
         }
         guard hasHandle else { return .auth }
-        guard hasName   else { return .profile }
+        guard hasName else { return .profile }
         return .walletChoice
     }
 
@@ -603,7 +615,7 @@ final class FirebaseService: ObservableObject {
             DebugLogger.log("❌ Firestore setData failed: \(error)")
         }
     }
-    
+
     func recordTransaction(
         recipientAddress: String,
         amount: Double,
@@ -613,9 +625,9 @@ final class FirebaseService: ObservableObject {
             print("No authenticated user")
             return
         }
-        
+
         let db = Firestore.firestore()
-        
+
         do {
             let transactionData: [String: Any] = [
                 "recipientAddress": recipientAddress,
@@ -625,10 +637,10 @@ final class FirebaseService: ObservableObject {
                 "timestamp": FieldValue.serverTimestamp(),
                 "notificationSent": false,
             ]
-            
+
             let docRef = try await db.collection("transactionRecords").addDocument(data: transactionData)
             print("Transaction record created: \(docRef.documentID)")
-            
+
         } catch {
             print("Error creating transaction record: \(error)")
         }

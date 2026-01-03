@@ -19,7 +19,6 @@ struct SplashView: View {
             DarkGradientView()
 
             VStack(spacing: 24) {
-                
                 Image(VendanoTheme.shared.isHosky() ? "vendoggo-logo" : "vendano-logo")
                     .resizable()
                     .renderingMode(.template)

@@ -98,14 +98,12 @@ struct VendanoApp: App {
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
-    
     private var authListenerHandle: AuthStateDidChangeListenerHandle?
-    
+
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        
         let env = AppState.shared.environment
         AppState.shared.loadFAQ()
-        
+
         switch env {
         case .appstorereview:
             // Don’t configure Firebase at all
@@ -113,16 +111,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         case .testnet:
             // Configure with your testnet Firebase plist
             if let filePath = Bundle.main.path(forResource: "GoogleService-Info-Testnet", ofType: "plist"),
-               let options = FirebaseOptions(contentsOfFile: filePath) {
+               let options = FirebaseOptions(contentsOfFile: filePath)
+            {
                 FirebaseApp.configure(options: options)
             }
         case .mainnet:
             FirebaseApp.configure()
-            
+
             authListenerHandle = Auth.auth().addStateDidChangeListener { _, _ in
                 FCMTokenBuffer.shared.flushIfPossible()
             }
-            
+
             ReinstallAuthEnforcer.run()
 
             AnalyticsManager.logOnce("first_open")

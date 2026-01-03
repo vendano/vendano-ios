@@ -65,7 +65,7 @@ struct NewSeedView: View {
                         ForEach(words.indices, id: \.self) { idx in
                             let word = words[idx]
                             let isDup = duplicateWords.contains(word)
-                            
+
                             HStack {
                                 Text("\(idx + 1).")
                                     .monospacedDigit()
@@ -108,12 +108,12 @@ struct NewSeedView: View {
                 Button("Got it", role: .cancel) {}
             } message: {
                 Text(L10n.NewSeedView.screenshotsMaySyncToIcloudAndExposeYour)
-                .vendanoFont(.body, size: 16)
+                    .vendanoFont(.body, size: 16)
             }
             .onAppear { regenerate() }
         }
     }
-    
+
     private var duplicateWords: Set<String> {
         var seen = Set<String>()
         var dups = Set<String>()

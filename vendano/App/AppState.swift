@@ -24,13 +24,15 @@ final class AppState: ObservableObject {
     @Published var displayName: String = ""
 
     // MARK: - Store settings (for accepting payments)
+
     @Published var storeName: String = UserDefaults.standard.string(forKey: "VendanoStoreName") ?? "" {
         didSet { UserDefaults.standard.set(storeName, forKey: "VendanoStoreName") }
     }
 
     @Published var storeDefaultPricingCurrency: PricingCurrency = {
         if let raw = UserDefaults.standard.string(forKey: "VendanoStoreDefaultPricingCurrency"),
-           let val = PricingCurrency(rawValue: raw) {
+           let val = PricingCurrency(rawValue: raw)
+        {
             return val
         }
         return .fiat
@@ -52,7 +54,6 @@ final class AppState: ObservableObject {
         didSet { UserDefaults.standard.set(storeTipsEnabled, forKey: "VendanoStoreTipsEnabled") }
     }
 
-
     @Published var otpEmail: String?
     @Published var otpPhone: String?
     @Published var phone: [String] = []
@@ -70,51 +71,51 @@ final class AppState: ObservableObject {
     @Published var viewedFAQIDs: Set<String> = []
     @Published var checkingTxs: Bool = false
     @Published var recentTxs: [TxRowViewModel] = []
-    
+
     @Published var displayToast = false
     @Published var toastMessage = ""
-    
+
     @Published var sendToAddress: String? = nil
-    
+
     @Published var isExpertMode: Bool = UserDefaults.standard.bool(forKey: "VendanoExpertMode") {
         didSet {
             UserDefaults.standard.set(isExpertMode, forKey: "VendanoExpertMode")
         }
     }
-    
+
     @Published var FAQs: FAQDocument?
-    
+
     var allFAQs: [FAQItem] {
         FAQs?.sections.flatMap(\.items) ?? []
     }
-    
+
     @Published var environment: AppEnvironment = .mainnet
-    
+
     func setEnvironment(_ env: AppEnvironment) {
         environment = env
         DebugLogger.log("🌐 Environment set to \(env.rawValue)")
     }
-    
+
     func resolveEnvironment(for identifier: String) -> AppEnvironment {
         // Special demo account
         if identifier.lowercased() == "apple@vendano.net" {
             return .appstorereview
         }
-        
+
         // hardcoded test users for staging
         if identifier.lowercased().hasSuffix("@test.vendano.net") {
             return .testnet
         }
-        
+
         return .mainnet
     }
-    
+
     @MainActor
     func loadFAQ() {
         do { FAQs = try FAQLoader.load() }
         catch { print("FAQ load error:", error) }
     }
-    
+
     @MainActor
     func showToast(_ message: String, duration: TimeInterval = 2.0) {
         toastMessage = message
@@ -205,8 +206,8 @@ final class AppState: ObservableObject {
                     let netAda = Double(netLovelace) / 1_000_000
 
                     DebugLogger.log(
-                        "    myInputSum=\(Double(myInputSum)/1_000_000) " +
-                        "myOutputSum=\(Double(myOutputSum)/1_000_000) netAda=\(netAda)"
+                        "    myInputSum=\(Double(myInputSum) / 1_000_000) " +
+                            "myOutputSum=\(Double(myOutputSum) / 1_000_000) netAda=\(netAda)"
                     )
 
                     // Skip pure no-op txs
@@ -222,7 +223,7 @@ final class AppState: ObservableObject {
                     // running = current balance *after* all later txs
                     // balanceAfter = what wallet shows right after THIS tx
                     let balanceAfter = running
-                    running -= netAda  // undo this tx going backwards
+                    running -= netAda // undo this tx going backwards
 
                     // Counterparty: any address not in myAddresses
                     let peers: [String]
@@ -252,7 +253,7 @@ final class AppState: ObservableObject {
 
                     DebugLogger.log(
                         "    -> outgoing=\(outgoing) moved=\(movedAda) " +
-                        "balanceAfter=\(balanceAfter) counterparty=\(counterparty)"
+                            "balanceAfter=\(balanceAfter) counterparty=\(counterparty)"
                     )
 
                     vms.append(.init(
@@ -438,4 +439,3 @@ final class AppState: ObservableObject {
         removeImage()
     }
 }
-

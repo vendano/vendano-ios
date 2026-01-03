@@ -45,7 +45,7 @@ struct NewContactAuthView: View {
         let digits = localNumber.filter(\.isWholeNumber)
         return digits.count >= 6 && digits.count <= 15 && dialCode.starts(with: "+")
     }
-    
+
     private var titleKey: LocalizedStringKey {
         if sent {
             return method == .email

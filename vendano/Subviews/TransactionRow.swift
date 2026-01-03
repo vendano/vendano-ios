@@ -44,8 +44,8 @@ struct TransactionRow: View {
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(
                         tx.outgoing
-                        ? theme.color(named: "Negative")   // sent
-                        : theme.color(named: "Positive")   // received
+                            ? theme.color(named: "Negative") // sent
+                            : theme.color(named: "Positive") // received
                     )
 
                 Text("\((tx.balanceAfter).formatted(.number.precision(.fractionLength(1))))₳")

@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct VendanoWalletMath {
+enum VendanoWalletMath {
     static let lovelacePerAda: Double = 1_000_000
-    static let minFeeOutputLovelace: UInt64 = 1_000_000   // 1 ADA
+    static let minFeeOutputLovelace: UInt64 = 1_000_000 // 1 ADA
 
     static func adaToLovelace(_ ada: Double) -> UInt64 {
         guard ada > 0 else { return 0 }

@@ -22,15 +22,15 @@ final class ProximityPaymentService: NSObject, ObservableObject {
 
     @Published private(set) var mode: Mode = .idle
     @Published private(set) var connectedPeerNames: [String] = []
-    @Published var receivedRequest: VendanoPaymentRequest? = nil          // payer
-    @Published var lastResponse: VendanoPaymentResponse? = nil            // merchant
+    @Published var receivedRequest: VendanoPaymentRequest? = nil // payer
+    @Published var lastResponse: VendanoPaymentResponse? = nil // merchant
     @Published var lastErrorMessage: String? = nil
 
     // MARK: - MPC internals
 
     private let serviceType = "vendano-pay"
     private let peerID = MCPeerID(displayName: UIDevice.current.name)
-    nonisolated(unsafe) private lazy var session: MCSession = {
+    private nonisolated(unsafe) lazy var session: MCSession = {
         let s = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
         s.delegate = self
         return s
@@ -101,19 +101,19 @@ final class ProximityPaymentService: NSObject, ObservableObject {
             let kind = try c.decode(Kind.self, forKey: .type)
             switch kind {
             case .request:
-                self = .request(try c.decode(VendanoPaymentRequest.self, forKey: .payload))
+                self = try .request(c.decode(VendanoPaymentRequest.self, forKey: .payload))
             case .response:
-                self = .response(try c.decode(VendanoPaymentResponse.self, forKey: .payload))
+                self = try .response(c.decode(VendanoPaymentResponse.self, forKey: .payload))
             }
         }
 
         func encode(to encoder: Encoder) throws {
             var c = encoder.container(keyedBy: CodingKeys.self)
             switch self {
-            case .request(let req):
+            case let .request(req):
                 try c.encode(Kind.request, forKey: .type)
                 try c.encode(req, forKey: .payload)
-            case .response(let resp):
+            case let .response(resp):
                 try c.encode(Kind.response, forKey: .type)
                 try c.encode(resp, forKey: .payload)
             }
@@ -146,7 +146,7 @@ final class ProximityPaymentService: NSObject, ObservableObject {
 // MARK: - MCSessionDelegate
 
 extension ProximityPaymentService: MCSessionDelegate {
-    nonisolated func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+    nonisolated func session(_ session: MCSession, peer _: MCPeerID, didChange state: MCSessionState) {
         Task { @MainActor in
             let names = session.connectedPeers.map { $0.displayName }.sorted()
             connectedPeerNames = names
@@ -158,14 +158,14 @@ extension ProximityPaymentService: MCSessionDelegate {
         }
     }
 
-    nonisolated func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+    nonisolated func session(_: MCSession, didReceive data: Data, fromPeer _: MCPeerID) {
         Task { @MainActor in
             do {
                 let msg = try JSONDecoder().decode(Message.self, from: data)
                 switch msg {
-                case .request(let req):
+                case let .request(req):
                     receivedRequest = req
-                case .response(let resp):
+                case let .response(resp):
                     lastResponse = resp
                 }
             } catch {
@@ -174,19 +174,19 @@ extension ProximityPaymentService: MCSessionDelegate {
         }
     }
 
-    nonisolated func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
-    nonisolated func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
-    nonisolated func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
+    nonisolated func session(_: MCSession, didReceive _: InputStream, withName _: String, fromPeer _: MCPeerID) {}
+    nonisolated func session(_: MCSession, didStartReceivingResourceWithName _: String, fromPeer _: MCPeerID, with _: Progress) {}
+    nonisolated func session(_: MCSession, didFinishReceivingResourceWithName _: String, fromPeer _: MCPeerID, at _: URL?, withError _: Error?) {}
 }
 
 // MARK: - Advertiser
 
 extension ProximityPaymentService: MCNearbyServiceAdvertiserDelegate {
-    nonisolated func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+    nonisolated func advertiser(_: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer _: MCPeerID, withContext _: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
         invitationHandler(true, session)
     }
 
-    nonisolated func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
+    nonisolated func advertiser(_: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
         Task { @MainActor in
             lastErrorMessage = error.localizedDescription
         }
@@ -196,14 +196,14 @@ extension ProximityPaymentService: MCNearbyServiceAdvertiserDelegate {
 // MARK: - Browser
 
 extension ProximityPaymentService: MCNearbyServiceBrowserDelegate {
-    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo _: [String: String]?) {
         // Auto-invite first peer we see for MVP (Square-like “just tap” feel)
         browser.invitePeer(peerID, to: session, withContext: nil, timeout: 10)
     }
 
-    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {}
+    nonisolated func browser(_: MCNearbyServiceBrowser, lostPeer _: MCPeerID) {}
 
-    nonisolated func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
+    nonisolated func browser(_: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
         Task { @MainActor in
             lastErrorMessage = error.localizedDescription
         }

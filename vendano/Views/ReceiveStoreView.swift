@@ -86,7 +86,7 @@ struct ReceiveStoreView: View {
                                 .vendanoFont(.caption, size: 13, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextSecondary"))
 
-                            Text("\(ada.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                            Text("\(ada.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                                 .vendanoFont(.headline, size: 20, weight: .bold)
                                 .foregroundColor(theme.color(named: "TextPrimary"))
 

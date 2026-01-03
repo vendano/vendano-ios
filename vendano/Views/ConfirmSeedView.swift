@@ -12,8 +12,8 @@ struct ConfirmSeedView: View {
     @StateObject private var state = AppState.shared
 
     @State private var correctWords: [String] = []
-    @State private var shuffledIndices: [Int] = []   // indexes into correctWords
-    @State private var selectedIndices: [Int] = []   // picked indexes, in order
+    @State private var shuffledIndices: [Int] = [] // indexes into correctWords
+    @State private var selectedIndices: [Int] = [] // picked indexes, in order
     @State private var error: Bool = false
 
     @State private var isCreatingWallet: Bool = false
@@ -37,9 +37,9 @@ struct ConfirmSeedView: View {
                         .multilineTextAlignment(.center)
 
                     Text(L10n.ConfirmSeedView.theseWordsAreNeverSentToOurServers)
-                    .vendanoFont(.caption, size: 13)
-                    .foregroundColor(theme.color(named: "TextSecondary"))
-                    .multilineTextAlignment(.center)
+                        .vendanoFont(.caption, size: 13)
+                        .foregroundColor(theme.color(named: "TextSecondary"))
+                        .multilineTextAlignment(.center)
 
                     // Tappable grid
                     LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 4), spacing: 12) {
@@ -54,13 +54,13 @@ struct ConfirmSeedView: View {
                                 Text(word)
                                     .vendanoFont(.caption, size: 16)
                                     .foregroundColor(isPicked
-                                                     ? theme.color(named: "TextReversed")
-                                                     : theme.color(named: "TextPrimary"))
+                                        ? theme.color(named: "TextReversed")
+                                        : theme.color(named: "TextPrimary"))
                                     .padding(8)
                                     .frame(maxWidth: .infinity)
                                     .background(isPicked
-                                                ? theme.color(named: "Accent")
-                                                : theme.color(named: "CellBackground"))
+                                        ? theme.color(named: "Accent")
+                                        : theme.color(named: "CellBackground"))
                                     .cornerRadius(6)
                             }
                             .disabled(isDisabled)
@@ -136,16 +136,16 @@ struct ConfirmSeedView: View {
 
                                             if let decodingError = error as? DecodingError {
                                                 switch decodingError {
-                                                case .keyNotFound(let key, let context):
+                                                case let .keyNotFound(key, context):
                                                     DebugLogger.log("❌ Wallet creation failed – missing key: \(key.stringValue), path: \(context.codingPath.map(\.stringValue))")
                                                     errorMessage = L10n.ConfirmSeedView.walletImportFailedMissingKey(key.stringValue)
-                                                case .valueNotFound(let type, let context):
+                                                case let .valueNotFound(type, context):
                                                     DebugLogger.log("❌ Wallet creation failed – missing value for type \(type), path: \(context.codingPath.map(\.stringValue))")
                                                     errorMessage = L10n.ConfirmSeedView.walletImportFailedMissingValue(String(describing: type))
-                                                case .dataCorrupted(let context):
+                                                case let .dataCorrupted(context):
                                                     DebugLogger.log("❌ Wallet creation failed – data corrupted: \(context.debugDescription)")
                                                     errorMessage = L10n.ConfirmSeedView.walletImportFailedCorruptedData
-                                                case .typeMismatch(let type, let context):
+                                                case let .typeMismatch(type, context):
                                                     DebugLogger.log("❌ Wallet creation failed – type mismatch \(type): \(context.debugDescription), path: \(context.codingPath.map(\.stringValue))")
                                                     errorMessage = L10n.ConfirmSeedView.walletImportFailedWrongFormat
                                                 @unknown default:
@@ -163,7 +163,6 @@ struct ConfirmSeedView: View {
                                             state.walletAddress = ""
                                         }
                                     }
-
                                 }
                             } else {
                                 withAnimation {

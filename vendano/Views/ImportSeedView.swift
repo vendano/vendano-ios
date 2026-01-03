@@ -44,22 +44,22 @@ struct ImportSeedView: View {
 
                     Button(L10n.ImportSeedView.import) {
                         let words = MnemonicText.tokenize(phraseText)
-                        
+
                         guard [12, 15, 18, 21, 24].contains(words.count) else {
                             errorMessage = L10n.ImportSeedView.invalidWordCount
                             showError = true
                             return
                         }
-                        
+
                         guard let lang = MnemonicDetector.detectLanguage(words: words) else {
                             errorMessage = L10n.ImportSeedView.recoveryPhraseNotValidAnyLanguage
                             showError = true
                             return
                         }
-                        
+
                         state.seedWords = words
                         state.seedLanguage = lang
-                        
+
                         // Save both words + language
                         if let data = try? JSONEncoder().encode(words) {
                             KeychainWrapper.standard.set(data, forKey: "seedWords")

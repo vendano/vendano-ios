@@ -5,8 +5,8 @@
 //  Created by Jeffrey Berthiaume on 1/2/26.
 //
 
-import UserNotifications
 import UIKit
+import UserNotifications
 
 @MainActor
 final class NotificationPermissionManager: ObservableObject {

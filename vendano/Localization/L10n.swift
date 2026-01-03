@@ -23,7 +23,7 @@ enum L10n {
         static let skip: LocalizedStringKey = "Common.skip"
         static var unnamed: String { String(localized: "Common.unnamed") }
         static var unknownError: String { String(localized: "Common.unknownError") }
-        
+
         static var on: String { String(localized: "Common.on") }
         static var off: String { String(localized: "Common.off") }
         static var setUp: String { String(localized: "Common.setUp") }
@@ -48,12 +48,12 @@ enum L10n {
         static let sendCode: LocalizedStringKey = "AuthView.sendCode"
         static let text1: LocalizedStringKey = "AuthView.text1"
         static let youExampleCom: LocalizedStringKey = "AuthView.youExampleCom"
-        
+
         static func errorSendingEmailLink(_ details: String) -> String {
             String(format: String(localized: "AuthView.errorSendingEmailLink", table: "AuthView"), details)
         }
     }
-    
+
     enum CardanoRustError {
         static func dataError(_ msg: String) -> String {
             String(format: String(localized: "CardanoRustError.dataError"), msg)
@@ -86,20 +86,23 @@ enum L10n {
         static let error: LocalizedStringKey = "ConfirmSeedView.error"
         static let incorrectOrderTryAgain: LocalizedStringKey = "ConfirmSeedView.incorrectOrderTryAgain"
         static let theseWordsAreNeverSentToOurServers: LocalizedStringKey = "ConfirmSeedView.theseWordsAreNeverSentToOurServers"
-        
+
         static var walletAddressNotFound: String { String(localized: "ConfirmSeedView.walletAddressNotFound") }
         static func walletImportFailedMissingKey(_ key: String) -> String {
-                String(format: String(localized: "ConfirmSeedView.walletImportFailedMissingKey"), key) }
+            String(format: String(localized: "ConfirmSeedView.walletImportFailedMissingKey"), key)
+        }
+
         static func walletImportFailedMissingValue(_ type: String) -> String { String(format: String(localized: "ConfirmSeedView.walletImportFailedMissingValue"), type) }
         static var walletImportFailedCorruptedData: String { String(localized: "ConfirmSeedView.walletImportFailedCorruptedData") }
         static var walletImportFailedWrongFormat: String { String(localized: "ConfirmSeedView.walletImportFailedWrongFormat") }
         static var walletImportFailedUnknownDecodingError: String { String(localized: "ConfirmSeedView.walletImportFailedUnknownDecodingError") }
-        
+
         static func tapRecoveryWordsInstruction(_ count: Int) -> String {
             String.localizedStringWithFormat(
                 NSLocalizedString(
                     "ConfirmSeedView.tapRecoveryWordsInstruction",
-                    comment: "Instruction to tap N recovery words in order"),
+                    comment: "Instruction to tap N recovery words in order"
+                ),
                 count
             )
         }
@@ -110,19 +113,19 @@ enum L10n {
         static let tellUsAboutYou: LocalizedStringKey = "CreateProfileView.tellUsAboutYou"
         static let yourName: LocalizedStringKey = "CreateProfileView.yourName"
     }
-    
+
     enum FAQLoader {
         static func missingJSONInBundle(name: String) -> String {
             String(format: String(localized: "FAQLoader.missingJSONInBundle"), name)
         }
     }
-    
+
     enum FAQSheet {
         static var segmentQuick: String { String(localized: "FAQSheet.segment.quick") }
         static var segmentExplain: String { String(localized: "FAQSheet.segment.explain") }
         static var segmentDeepDive: String { String(localized: "FAQSheet.segment.deepDive") }
     }
-    
+
     enum FAQView {
         static let titleOnboarding: LocalizedStringKey = "FAQView.titleOnboarding"
         static let titleCommonQuestions: LocalizedStringKey = "FAQView.titleCommonQuestions"
@@ -136,7 +139,7 @@ enum L10n {
         static var emptyPrompt4: String { String(localized: "FeedbackSheet.emptyPrompt.4") }
         static var emptyPrompt5: String { String(localized: "FeedbackSheet.emptyPrompt.5") }
     }
-    
+
     enum FiatCurrency {
         static var usd: String { String(localized: "FiatCurrency.usd") }
         static var eur: String { String(localized: "FiatCurrency.eur") }
@@ -147,7 +150,7 @@ enum L10n {
         static var php: String { String(localized: "FiatCurrency.php") }
         static var inr: String { String(localized: "FiatCurrency.inr") }
     }
-    
+
     enum FirebaseService {
         static var errorNotSignedIn: String {
             String(localized: "FirebaseService.error.notSignedIn")
@@ -175,7 +178,7 @@ enum L10n {
         static let invalidRecoveryPhrase: LocalizedStringKey = "ImportSeedView.invalidRecoveryPhrase"
         static let pasteYour1215Or24WordRecovery: LocalizedStringKey = "ImportSeedView.pasteYour1215Or24WordRecovery"
         static let walletImport: LocalizedStringKey = "ImportSeedView.walletImport"
-        
+
         static var invalidWordCount: String { String(localized: "ImportSeedView.invalidWordCount") }
         static var recoveryPhraseNotValidAnyLanguage: String { String(localized: "ImportSeedView.recoveryPhraseNotValidAnyLanguage") }
     }
@@ -218,6 +221,7 @@ enum L10n {
         static func wordCountOption(_ count: Int) -> String {
             String(format: String(localized: "NewSeedView.wordCountOption"), count)
         }
+
         static func writeTheseWordsInstruction(_ count: Int) -> String {
             String(format: String(localized: "NewSeedView.writeTheseWordsInstruction"), count)
         }
@@ -323,67 +327,80 @@ enum L10n {
         static let weDonTRecognizeThisAddressInVendano: LocalizedStringKey = "SendView.weDonTRecognizeThisAddressInVendano"
         static let youExampleCom: LocalizedStringKey = "SendView.youExampleCom"
         static let yourAdaHasBeenSuccessfullySentYouLl: LocalizedStringKey = "SendView.yourAdaHasBeenSuccessfullySentYouLl"
-        
+
         static var userSendingUnknownADAAmount: String {
             String(localized: "SendView.userSendingUnknownADAAmount")
         }
+
         static func inviteMessage(senderName: String, adaAmount: String) -> String {
             String(
                 format: String(localized: "SendView.inviteMessage"),
                 senderName, adaAmount
             )
         }
+
         static var sendFailedTryAgain: String {
             String(localized: "SendView.sendFailedTryAgain")
         }
+
         static var inviteEmailSubject: String {
             String(localized: "SendView.inviteEmailSubject")
         }
+
         static var notEnoughAdaForTransaction: String {
             String(localized: "SendView.notEnoughAdaForTransaction")
         }
+
         static func couldNotEstimateFeeWithMessage(_ message: String) -> String {
             String(format: String(localized: "SendView.couldNotEstimateFeeWithMessage"), message)
         }
+
         static var couldNotEstimateFeeTryAgain: String { String(localized: "SendView.couldNotEstimateFeeTryAgain")
         }
+
         static var couldNotCalculateMaxSendable: String { String(localized: "SendView.couldNotCalculateMaxSendable")
         }
+
         static var enterValidAmount: String { String(localized: "SendView.enterValidAmount")
         }
+
         static var confirmBeforeSendingReason: String { String(localized: "SendView.confirmBeforeSendingReason")
         }
+
         static func maxSendableDueToTokens(_ formattedAda: String) -> String { String(format: String(localized: "SendView.maxSendableDueToTokens"), formattedAda)
         }
+
         static var cardanoRejectedMinAdaWithTokens: String { String(localized: "SendView.cardanoRejectedMinAdaWithTokens")
         }
+
         static var recipientCardanoAddress: String { String(localized: "SendView.recipientCardanoAddress")
         }
-        
+
         static func vendanoFeeFormat(_ message: String) -> String {
             String(format: String(localized: "SendView.vendanoFeeFormat"), message)
         }
+
         static var authPrimerTitle: String { String(localized: "SendView.authPrimerTitle") }
         static func authPrimerMessage(_ message: String) -> String {
             String(format: String(localized: "SendView.authPrimerMessage"), message)
         }
+
         static var authPasscode: String { String(localized: "SendView.authPasscode") }
         static var authFaceId: String { String(localized: "SendView.authFaceId") }
         static var authTouchId: String { String(localized: "SendView.authTouchId") }
         static var authBiometrics: String { String(localized: "SendView.authBiometrics") }
         static var authFailed: String { String(localized: "SendView.authFailed") }
-        
+
         static func authLockedFormat(_ message: String) -> String {
             String(format: String(localized: "SendView.authLockedFormat"), message)
         }
-        
     }
 
     enum SplashView {
         static let easyAdaTransfersByPhoneOrEmail: LocalizedStringKey = "SplashView.easyAdaTransfersByPhoneOrEmail"
         static let getStarted: LocalizedStringKey = "SplashView.getStarted"
     }
-    
+
     enum WalletChoiceView {
         static let createANewWalletAndWeLlGive: LocalizedStringKey = "WalletChoiceView.createANewWalletAndWeLlGive"
         static let createNewWallet: LocalizedStringKey = "WalletChoiceView.createNewWallet"
@@ -392,7 +409,7 @@ enum L10n {
         static let letSBegin: LocalizedStringKey = "WalletChoiceView.letSBegin"
         static let toSendOrReceiveAdaYouFirstNeed: LocalizedStringKey = "WalletChoiceView.toSendOrReceiveAdaYouFirstNeed"
     }
-    
+
     enum WalletService {
         static var walletNotInitialized: String {
             String(localized: "WalletService.walletNotInitialized")
@@ -418,7 +435,7 @@ enum L10n {
             String(format: String(localized: "WalletService.insufficientFunds"), haveAda, needAda)
         }
     }
-    
+
     enum HomeEmptyFunding {
         static let title = NSLocalizedString("HomeEmptyFunding.title", comment: "")
         static let subtitle = NSLocalizedString("HomeEmptyFunding.subtitle", comment: "")
@@ -446,8 +463,6 @@ enum L10n {
         static let title = NSLocalizedString("NotificationPrimerCard.title", comment: "")
         static let details = NSLocalizedString("NotificationPrimerCard.details", comment: "")
     }
-    
-
 
     enum StoreView {
         static let personalTab = NSLocalizedString("StoreView.personalTab", comment: "")
@@ -539,6 +554,4 @@ enum L10n {
         static let paying = NSLocalizedString("StoreView.paying", comment: "")
         static let cancel = NSLocalizedString("StoreView.cancel", comment: "")
     }
-
-
 }

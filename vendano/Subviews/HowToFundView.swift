@@ -1,5 +1,5 @@
 //
-//  HomeEmptyFundingCards.swift
+//  HowToFundView.swift
 //  vendano
 //
 //  Created by Jeffrey Berthiaume on 1/2/26.
@@ -215,14 +215,14 @@ struct HowToFundView: View {
 
         private var backgroundColor: Color {
             isEmphasized
-            ? theme.color(named: "FieldBackground").opacity(0.7)
-            : theme.color(named: "CellBackground")
+                ? theme.color(named: "FieldBackground").opacity(0.7)
+                : theme.color(named: "CellBackground")
         }
 
         private var borderColor: Color {
             isEmphasized
-            ? theme.color(named: "Accent").opacity(0.55)
-            : theme.color(named: "FieldBackground").opacity(0.9)
+                ? theme.color(named: "Accent").opacity(0.55)
+                : theme.color(named: "FieldBackground").opacity(0.9)
         }
     }
 }

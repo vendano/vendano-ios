@@ -7,7 +7,7 @@
 import Foundation
 
 struct VendanoPaymentRequest: Codable, Identifiable, Equatable {
-    let id: String               // UUID string
+    let id: String // UUID string
     let createdAt: Date
     let expiresAt: Date
 
@@ -20,9 +20,9 @@ struct VendanoPaymentRequest: Codable, Identifiable, Equatable {
     // Pricing
     let pricingCurrency: PricingCurrency
     let fiatCurrencyCode: String?
-    let fiatSubtotal: Double?            // what vendor typed (before buffer)
-    let exchangeRateFiatPerAda: Double?  // e.g. 0.39 (USD per ADA)
-    let bufferPercent: Double            // 0.0 ... 0.25
+    let fiatSubtotal: Double? // what vendor typed (before buffer)
+    let exchangeRateFiatPerAda: Double? // e.g. 0.39 (USD per ADA)
+    let bufferPercent: Double // 0.0 ... 0.25
 
     // What payer actually pays (base, tip separate)
     let baseAda: Double

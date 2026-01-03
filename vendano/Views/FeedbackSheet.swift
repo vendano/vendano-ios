@@ -14,13 +14,13 @@ struct FeedbackSheet: View {
     @State private var text = ""
     @State private var prompt = ""
     @FocusState private var focus: Bool
-    
+
     private let emptyPrompts = [
         L10n.FeedbackSheet.emptyPrompt1,
         L10n.FeedbackSheet.emptyPrompt2,
         L10n.FeedbackSheet.emptyPrompt3,
         L10n.FeedbackSheet.emptyPrompt4,
-        L10n.FeedbackSheet.emptyPrompt5
+        L10n.FeedbackSheet.emptyPrompt5,
     ]
 
     var body: some View {

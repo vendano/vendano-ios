@@ -119,17 +119,16 @@ struct FAQView: View {
             selected = faq
         }
     }
-    
+
     private var FAQTitle: LocalizedStringKey {
         onFinish == nil
-        ? L10n.FAQView.titleOnboarding
-        : L10n.FAQView.titleCommonQuestions
+            ? L10n.FAQView.titleOnboarding
+            : L10n.FAQView.titleCommonQuestions
     }
 
     private var FAQContinueButtonLabel: LocalizedStringKey {
         onFinish == nil
-        ? L10n.Common.continue
-        : L10n.Common.close
+            ? L10n.Common.continue
+            : L10n.Common.close
     }
-
 }

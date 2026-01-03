@@ -28,9 +28,10 @@ actor NFTService {
                     from: await makeRequest(url))
         return utxos.flatMap { $0.amount }
     }
-    
+
     func fetchMetadata(for assetId: String) async throws
-        -> (meta: AssetMetadataResponse, onchain: [String: Any]?) {
+        -> (meta: AssetMetadataResponse, onchain: [String: Any]?)
+    {
         let url = URL(string: "\(baseURL)/assets/\(assetId)")!
         let data = try await makeRequest(url)
 

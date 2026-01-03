@@ -18,22 +18,21 @@ struct TapToPayPayerView: View {
         ZStack {
             DarkGradientView()
                 .ignoresSafeArea()
-            
+
             SheetChrome(onClose: { proximity.stop(); dismiss() }) {
-                
                 VStack(spacing: 18) {
                     VStack(spacing: 8) {
                         Text(L10n.StoreView.tapToPayTitle)
                             .vendanoFont(.headline, size: 24, weight: .bold)
                             .foregroundColor(theme.color(named: "TextReversed"))
-                        
+
                         Text(L10n.StoreView.tapToPaySubtitle)
                             .vendanoFont(.body, size: 14)
                             .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
-                    
+
                     VStack(alignment: .leading, spacing: 10) {
                         if proximity.connectedPeerNames.isEmpty {
                             Text(L10n.StoreView.searchingForMerchant)
@@ -44,7 +43,7 @@ struct TapToPayPayerView: View {
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                                 .foregroundColor(theme.color(named: "TextReversed"))
                         }
-                        
+
                         if let err = proximity.lastErrorMessage {
                             Text(err)
                                 .vendanoFont(.caption, size: 13)
@@ -52,11 +51,10 @@ struct TapToPayPayerView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     Spacer()
                 }
             }
-            
         }
         .onAppear {
             proximity.startPayer()
@@ -142,7 +140,7 @@ private struct PaymentConfirmView: View {
                         .foregroundColor(theme.color(named: "TextReversed"))
                         .multilineTextAlignment(.center)
 
-                    Text("\(request.baseAda.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                    Text("\(request.baseAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                         .vendanoFont(.title, size: 40, weight: .bold)
                         .foregroundColor(theme.color(named: "TextReversed"))
                 }
@@ -173,19 +171,19 @@ private struct PaymentConfirmView: View {
                         HStack {
                             Text(L10n.StoreView.networkFee)
                             Spacer()
-                            Text(netFeeAda.map { "\($0.formatted(.number.precision(.fractionLength(3...6)))) ADA" } ?? L10n.StoreView.calculating)
+                            Text(netFeeAda.map { "\($0.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA" } ?? L10n.StoreView.calculating)
                                 .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                         }
                         HStack {
                             Text(L10n.StoreView.vendanoFeePaidByStore(Config.vendanoAppFeePercentFormatted))
                             Spacer()
-                            Text("\(vendanoFeeAda.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                            Text("\(vendanoFeeAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                                 .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                         }
                         HStack {
                             Text(L10n.StoreView.storeReceives)
                             Spacer()
-                            Text("\(merchantReceivesAda.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                            Text("\(merchantReceivesAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                                 .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                         }
 
@@ -195,7 +193,7 @@ private struct PaymentConfirmView: View {
                             Text(L10n.StoreView.youPayTotal)
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                             Spacer()
-                            Text("\(payerTotalAda.formatted(.number.precision(.fractionLength(3...6)))) ADA")
+                            Text("\(payerTotalAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")
                                 .vendanoFont(.body, size: 16, weight: .semibold)
                         }
                     }

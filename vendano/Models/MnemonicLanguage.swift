@@ -5,8 +5,8 @@
 //  Created by Jeffrey Berthiaume on 12/29/25.
 //
 
-import Foundation
 import Bip39
+import Foundation
 
 enum MnemonicLanguage: String, CaseIterable, Codable {
     case app

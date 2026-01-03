@@ -1,10 +1,9 @@
 //
-//  FAQDocument.swift
+//  FAQLoader.swift
 //  vendano
 //
 //  Created by Jeffrey Berthiaume on 12/29/25.
 //
-
 
 import Foundation
 
