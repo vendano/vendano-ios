@@ -292,7 +292,7 @@
 "StoreView.storeTab" = "매장";
 "StoreView.storeSettings" = "매장";
 "StoreView.storeName" = "매장 이름";
-"StoreView.storeNamePlaceholder" = "예: My Donuts";
+"StoreView.storeNamePlaceholder" = "예: Lovelace Cafe";
 "StoreView.storeNameNotSet" = "설정에서 매장 이름을 설정하세요";
 "StoreView.storeNameSetupHint" = "팁: 프로필 → 매장에서 매장 이름을 설정하면 고객이 누구에게 결제하는지 확인할 수 있어요.";
 "StoreView.defaultStoreNameFallback" = "매장";
@@ -313,7 +313,7 @@
 "StoreView.fiatApproxUnavailable" = "법정화폐 예상 금액을 사용할 수 없습니다(환율이 로드되지 않음).";
 "StoreView.tapToCollect" = "탭으로 받기";
 "StoreView.readyToCollectTitle" = "받을 준비 완료";
-"StoreView.readyToCollectSubtitle" = "고객에게 Vendano → Send → Tap to pay를 열도록 안내한 뒤, 기기를 서로 탭하세요.";
+"StoreView.readyToCollectSubtitle" = "고객에게 Vendano → 보내기 → 빠른 결제를 열게 한 다음, 두 기기를 서로 가까이 가져가세요(윗부분을 맞대지 마세요—iOS에서 NameDrop이 뜰 수 있어요).";
 "StoreView.waitingForCustomer" = "고객 대기 중…";
 "StoreView.connectedTo" = "%1$@에 연결됨";
 "StoreView.paymentComplete" = "결제 완료 • Tx: %1$@";
@@ -322,9 +322,9 @@
 "StoreView.paymentFailed" = "결제 실패: %1$@";
 "StoreView.paymentExpired" = "요청이 만료되었습니다.";
 "StoreView.paymentCancelled" = "취소되었습니다.";
-"StoreView.tapToPay" = "탭으로 결제";
-"StoreView.tapToPayTitle" = "탭으로 결제";
-"StoreView.tapToPaySubtitle" = "근처의 Vendano 판매자를 찾아 기기를 탭하여 결제 요청을 받으세요.";
+"StoreView.tapToPay" = "빠른 결제";
+"StoreView.tapToPayTitle" = "빠른 결제";
+"StoreView.tapToPaySubtitle" = "근처의 Vendano 판매자를 찾고, 기기를 서로 가까이 가져가 결제 요청을 받으세요.";
 "StoreView.searchingForMerchant" = "판매자 검색 중…";
 "StoreView.payStoreTitle" = "%1$@에게 결제할까요?";
 "StoreView.addTip" = "팁 추가";
@@ -339,3 +339,5 @@
 
 "WalletService.walletKeychainNotInitialized" = "보안 저장소가 초기화되지 않았습니다.";
 "WalletService.noWalletFound" = "주소를 불러온 후 지갑 계정을 찾을 수 없습니다.";
+"StoreView.quickPayMatchHintMerchant" = "고객과 같은 색/심볼인지 확인하세요.";
+"StoreView.quickPayMatchHintPayer" = "판매자와 같은 색/심볼인지 확인하세요.";

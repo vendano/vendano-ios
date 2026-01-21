@@ -20,7 +20,7 @@ struct PlaceholderCell: View {
             .background(theme.color(named: "CellBackground"))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.black, lineWidth: 1)
+                    .stroke(theme.color(named: "TextPrimary"), lineWidth: 1)
                     .opacity(0.3)
             )
     }

@@ -11,11 +11,16 @@ struct OnboardingFAQCardView: View {
 
     @State private var currentIndex: Int = 0
     @State private var level: Int = 0 // 0 = answer, 1 = clarify, 2 = details
+
+    // We keep dragOffset as State so we can animate it to 0 on release.
     @State private var dragOffset: CGFloat = 0
     @GestureState private var isDragging: Bool = false
 
     // Local-only "viewed" tracking for this onboarding screen
     @State private var locallyViewed = Set<FAQItem.ID>()
+    
+    @State private var viewedMarkWorkItem: DispatchWorkItem?
+    private let viewedMarkDelay: TimeInterval = 0.34
 
     let faqs: [FAQItem]?
     let onSkip: (() -> Void)?
@@ -39,53 +44,60 @@ struct OnboardingFAQCardView: View {
                 VStack(spacing: 20) {
                     Spacer(minLength: 0)
 
-                    // ---- Pager container (measure AFTER padding, and clip) ----
                     GeometryReader { proxy in
-                        let pageWidth = max(1, proxy.size.width)
+                        let pageSize = proxy.size
+                        let pageWidth = max(1, pageSize.width)
 
-                        // Build once to reuse in both .gesture paths
                         let drag = DragGesture(minimumDistance: 12, coordinateSpace: .local)
                             .updating($isDragging) { _, s, _ in s = true }
                             .onChanged { value in
-                                dragOffset = value.translation.width
+                                // IMPORTANT: update dragOffset with animations disabled so it tracks the finger perfectly.
+                                var t = value.translation.width
+                                t = applyEdgeResistance(translation: t, count: faqs.count)
+
+                                var tx = Transaction()
+                                tx.animation = nil
+                                withTransaction(tx) {
+                                    dragOffset = t
+                                }
                             }
                             .onEnded { value in
                                 let threshold = pageWidth * 0.22
-                                let translation = value.translation.width
-                                let count = faqs.count
+                                let translation = applyEdgeResistance(translation: value.translation.width, count: faqs.count)
 
-                                var newIndex = currentIndex
+                                let newIndex: Int
                                 if translation <= -threshold {
-                                    newIndex = min(currentIndex + 1, count - 1)
+                                    newIndex = min(currentIndex + 1, faqs.count - 1)
                                 } else if translation >= threshold {
                                     newIndex = max(currentIndex - 1, 0)
+                                } else {
+                                    newIndex = currentIndex
                                 }
-                                dragOffset = 0
-                                if newIndex != currentIndex {
-                                    withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2)) {
+
+                                // IMPORTANT: animate BOTH snap-back (dragOffset -> 0) and page change together.
+                                withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2)) {
+                                    dragOffset = 0
+                                    if newIndex != currentIndex {
                                         currentIndex = newIndex
                                         level = 0
                                     }
                                 }
                             }
 
-                        ZStack {
-                            HStack(spacing: 0) {
-                                ForEach(Array(faqs.enumerated()), id: \.offset) { _, item in
-                                    pageView(for: item)
-                                        .frame(width: pageWidth)
-                                }
+                        HStack(spacing: 0) {
+                            ForEach(Array(faqs.enumerated()), id: \.element.id) { _, item in
+                                pageView(for: item, pageSize: pageSize)
+                                    .frame(width: pageWidth, height: pageSize.height)
                             }
-                            .offset(x: -CGFloat(currentIndex) * pageWidth + dragOffset)
-                            .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2), value: currentIndex)
-                            .animation(nil, value: dragOffset)
                         }
-                        .clipped() // avoid showing blank gutters
-                        .contentShape(Rectangle()) // full-rect hit area
-                        .highPriorityGesture(drag, including: .all) // swipe works anywhere, even over buttons
+                        .offset(x: -CGFloat(currentIndex) * pageWidth + dragOffset)
+                        .clipped()
+                        .contentShape(Rectangle())
+                        .highPriorityGesture(drag, including: .all)
+                        .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2), value: currentIndex)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.horizontal, 24) // width measured AFTER this padding
+                    .padding(.horizontal, 24)
 
                     Spacer(minLength: 0)
 
@@ -108,9 +120,18 @@ struct OnboardingFAQCardView: View {
                 }
                 .onChange(of: currentIndex) { oldIndex, _ in
                     guard faqs.indices.contains(oldIndex) else { return }
+
+                    // Cancel any pending mark if the user swipes again quickly
+                    viewedMarkWorkItem?.cancel()
+
                     let item = faqs[oldIndex]
-                    locallyViewed.insert(item.id)
+                    let work = DispatchWorkItem {
+                        locallyViewed.insert(item.id)
+                    }
+                    viewedMarkWorkItem = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + viewedMarkDelay, execute: work)
                 }
+
             } else {
                 Text(L10n.OnboardingFAQCardView.noFaqsAvailable)
                     .vendanoFont(.body, size: 16)
@@ -122,46 +143,85 @@ struct OnboardingFAQCardView: View {
 
     // MARK: – Page Content
 
-    @ViewBuilder
-    private func pageView(for item: FAQItem) -> some View {
+    private func pageView(for item: FAQItem, pageSize: CGSize) -> some View {
         let isViewed = locallyViewed.contains(item.id)
-        VStack(spacing: 24) {
-            // navigation arrows + tappable card
-            HStack {
-                arrowButton(direction: -1, currentViewed: isViewed)
-                Spacer()
-                Button(action: toggleLevel) {
-                    card(for: item, viewed: isViewed)
-                }
-                Spacer()
-                arrowButton(direction: 1, currentViewed: isViewed)
-            }
-            .padding(.horizontal)
+        
+        let topInset = clamp(pageSize.height * 0.06, min: 16, max: 52)
+        let bottomInset = clamp(pageSize.height * 0.04, min: 12, max: 44)
 
-            // question and answer/clarify/details
-            Button(action: toggleLevel) {
-                Text(item.question)
-                    .vendanoFont(.title, size: 24, weight: .semibold)
-                    .foregroundColor(theme.color(named: "TextPrimary"))
-                    .multilineTextAlignment(.center)
-            }
-            Button(action: toggleLevel) {
-                Text(level == 0 ? item.answer : (level == 1 ? item.clarify : item.details))
+        // Keep header + body area stable so chevrons don't shift when text changes.
+        let headerHeight: CGFloat = 160
+        let questionMinHeight: CGFloat = 56
+
+        // Fixed body height: enough room, but doesn't grow/shrink with content.
+        // Tune these if you want it tighter/looser.
+        let bodyHeight = clamp(pageSize.height * 0.28, min: 160, max: 260)
+
+        return VStack(spacing: 16) {
+            Spacer(minLength: topInset)
+
+            headerRow(item: item, isViewed: isViewed)
+                .frame(height: headerHeight, alignment: .center)
+
+            Text(item.question)
+                .vendanoFont(.title, size: 24, weight: .semibold)
+                .foregroundColor(theme.color(named: "TextPrimary"))
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity, minHeight: questionMinHeight, alignment: .center)
+                .padding(.horizontal)
+
+            ScrollView(showsIndicators: false) {
+                Text(currentBodyText(for: item))
                     .vendanoFont(.body, size: 16)
                     .foregroundColor(theme.color(named: "TextSecondary"))
                     .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
+                    .padding(.vertical, 10)
             }
-            .padding()
+            .frame(height: bodyHeight)
+            .contentShape(Rectangle())
+            .onTapGesture { toggleLevel() }
 
-            // tap prompt
-            Button(action: toggleLevel) {
-                Text(promptText)
-                    .vendanoFont(.body, size: 14, weight: .semibold)
-                    .foregroundColor(theme.color(named: "Accent"))
-            }
+            Text(promptText)
+                .vendanoFont(.body, size: 14, weight: .semibold)
+                .foregroundColor(theme.color(named: "Accent"))
+                .padding(.top, 4)
+                .contentShape(Rectangle())
+                .onTapGesture { toggleLevel() }
+
+            Spacer(minLength: bottomInset)
         }
-        .frame(maxHeight: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .contentShape(Rectangle())
+        .onTapGesture { toggleLevel() }
+    }
+
+    private func headerRow(item: FAQItem, isViewed: Bool) -> some View {
+        HStack {
+            arrowButton(direction: -1, currentViewed: isViewed)
+
+            Spacer()
+
+            card(for: item, viewed: isViewed)
+                .contentShape(Rectangle())
+                .onTapGesture { toggleLevel() }
+
+            Spacer()
+
+            arrowButton(direction: 1, currentViewed: isViewed)
+        }
+        .padding(.horizontal)
+    }
+
+    private func currentBodyText(for item: FAQItem) -> String {
+        switch level {
+        case 0: return item.answer
+        case 1: return item.clarify
+        default: return item.details
+        }
     }
 
     // MARK: – Components
@@ -190,12 +250,15 @@ struct OnboardingFAQCardView: View {
             guard let faqs else { return }
             let count = faqs.count
             guard count > 0 else { return }
-            let target = (currentIndex + direction + count) % count // wrap
+
+            // NOTE: This wraps. If you want swipe to also wrap, we can mirror that logic in the gesture.
+            let target = (currentIndex + direction + count) % count
+
             withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.9, blendDuration: 0.2)) {
                 currentIndex = target
                 level = 0
+                dragOffset = 0
             }
-            // marking 'viewed' happens in onChange(currentIndex)
         } label: {
             Image(systemName: direction < 0 ? "chevron.left" : "chevron.right")
                 .font(.largeTitle)
@@ -218,5 +281,22 @@ struct OnboardingFAQCardView: View {
 
     private func toggleLevel() {
         level = (level + 1) % 3
+    }
+
+    // Edge resistance to avoid harsh stops at ends when swiping.
+    private func applyEdgeResistance(translation: CGFloat, count: Int) -> CGFloat {
+        guard count > 0 else { return translation }
+
+        let atFirst = currentIndex == 0
+        let atLast = currentIndex == count - 1
+
+        if (atFirst && translation > 0) || (atLast && translation < 0) {
+            return translation * 0.35
+        }
+        return translation
+    }
+
+    private func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
+        Swift.max(min, Swift.min(max, value))
     }
 }

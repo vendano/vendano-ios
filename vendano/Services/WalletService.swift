@@ -599,23 +599,23 @@ final class WalletService: ObservableObject {
     @MainActor
     func recomputeSendableAda() async {
         guard let bech32 = address else {
-            adaBalance = 0
+            // ✅ Don’t clobber balances when wallet isn’t ready
+            spendableAda = nil
             return
         }
 
         do {
-            // Use the same logic as the Send “All” button, but
-            // with our own address and tip = 0 as a neutral case.
+            // Compute “max sendable” but do NOT overwrite adaBalance
             let max = try await maxSendableAda(to: bech32, tipAda: 0)
-            adaBalance = max
-            DebugLogger.log("⭐ [wallet] recomputed sendable ADA (adaBalance): \(max)")
+
+            // ✅ Safer: treat 0 as “unknown” so Send falls back to adaBalance
+            spendableAda = (max > 0) ? max : nil
+
+            DebugLogger.log("⭐ [wallet] recomputed spendable ADA (spendableAda): \(spendableAda?.description ?? "nil")")
         } catch {
             DebugLogger.log("⚠️ recomputeSendableAda failed: \(error)")
-
-            // Fallback so the UI isn’t blank or 0 in weird cases:
-            if let total = totalAdaBalance {
-                adaBalance = total
-            }
+            spendableAda = nil
         }
     }
+
 }

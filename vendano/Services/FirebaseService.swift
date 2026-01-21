@@ -284,16 +284,25 @@ final class FirebaseService: ObservableObject {
 
     func saveAddress(_ addr: String) async throws {
         guard let uid = user?.uid else { return }
-        guard let db = db else { return } // demo: no-op
+        guard let db = db else { return }
         try await db.collection("public").document(uid).setData(["walletAddress": addr], merge: true)
         try await db.collection("users").document(uid).setData(["walletAddress": addr], merge: true)
     }
 
     func updateDisplayName(_ name: String) async throws {
         guard let uid = user?.uid else { return }
-        guard let db = db else { return } // demo: no-op
+        guard let db = db else { return }
         try await db.collection("public").document(uid).setData([
             "displayName": name,
+            "updatedDate": FieldValue.serverTimestamp(),
+        ], merge: true)
+    }
+    
+    func updateStoreName(_ storeName: String) async throws {
+        guard let uid = user?.uid else { return }
+        guard let db = db else { return }
+        try await db.collection("public").document(uid).setData([
+            "storeName": storeName,
             "updatedDate": FieldValue.serverTimestamp(),
         ], merge: true)
     }
@@ -415,10 +424,23 @@ final class FirebaseService: ObservableObject {
                 let snap = try await query.getDocuments()
                 if let doc = snap.documents.first {
                     let data = doc.data()
-                    guard let name = data["displayName"] as? String,
-                          let address = data["walletAddress"] as? String else { return nil }
+                    
+                    guard let address = data["walletAddress"] as? String else { return nil }
+
+                    let displayName = (data["displayName"] as? String) ?? ""
+                    let storeName = (data["storeName"] as? String) ?? ""
+
+                    let preferredName: String = {
+                        if !storeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            return storeName
+                        }
+                        return displayName
+                    }()
+
                     let avatar = data["avatarURL"] as? String
-                    return (name, avatar, address)
+                    return (preferredName, avatar, address)
+
+                    
                 }
             } catch {
                 DebugLogger.log("⚠️ fetchRecipient query failed: \(error)")

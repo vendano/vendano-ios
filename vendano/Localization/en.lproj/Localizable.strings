@@ -268,7 +268,7 @@
 "StoreView.storeTab" = "Store";
 "StoreView.storeSettings" = "Store";
 "StoreView.storeName" = "Store name";
-"StoreView.storeNamePlaceholder" = "e.g. My Donuts";
+"StoreView.storeNamePlaceholder" = "e.g. Lovelace Cafe";
 "StoreView.storeNameNotSet" = "Set your store name in Settings";
 "StoreView.storeNameSetupHint" = "Tip: Set your store name in Profile → Store so customers see who they’re paying.";
 "StoreView.defaultStoreNameFallback" = "Store";
@@ -289,7 +289,7 @@
 "StoreView.fiatApproxUnavailable" = "Fiat estimate unavailable (rate not loaded).";
 "StoreView.tapToCollect" = "Tap to collect";
 "StoreView.readyToCollectTitle" = "Ready to collect";
-"StoreView.readyToCollectSubtitle" = "Ask the customer to open Vendano → Send → Tap to pay, then tap devices.";
+"StoreView.readyToCollectSubtitle" = "Ask the customer to open Vendano → Send → Quick Pay, then hold phones near each other (don’t touch the tops—iOS may show NameDrop).";
 "StoreView.waitingForCustomer" = "Waiting for customer…";
 "StoreView.connectedTo" = "Connected to %1$@";
 "StoreView.paymentComplete" = "Payment complete • Tx: %1$@";
@@ -298,9 +298,9 @@
 "StoreView.paymentFailed" = "Payment failed: %1$@";
 "StoreView.paymentExpired" = "Request expired.";
 "StoreView.paymentCancelled" = "Cancelled.";
-"StoreView.tapToPay" = "Tap to pay";
-"StoreView.tapToPayTitle" = "Tap to pay";
-"StoreView.tapToPaySubtitle" = "Find a nearby Vendano seller and tap devices to receive the payment request.";
+"StoreView.tapToPay" = "Quick Pay";
+"StoreView.tapToPayTitle" = "Quick Pay";
+"StoreView.tapToPaySubtitle" = "Find a nearby Vendano seller and hold phones near each other to receive the payment request.";
 "StoreView.searchingForMerchant" = "Searching for a seller…";
 "StoreView.payStoreTitle" = "Pay %1$@?";
 "StoreView.addTip" = "Add a tip";
@@ -315,3 +315,5 @@
 
 "WalletService.walletKeychainNotInitialized" = "Secure storage was not initialized.";
 "WalletService.noWalletFound" = "No wallet account was found after loading addresses.";
+"StoreView.quickPayMatchHintMerchant" = "Match the color & symbol with the customer.";
+"StoreView.quickPayMatchHintPayer" = "Make sure the color & symbol match the seller.";

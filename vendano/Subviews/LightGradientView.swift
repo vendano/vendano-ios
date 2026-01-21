@@ -26,7 +26,7 @@ struct LightGradientView: View {
                     gradient: Gradient(colors: [
                         theme.color(named: "GlowPink").opacity(0.35),
                         theme.color(named: "GlowPurple").opacity(0.25),
-                        Color.white.opacity(0.05),
+                        theme.color(named: "TextReversed").opacity(0.05),
                         .clear,
                     ]),
                     center: .center,

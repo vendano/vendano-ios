@@ -266,7 +266,7 @@
 "StoreView.storeTab" = "店舗";
 "StoreView.storeSettings" = "店舗";
 "StoreView.storeName" = "店舗名";
-"StoreView.storeNamePlaceholder" = "例: My Donuts";
+"StoreView.storeNamePlaceholder" = "例: Lovelace Cafe";
 "StoreView.storeNameNotSet" = "設定で店舗名を設定してください";
 "StoreView.storeNameSetupHint" = "ヒント: プロフィール → 店舗 で店舗名を設定すると、お客様に支払い先が表示されます。";
 "StoreView.defaultStoreNameFallback" = "店舗";
@@ -287,7 +287,7 @@
 "StoreView.fiatApproxUnavailable" = "法定通貨の概算は利用できません（レート未取得）。";
 "StoreView.tapToCollect" = "タップで受け取る";
 "StoreView.readyToCollectTitle" = "受け取り準備完了";
-"StoreView.readyToCollectSubtitle" = "お客様に Vendano → Send → Tap to pay を開いてもらい、端末同士をタップしてください。";
+"StoreView.readyToCollectSubtitle" = "お客さまに Vendano → 送金 → クイック支払い を開いてもらい、端末同士を近づけてください（上部をくっつけないでください—iOSでNameDropが表示されることがあります）。";
 "StoreView.waitingForCustomer" = "お客様を待機中…";
 "StoreView.connectedTo" = "%1$@ に接続しました";
 "StoreView.paymentComplete" = "支払い完了 • Tx: %1$@";
@@ -296,9 +296,9 @@
 "StoreView.paymentFailed" = "支払いに失敗しました: %1$@";
 "StoreView.paymentExpired" = "リクエストの有効期限が切れました。";
 "StoreView.paymentCancelled" = "キャンセルしました。";
-"StoreView.tapToPay" = "タップで支払う";
-"StoreView.tapToPayTitle" = "タップで支払う";
-"StoreView.tapToPaySubtitle" = "近くの Vendano 販売者を探して、端末同士をタップして支払いリクエストを受け取ってください。";
+"StoreView.tapToPay" = "クイック支払い";
+"StoreView.tapToPayTitle" = "クイック支払い";
+"StoreView.tapToPaySubtitle" = "近くの Vendano の販売者を探し、端末同士を近づけて支払いリクエストを受け取ってください。";
 "StoreView.searchingForMerchant" = "販売者を検索中…";
 "StoreView.payStoreTitle" = "%1$@ に支払いますか？";
 "StoreView.addTip" = "チップを追加";
@@ -313,3 +313,5 @@
 
 "WalletService.walletKeychainNotInitialized" = "セキュアストレージが初期化されていません。";
 "WalletService.noWalletFound" = "アドレスの読み込み後にウォレットアカウントが見つかりませんでした。";
+"StoreView.quickPayMatchHintMerchant" = "お客さまと同じ色とシンボルか確認してください。";
+"StoreView.quickPayMatchHintPayer" = "販売者と同じ色とシンボルか確認してください。";

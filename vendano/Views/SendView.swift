@@ -100,6 +100,8 @@ struct SendView: View {
     @State private var tipText = ""
 
     @State private var showNotificationPrompt = false
+    
+    @StateObject private var proximity = ProximityPaymentService.shared
 
     // rudimentary checks
     private var emailOK: Bool {
@@ -144,16 +146,25 @@ struct SendView: View {
 
                 // form
                 Form {
-                    Section {
-                        Button {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            showTapToPay = true
-                        } label: {
-                            Label(L10n.StoreView.tapToPay, systemImage: "wave.3.right")
+                    
+                    
+                    if proximity.isQuickPayAvailable {
+                        Section {
+                            Button {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                showTapToPay = true
+                            } label: {
+                                Label(L10n.StoreView.tapToPay, systemImage: "wave.3.right")
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.white.opacity(0.65), lineWidth: 4)
+                            )
+                            .transition(.opacity)
+                            .listRowBackground(Color.clear)
                         }
-                        .buttonStyle(PrimaryButtonStyle())
                     }
-                    .listRowBackground(theme.color(named: "CellBackground"))
 
                     Section(header: Text(L10n.SendView.to)
                         .vendanoFont(.headline, size: 18, weight: .semibold)
@@ -539,11 +550,14 @@ struct SendView: View {
             .onChange(of: adaText) { _, _ in recalcFee() }
 
             if isSending {
-                Color.black.opacity(0.4).ignoresSafeArea()
+                theme.color(named: "TextPrimary").opacity(0.4).ignoresSafeArea()
                 ProgressView(L10n.SendView.sendingAda)
                     .padding(24)
                     .background(RoundedRectangle(cornerRadius: 8).fill(theme.color(named: "FieldBackground")))
             }
+        }
+        .onAppear {
+            proximity.startMerchantDiscovery()
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .alert(L10n.SendView.unknownAddress, isPresented: $showWarning) {
@@ -593,7 +607,9 @@ struct SendView: View {
         } message: {
             Text(L10n.SendView.authPrimerMessage(authMethodName()))
         }
-        .sheet(isPresented: $showTapToPay) {
+        .sheet(isPresented: $showTapToPay, onDismiss: {
+            proximity.startMerchantDiscovery()
+        }) {
             TapToPayPayerView()
                 .environmentObject(theme)
         }

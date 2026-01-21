@@ -24,6 +24,8 @@ struct TapToCollectMerchantView: View {
             SheetChrome(onClose: { proximity.stop(); dismiss() }) {
                 VStack(spacing: 18) {
                     VStack(spacing: 8) {
+                        QuickPayMatchBadge(match: request.quickPayMatch, size: 86)
+
                         Text(L10n.StoreView.readyToCollectTitle)
                             .vendanoFont(.headline, size: 24, weight: .bold)
                             .foregroundColor(theme.color(named: "TextReversed"))
@@ -32,8 +34,15 @@ struct TapToCollectMerchantView: View {
                             .vendanoFont(.body, size: 14)
                             .foregroundColor(theme.color(named: "TextReversed").opacity(0.75))
                             .multilineTextAlignment(.center)
+
+                        Text(L10n.StoreView.quickPayMatchHintMerchant)
+                            .vendanoFont(.caption, size: 13, weight: .semibold)
+                            .foregroundColor(theme.color(named: "TextReversed").opacity(0.85))
+                            .multilineTextAlignment(.center)
+                            .multilineTextAlignment(.center)
                     }
                     .padding(.top, 4)
+                    .padding([.leading, .trailing], 20)
 
                     VStack(spacing: 10) {
                         Text("\(request.baseAda.formatted(.number.precision(.fractionLength(3 ... 6)))) ADA")

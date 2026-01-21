@@ -43,7 +43,7 @@ struct DarkGradientView: View {
                         theme.color(named: "GlowPurple"),
                         theme.color(named: "GlowPink"),
                         theme.color(named: "AccentAlt"),
-                        theme.color(named: "GlowPurple"),
+                        theme.color(named: "GlowPurple")
                     ]),
                     center: .center
                 )

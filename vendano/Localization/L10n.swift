@@ -518,6 +518,8 @@ enum L10n {
         static let tapToCollect = NSLocalizedString("StoreView.tapToCollect", comment: "")
         static let readyToCollectTitle = NSLocalizedString("StoreView.readyToCollectTitle", comment: "")
         static let readyToCollectSubtitle = NSLocalizedString("StoreView.readyToCollectSubtitle", comment: "")
+        static let quickPayMatchHintMerchant = NSLocalizedString("StoreView.quickPayMatchHintMerchant", comment: "")
+        static let quickPayMatchHintPayer = NSLocalizedString("StoreView.quickPayMatchHintPayer", comment: "")
         static let waitingForCustomer = NSLocalizedString("StoreView.waitingForCustomer", comment: "")
 
         static func connectedTo(_ names: String) -> String {

@@ -25,12 +25,15 @@ final class ProximityPaymentService: NSObject, ObservableObject {
     @Published var receivedRequest: VendanoPaymentRequest? = nil // payer
     @Published var lastResponse: VendanoPaymentResponse? = nil // merchant
     @Published var lastErrorMessage: String? = nil
+    @Published private(set) var isQuickPayAvailable: Bool = false
+    private var discoveredMerchantPeers = Set<MCPeerID>()
+    private var autoInviteMerchant = false
 
     // MARK: - MPC internals
 
     private let serviceType = "vendano-pay"
     private let peerID = MCPeerID(displayName: UIDevice.current.name)
-    private nonisolated(unsafe) lazy var session: MCSession = {
+    private lazy var session: MCSession = {
         let s = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
         s.delegate = self
         return s
@@ -39,11 +42,13 @@ final class ProximityPaymentService: NSObject, ObservableObject {
     private var advertiser: MCNearbyServiceAdvertiser?
     private var browser: MCNearbyServiceBrowser?
 
+    private var hasInvitedMerchant = false
+
     private var currentMerchantRequest: VendanoPaymentRequest? = nil
 
     // MARK: - Lifecycle
 
-    func stop() {
+    func stop(resetAvailability: Bool = true) {
         advertiser?.stopAdvertisingPeer()
         advertiser = nil
 
@@ -51,6 +56,14 @@ final class ProximityPaymentService: NSObject, ObservableObject {
         browser = nil
 
         session.disconnect()
+
+        hasInvitedMerchant = false
+        
+        if resetAvailability {
+            discoveredMerchantPeers.removeAll()
+            isQuickPayAvailable = false
+        }
+        autoInviteMerchant = false
 
         mode = .idle
         connectedPeerNames = []
@@ -68,11 +81,24 @@ final class ProximityPaymentService: NSObject, ObservableObject {
         mode = .merchant(request: request)
         currentMerchantRequest = request
 
-        let adv = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: ["v": "1"], serviceType: serviceType)
+        let adv = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: ["v": "1", "role": "merchant"], serviceType: serviceType)
         adv.delegate = self
         adv.startAdvertisingPeer()
         advertiser = adv
     }
+    
+    func startMerchantDiscovery() {
+        stop()
+        
+        autoInviteMerchant = false
+
+        mode = .payer
+        let b = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
+        b.delegate = self
+        b.startBrowsingForPeers()
+        browser = b
+    }
+
 
     // MARK: - Payer
 
@@ -80,6 +106,8 @@ final class ProximityPaymentService: NSObject, ObservableObject {
         stop()
 
         mode = .payer
+        
+        autoInviteMerchant = true
 
         let b = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
         b.delegate = self
@@ -155,6 +183,11 @@ extension ProximityPaymentService: MCSessionDelegate {
             if case .merchant = mode, state == .connected {
                 sendCurrentRequestIfPossible()
             }
+
+            if case .payer = mode, state == .connected {
+                // We have a connection; stop browsing to avoid re-invites.
+                browser?.stopBrowsingForPeers()
+            }
         }
     }
 
@@ -182,8 +215,15 @@ extension ProximityPaymentService: MCSessionDelegate {
 // MARK: - Advertiser
 
 extension ProximityPaymentService: MCNearbyServiceAdvertiserDelegate {
-    nonisolated func advertiser(_: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer _: MCPeerID, withContext _: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        invitationHandler(true, session)
+    nonisolated func advertiser(
+        _: MCNearbyServiceAdvertiser,
+        didReceiveInvitationFromPeer _: MCPeerID,
+        withContext _: Data?,
+        invitationHandler: @escaping (Bool, MCSession?) -> Void
+    ) {
+        Task { @MainActor in
+            invitationHandler(true, self.session)
+        }
     }
 
     nonisolated func advertiser(_: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
@@ -196,12 +236,42 @@ extension ProximityPaymentService: MCNearbyServiceAdvertiserDelegate {
 // MARK: - Browser
 
 extension ProximityPaymentService: MCNearbyServiceBrowserDelegate {
-    nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo _: [String: String]?) {
-        // Auto-invite first peer we see for MVP (Square-like “just tap” feel)
-        browser.invitePeer(peerID, to: session, withContext: nil, timeout: 10)
+
+    nonisolated func browser(
+        _ mcBrowser: MCNearbyServiceBrowser,
+        foundPeer foundPeerID: MCPeerID,
+        withDiscoveryInfo info: [String : String]?
+    ) {
+        guard info?["role"] == "merchant" else { return }
+
+        Task { @MainActor in
+            // Optional but helps avoid acting on stale callbacks after stop()
+            guard self.browser === mcBrowser else { return }
+
+            self.discoveredMerchantPeers.insert(foundPeerID)
+            self.isQuickPayAvailable = !self.discoveredMerchantPeers.isEmpty
+
+            guard self.autoInviteMerchant,
+                  !self.hasInvitedMerchant,
+                  self.session.connectedPeers.isEmpty
+            else { return }
+
+            self.hasInvitedMerchant = true
+            mcBrowser.invitePeer(foundPeerID, to: self.session, withContext: nil, timeout: 10)
+        }
     }
 
-    nonisolated func browser(_: MCNearbyServiceBrowser, lostPeer _: MCPeerID) {}
+    nonisolated func browser(
+        _ mcBrowser: MCNearbyServiceBrowser,
+        lostPeer lostPeerID: MCPeerID
+    ) {
+        Task { @MainActor in
+            guard self.browser === mcBrowser else { return }
+
+            self.discoveredMerchantPeers.remove(lostPeerID)
+            self.isQuickPayAvailable = !self.discoveredMerchantPeers.isEmpty
+        }
+    }
 
     nonisolated func browser(_: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
         Task { @MainActor in
@@ -209,3 +279,4 @@ extension ProximityPaymentService: MCNearbyServiceBrowserDelegate {
         }
     }
 }
+

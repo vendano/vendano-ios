@@ -27,6 +27,9 @@ struct ProfileSheet: View {
 
     @State private var authPurpose: ContactMethod?
     @State private var name = ""
+    @State private var originalName = ""
+    @State private var originalStoreName = ""
+
     @State private var pickerItem: PhotosPickerItem?
     @State private var pickerPresented = false
     @State private var avatar: Image?
@@ -54,12 +57,29 @@ struct ProfileSheet: View {
                     Button(textChanged ? L10n.Common.save : L10n.Common.done) {
                         if textChanged {
                             Task {
+                                let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                                let trimmedStore = state.storeName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                                let nameChanged = trimmedName != originalName
+                                let storeChanged = trimmedStore != originalStoreName
+
                                 do {
-                                    try await FirebaseService.shared.updateDisplayName(name)
-                                    state.displayName = name
+                                    if nameChanged {
+                                        try await FirebaseService.shared.updateDisplayName(trimmedName)
+                                        state.displayName = trimmedName
+                                        originalName = trimmedName
+                                    }
+
+                                    if storeChanged {
+                                        try await FirebaseService.shared.updateStoreName(trimmedStore)
+                                        originalStoreName = trimmedStore
+                                    }
+
+                                    textChanged = false
                                 } catch {
-                                    DebugLogger.log("⚠️ Failed to save name: \(error)")
+                                    DebugLogger.log("⚠️ Failed to save profile name/store name: \(error)")
                                 }
+
                                 dismiss()
                             }
                         } else {
@@ -198,6 +218,10 @@ struct ProfileSheet: View {
                                 .padding(12)
                                 .background(theme.color(named: "FieldBackground"))
                                 .cornerRadius(10)
+                                .onChange(of: state.storeName) { _, _ in
+                                    textChanged = true
+                                }
+
                         }
                         .padding(.vertical, 6)
 
@@ -327,6 +351,9 @@ struct ProfileSheet: View {
                 .background(Color.clear)
                 .onAppear {
                     name = state.displayName
+                    originalName = state.displayName
+                    originalStoreName = state.storeName
+
                     avatar = state.avatar
                     focus = true
                 }

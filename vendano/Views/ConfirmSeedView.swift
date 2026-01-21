@@ -191,7 +191,7 @@ struct ConfirmSeedView: View {
             }
 
             if isCreatingWallet {
-                Color.black.opacity(0.4)
+                theme.color(named: "TextPrimary").opacity(0.4)
                     .ignoresSafeArea()
                 ProgressView()
                     .progressViewStyle(.circular)

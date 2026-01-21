@@ -267,7 +267,7 @@
 "StoreView.storeTab" = "Tienda";
 "StoreView.storeSettings" = "Tienda";
 "StoreView.storeName" = "Nombre de la tienda";
-"StoreView.storeNamePlaceholder" = "Ej.: My Donuts";
+"StoreView.storeNamePlaceholder" = "Ej.: Lovelace Cafe";
 "StoreView.storeNameNotSet" = "Configura el nombre de tu tienda en Ajustes";
 "StoreView.storeNameSetupHint" = "Consejo: Configura el nombre de tu tienda en Perfil → Tienda para que los clientes vean a quién le están pagando.";
 "StoreView.defaultStoreNameFallback" = "Tienda";
@@ -288,7 +288,7 @@
 "StoreView.fiatApproxUnavailable" = "Estimación en moneda local no disponible (tasa no cargada).";
 "StoreView.tapToCollect" = "Toca para cobrar";
 "StoreView.readyToCollectTitle" = "Listo para cobrar";
-"StoreView.readyToCollectSubtitle" = "Pídele al cliente que abra Vendano → Send → Tap to pay y luego acerquen los dispositivos.";
+"StoreView.readyToCollectSubtitle" = "Pídele al cliente que abra Vendano → Enviar → Pago rápido y luego acerquen los teléfonos (sin juntar las partes superiores—iOS puede mostrar NameDrop).";
 "StoreView.waitingForCustomer" = "Esperando al cliente…";
 "StoreView.connectedTo" = "Conectado a %1$@";
 "StoreView.paymentComplete" = "Pago completado • Tx: %1$@";
@@ -297,9 +297,9 @@
 "StoreView.paymentFailed" = "El pago falló: %1$@";
 "StoreView.paymentExpired" = "La solicitud expiró.";
 "StoreView.paymentCancelled" = "Cancelado.";
-"StoreView.tapToPay" = "Toca para pagar";
-"StoreView.tapToPayTitle" = "Toca para pagar";
-"StoreView.tapToPaySubtitle" = "Busca un vendedor cercano de Vendano y acerquen los dispositivos para recibir la solicitud de pago.";
+"StoreView.tapToPay" = "Pago rápido";
+"StoreView.tapToPayTitle" = "Pago rápido";
+"StoreView.tapToPaySubtitle" = "Busca un vendedor Vendano cercano y acerquen los teléfonos para recibir la solicitud de pago.";
 "StoreView.searchingForMerchant" = "Buscando un vendedor…";
 "StoreView.payStoreTitle" = "¿Pagar a %1$@?";
 "StoreView.addTip" = "Agregar propina";
@@ -314,3 +314,5 @@
 
 "WalletService.walletKeychainNotInitialized" = "No se pudo inicializar el almacenamiento seguro.";
 "WalletService.noWalletFound" = "No se encontró ninguna cuenta de la billetera después de cargar las direcciones.";
+"StoreView.quickPayMatchHintMerchant" = "Verifica que el color y el símbolo coincidan con el cliente.";
+"StoreView.quickPayMatchHintPayer" = "Verifica que el color y el símbolo coincidan con el vendedor.";

@@ -11,6 +11,9 @@ struct VendanoPaymentRequest: Codable, Identifiable, Equatable {
     let createdAt: Date
     let expiresAt: Date
 
+    // Quick Pay pairing
+    let quickPayMatch: QuickPayMatch
+
     // Display
     let storeName: String
 
