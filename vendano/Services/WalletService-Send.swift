@@ -542,6 +542,10 @@ extension WalletService {
             parameters: ["base_lovelace": baseCoin, "tip_lovelace": tipCoin, "fee_lovelace": feeCoin]
         )
 
+        // Refresh balances and flush the stale UTxO cache so that any
+        // subsequent fee estimate or send uses the post-payment chain state.
+        await refreshBalancesFromChain()
+
         return txHash.hex
     }
 
