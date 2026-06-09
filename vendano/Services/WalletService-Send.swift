@@ -547,6 +547,73 @@ extension WalletService {
         return txHash.hex
     }
 
+    /// Estimates the Cardano network fee for a store payment using the same transaction structure
+    /// as `sendStorePayment`. The Vendano fee is deducted from the merchant output (store-pays model),
+    /// so the payer only needs `baseAda + tipAda + networkFee` — NOT `baseAda + vendanoFee + networkFee`.
+    /// Using the generic `estimateNetworkFee` (standard path) over-estimates the required balance by the
+    /// Vendano fee amount, incorrectly disabling the Pay Now button for payments ≥ 100 ADA.
+    func estimateNetworkFeeForStorePay(
+        to merchantAddress: String,
+        baseAda: Double,
+        tipAda: Double
+    ) async throws -> Double {
+        guard let cardano = cardano else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 30,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
+            )
+        }
+
+        guard let acct = cardano.addresses.fetchedAccounts().first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 31,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noAccountLoaded]
+            )
+        }
+
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 32,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
+            )
+        }
+
+        let utxos: [CardanoCore.TransactionUnspentOutput]
+        if !currentUtxos.isEmpty {
+            utxos = currentUtxos
+        } else {
+            let fetched = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+            currentUtxos = fetched
+            utxos = fetched
+        }
+
+        let toAddr = try CardanoCore.Address(bech32: merchantAddress)
+        let baseCoin = VendanoWalletMath.adaToLovelace(baseAda)
+        let tipCoin: UInt64 = tipAda < 1 ? 0 : VendanoWalletMath.adaToLovelace(tipAda)
+        let feeCoin = VendanoWalletMath.vendanoFeeLovelace(
+            forSendLovelace: baseCoin,
+            percent: Config.vendanoAppFeePercent
+        )
+        let merchantCoin: UInt64 = (feeCoin > baseCoin ? 0 : (baseCoin - feeCoin)) + tipCoin
+
+        let (txBody, _) = try buildCandidateTransactionStore(
+            cardano: cardano,
+            utxos: utxos,
+            changeAddr: changeAddr,
+            toAddr: toAddr,
+            merchantCoin: merchantCoin,
+            feeCoin: feeCoin
+        )
+
+        return VendanoWalletMath.lovelaceToAda(txBody.fee)
+    }
+
     /// Builds a tx where merchant output is already net-of-fee, and a second output pays Vendano fee address (if feeCoin > 0).
     private func buildCandidateTransactionStore(
         cardano: Cardano,
