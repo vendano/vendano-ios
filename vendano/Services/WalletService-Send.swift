@@ -542,6 +542,8 @@ extension WalletService {
             parameters: ["base_lovelace": baseCoin, "tip_lovelace": tipCoin, "fee_lovelace": feeCoin]
         )
 
+        await refreshBalancesFromChain()
+
         return txHash.hex
     }
 
