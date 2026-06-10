@@ -542,6 +542,8 @@ extension WalletService {
             parameters: ["base_lovelace": baseCoin, "tip_lovelace": tipCoin, "fee_lovelace": feeCoin]
         )
 
+        await refreshBalancesFromChain()
+
         return txHash.hex
     }
 
@@ -618,5 +620,73 @@ extension WalletService {
         )
 
         return (txBody: txBody, required: required)
+    }
+
+    /// Estimates the Cardano network fee for a store payment (payer pays base + tip + networkFee;
+    /// Vendano fee is deducted from the merchant output, not added as an extra payer output).
+    /// This mirrors the exact coin layout of `sendStorePayment` / `buildCandidateTransactionStore`.
+    func estimateNetworkFeeForStorePay(
+        to merchantAddress: String,
+        baseAda: Double,
+        tipAda: Double
+    ) async throws -> Double {
+        guard let cardano = cardano else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 20,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.walletNotInitialized]
+            )
+        }
+
+        guard let acct = cardano.addresses.fetchedAccounts().first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 21,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
+            )
+        }
+
+        let allAddrs = try cardano.addresses.get(cached: acct)
+        guard let changeAddr = allAddrs.first else {
+            throw NSError(
+                domain: "Vendano.Send",
+                code: 23,
+                userInfo: [NSLocalizedDescriptionKey: L10n.WalletService.noPaymentAddressAvailable]
+            )
+        }
+
+        let utxos: [CardanoCore.TransactionUnspentOutput]
+        if !currentUtxos.isEmpty {
+            utxos = currentUtxos
+        } else {
+            let fetched = try await collectAllUTXOs(
+                from: cardano.utxos.get(for: allAddrs, asset: nil)
+            )
+            currentUtxos = fetched
+            utxos = fetched
+        }
+
+        let toAddr = try CardanoCore.Address(bech32: merchantAddress)
+
+        let baseCoin = VendanoWalletMath.adaToLovelace(baseAda)
+        let tipCoin: UInt64 = tipAda < 1 ? 0 : VendanoWalletMath.adaToLovelace(tipAda)
+        let feeCoin = VendanoWalletMath.vendanoFeeLovelace(
+            forSendLovelace: baseCoin,
+            percent: Config.vendanoAppFeePercent
+        )
+        let merchantCoin: UInt64 = (feeCoin > baseCoin ? 0 : (baseCoin - feeCoin)) + tipCoin
+
+        let (txBody, _) = try buildCandidateTransactionStore(
+            cardano: cardano,
+            utxos: utxos,
+            changeAddr: changeAddr,
+            toAddr: toAddr,
+            merchantCoin: merchantCoin,
+            feeCoin: feeCoin
+        )
+
+        let feeAda = VendanoWalletMath.lovelaceToAda(txBody.fee)
+        DebugLogger.log("🏪 [fee-store] estimateNetworkFeeForStorePay feeAda=\(feeAda)")
+        return feeAda
     }
 }

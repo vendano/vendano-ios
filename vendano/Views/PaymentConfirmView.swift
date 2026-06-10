@@ -198,10 +198,10 @@ struct PaymentConfirmView: View {
         feeError = nil
 
         do {
-            let fee = try await wallet.estimateNetworkFee(
+            let fee = try await wallet.estimateNetworkFeeForStorePay(
                 to: request.merchantAddress,
-                ada: request.baseAda + tipAda,
-                tip: 0
+                baseAda: request.baseAda,
+                tipAda: tipAda
             )
             netFeeAda = fee
         } catch {
