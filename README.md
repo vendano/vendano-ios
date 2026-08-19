@@ -11,7 +11,7 @@ The goal is to make Cardano transactions feel as familiar as texting: no arcane 
 
 ### Repository Overview
 
-**vendano-ios** is the code for the client app of the Vendano wallet. This repository contains the SwiftUI-based codebase for iOS 16+, organized to support review of architecture, data flows, and security/privacy practices. `Info.plist` and `GoogleService-Info.plist` are intentionally omitted to avoid publishing secrets. The code is in active development and is intended to be compiled and shipped after review.
+`vendano-ios` is the open-source SwiftUI codebase for the production Vendano wallet distributed through Apple's App Store. End users install the signed production application from the App Store; they do not clone this repository, open Xcode, or provide developer credentials. `Info.plist`, `GoogleService-Info.plist`, Blockfrost credentials, Apple signing material, and entitlements are intentionally omitted from public source control because they contain environment-specific configuration or secrets. Developers who compile an independent fork must provide their own service configuration and signing identity. This separation between a signed production binary and public source is standard mobile release practice.
 
 ### Security and privacy notes
 
